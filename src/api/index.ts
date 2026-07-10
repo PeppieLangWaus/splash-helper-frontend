@@ -1,6 +1,6 @@
 import type { ActiveSession, ArchivedSession, AdminUser, SplashEntry } from '../types';
 
-const BASE = '/api';
+const BASE = `${import.meta.env.VITE_API_BASE_URL}`;
 
 function authHeaders(token: string): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
