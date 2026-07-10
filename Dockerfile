@@ -11,6 +11,9 @@ COPY src ./src
 COPY public ./public
 COPY index.html vite.config.ts eslint.config.js ./
 
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 RUN npm run build
 
 # ── Stage 2: runtime ───────────────────────────────────────────────────────────
