@@ -157,7 +157,9 @@ function AppInner() {
         </div>
       </nav>
 
-      {view.name === 'active' && <AllSplashersView />}
+      {view.name === 'active' && (
+        <AllSplashersView onSelectUser={(username) => setView({ name: 'user', username })} />
+      )}
       {view.name === 'upload' && <UploadView />}
       {view.name === 'user' && (
         <UserView
@@ -166,7 +168,9 @@ function AppInner() {
           onLoginRequired={() => setView({ name: 'login' })}
         />
       )}
-      {view.name === 'admin' && <AdminView />}
+      {view.name === 'admin' && (
+        <AdminView onSelectUser={(username) => setView({ name: 'user', username })} />
+      )}
       {view.name === 'dev' && <DevSessionsPanel />}
     </div>
   );

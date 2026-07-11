@@ -27,7 +27,17 @@ const s = {
     borderRadius: 8,
     padding: '1rem 1.1rem',
   },
-  cardUsername: { fontWeight: 700, fontSize: '1rem', color: '#1f2937', marginBottom: '0.5rem' },
+  cardUsername: {
+    fontWeight: 700,
+    fontSize: '1rem',
+    color: '#1f2937',
+    marginBottom: '0.5rem',
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    cursor: 'pointer',
+    textDecoration: 'none',
+  },
   pill: {
     display: 'inline-block',
     padding: '0.1rem 0.5rem',
@@ -57,11 +67,13 @@ function timeSince(ts: number) {
   return `${Math.floor(min / 60)}h ago`;
 }
 
-function SessionCard({ session }: { session: ActiveSession }) {
+function SessionCard({ session, onSelectUser }: { session: ActiveSession; onSelectUser?: (username: string) => void }) {
   const d = session.sessionData;
   return (
     <div style={s.card}>
-      <div style={s.cardUsername}>{session.username}</div>
+      <button style={s.cardUsername} type="button" onClick={() => onSelectUser?.(session.username)}>
+        {session.username}
+      </button>
       <div style={s.pill}>Live</div>
       {d ? (
         <>
@@ -85,7 +97,11 @@ function SessionCard({ session }: { session: ActiveSession }) {
   );
 }
 
-export default function AllSplashersView() {
+interface Props {
+  onSelectUser?: (username: string) => void;
+}
+
+export default function AllSplashersView({ onSelectUser }: Props) {
   const [sessions, setSessions] = useState<ActiveSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -136,7 +152,7 @@ export default function AllSplashersView() {
       {!error && sessions.length > 0 && (
         <div style={s.grid}>
           {sessions.map((session) => (
-            <SessionCard key={session.username} session={session} />
+            <SessionCard key={session.username} session={session} onSelectUser={onSelectUser} />
           ))}
         </div>
       )}
