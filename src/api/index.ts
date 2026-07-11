@@ -112,6 +112,13 @@ export async function adminDeleteSession(sessionId: string, token: string): Prom
 
 // ─── Dev-only fake sessions (backend rejects these outside NODE_ENV=production check) ─────────
 
+export async function devGetAdminToken(): Promise<{ token: string; username: string; isAdmin: boolean }> {
+  const res = await fetch(`${BASE}/dev/admin-token`, { method: 'POST' });
+  const data = (await res.json()) as { token?: string; username?: string; isAdmin?: boolean; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to get dev admin token');
+  return data as { token: string; username: string; isAdmin: boolean };
+}
+
 export async function devAddFakeSession(username: string): Promise<ActiveSession> {
   const res = await fetch(`${BASE}/dev/sessions`, {
     method: 'POST',

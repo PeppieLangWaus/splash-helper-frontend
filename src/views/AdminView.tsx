@@ -21,6 +21,7 @@ const s = {
   td: { padding: '0.6rem 0.85rem', color: '#374151', borderBottom: '1px solid #f3f4f6', verticalAlign: 'middle' as const },
   btnDanger: { padding: '0.25rem 0.65rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 5, color: '#991b1b', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 },
   btnAction: { padding: '0.25rem 0.65rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 5, color: '#1d4ed8', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, marginRight: '0.4rem' },
+  usernameLink: { background: 'none', border: 'none', padding: 0, color: '#2563eb', fontWeight: 600, cursor: 'pointer', fontSize: 'inherit' },
   errorBox: { padding: '0.65rem 0.85rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b', fontSize: '0.875rem', marginBottom: '1rem' },
   successBox: { padding: '0.65rem 0.85rem', background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: 6, color: '#065f46', fontSize: '0.875rem', marginBottom: '1rem' },
   secretRow: { display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1rem' },
@@ -32,7 +33,11 @@ const s = {
 function fmt(n: number) { return n.toLocaleString(); }
 function fmtDate(ts: number) { return new Date(ts).toLocaleString(); }
 
-export default function AdminView() {
+interface Props {
+  onSelectUser?: (username: string) => void;
+}
+
+export default function AdminView({ onSelectUser }: Props) {
   const { token } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [sessions, setSessions] = useState<ArchivedSession[]>([]);
@@ -162,7 +167,11 @@ export default function AdminView() {
               <tbody>
                 {users.map((u) => (
                   <tr key={u._id}>
-                    <td style={s.td}>{u.username}</td>
+                    <td style={s.td}>
+                      <button style={s.usernameLink} type="button" onClick={() => onSelectUser?.(u.username)}>
+                        {u.username}
+                      </button>
+                    </td>
                     <td style={s.td}><span style={s.badge(u.isAdmin)}>{u.isAdmin ? 'Yes' : 'No'}</span></td>
                     <td style={s.td}><span style={s.badge(u.setupLinkUsed)}>{u.setupLinkUsed ? 'Yes' : 'Pending'}</span></td>
                     <td style={s.td}>{new Date(u.createdAt).toLocaleString()}</td>
@@ -214,7 +223,11 @@ export default function AdminView() {
                       const d = entry.session;
                       return (
                         <tr key={entry.sessionId}>
-                          <td style={s.td}>{entry.username}</td>
+                          <td style={s.td}>
+                            <button style={s.usernameLink} type="button" onClick={() => onSelectUser?.(entry.username)}>
+                              {entry.username}
+                            </button>
+                          </td>
                           <td style={{ ...s.td, whiteSpace: 'nowrap' }}>{fmtDate(entry.createdTimestamp)}</td>
                           <td style={s.td}>{d.spell}</td>
                           <td style={s.td}>{d.world}</td>
