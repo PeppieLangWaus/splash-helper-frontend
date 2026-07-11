@@ -6,13 +6,15 @@ import UserView from './views/UserView';
 import LoginView from './views/LoginView';
 import SetupAccountView from './views/SetupAccountView';
 import AdminView from './views/AdminView';
+import DevSessionsPanel from './views/DevSessionsPanel';
 
 type View =
   | { name: 'active' }
   | { name: 'upload' }
   | { name: 'user'; username: string }
   | { name: 'login' }
-  | { name: 'admin' };
+  | { name: 'admin' }
+  | { name: 'dev' };
 
 const nav = {
   wrapper: {
@@ -121,6 +123,15 @@ function AppInner() {
             Admin
           </button>
         )}
+        {import.meta.env.DEV && (
+          <button
+            style={nav.btn(view.name === 'dev')}
+            onClick={() => setView({ name: 'dev' })}
+            type="button"
+          >
+            Dev
+          </button>
+        )}
 
         <div style={nav.right}>
           {user ? (
@@ -156,6 +167,7 @@ function AppInner() {
         />
       )}
       {view.name === 'admin' && <AdminView />}
+      {view.name === 'dev' && <DevSessionsPanel />}
     </div>
   );
 }
