@@ -109,3 +109,35 @@ export async function adminDeleteSession(sessionId: string, token: string): Prom
     throw new Error(data.error ?? 'Delete failed');
   }
 }
+
+// ─── Dev-only fake sessions (backend rejects these outside NODE_ENV=production check) ─────────
+
+export async function devAddFakeSession(username: string): Promise<ActiveSession> {
+  const res = await fetch(`${BASE}/dev/sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username }),
+  });
+  const data = (await res.json()) as ActiveSession & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to add fake session');
+  return data;
+}
+
+export async function devTickFakeSession(username: string): Promise<ActiveSession> {
+  const res = await fetch(`${BASE}/dev/sessions/${encodeURIComponent(username)}/tick`, {
+    method: 'POST',
+  });
+  const data = (await res.json()) as ActiveSession & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update fake session');
+  return data;
+}
+
+export async function devRemoveFakeSession(username: string): Promise<void> {
+  const res = await fetch(`${BASE}/dev/sessions/${encodeURIComponent(username)}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    const data = (await res.json()) as { error?: string };
+    throw new Error(data.error ?? 'Failed to remove fake session');
+  }
+}
