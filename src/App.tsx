@@ -6,6 +6,7 @@ import UserView from './views/UserView';
 import LoginView from './views/LoginView';
 import SetupAccountView from './views/SetupAccountView';
 import AdminView from './views/AdminView';
+import CommunityView from './views/CommunityView';
 import DevSessionsPanel from './views/DevSessionsPanel';
 
 type View =
@@ -14,6 +15,7 @@ type View =
   | { name: 'user'; username: string }
   | { name: 'login' }
   | { name: 'admin' }
+  | { name: 'community' }
   | { name: 'dev' };
 
 const nav = {
@@ -114,6 +116,15 @@ function AppInner() {
             My Sessions
           </button>
         )}
+        {user?.communityEligible && (
+          <button
+            style={nav.btn(view.name === 'community')}
+            onClick={() => setView({ name: 'community' })}
+            type="button"
+          >
+            My Community
+          </button>
+        )}
         {user?.isAdmin && (
           <button
             style={nav.btn(view.name === 'admin')}
@@ -171,6 +182,7 @@ function AppInner() {
       {view.name === 'admin' && (
         <AdminView onSelectUser={(username) => setView({ name: 'user', username })} />
       )}
+      {view.name === 'community' && <CommunityView />}
       {view.name === 'dev' && <DevSessionsPanel />}
     </div>
   );
