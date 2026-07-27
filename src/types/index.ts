@@ -60,6 +60,7 @@ export interface ArchivedSession {
 export interface AuthUser {
   username: string;
   isAdmin: boolean;
+  communityEligible: boolean;
 }
 
 /** User record returned from admin endpoints */
@@ -69,4 +70,29 @@ export interface AdminUser {
   isAdmin: boolean;
   setupLinkUsed: boolean;
   createdAt: string;
+}
+
+/** Community record returned from the communities endpoints */
+export interface Community {
+  _id: string;
+  name: string;
+  ownerIds: string[];
+  memberUserIds: string[];
+  discordActiveWebhookUrl?: string;
+  discordHistoryWebhookUrl?: string;
+  createdAt: string;
+}
+
+/** Splasher (User) record returned from GET /communities/:id/splashers */
+export interface CommunitySplasher {
+  _id: string;
+  username: string;
+  discordActiveWebhookUrl?: string;
+  discordHistoryWebhookUrl?: string;
+}
+
+/** A splasher's own personal webhook overrides, additive with any community webhook. */
+export interface SplasherWebhooks {
+  discordActiveWebhookUrl?: string;
+  discordHistoryWebhookUrl?: string;
 }

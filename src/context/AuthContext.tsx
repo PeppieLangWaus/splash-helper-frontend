@@ -7,7 +7,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
-  setFromToken: (token: string, username: string, isAdmin: boolean) => void;
+  setFromToken: (token: string, username: string, isAdmin: boolean, communityEligible: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -25,8 +25,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('authToken'));
   const [user, setUser] = useState<AuthUser | null>(readStoredUser);
 
-  function setFromToken(newToken: string, username: string, isAdmin: boolean) {
-    const authUser: AuthUser = { username, isAdmin };
+  function setFromToken(newToken: string, username: string, isAdmin: boolean, communityEligible: boolean) {
+    const authUser: AuthUser = { username, isAdmin, communityEligible };
     localStorage.setItem('authToken', newToken);
     localStorage.setItem('authUser', JSON.stringify(authUser));
     setToken(newToken);
@@ -39,9 +39,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
-    const data = (await res.json()) as { token?: string; username?: string; isAdmin?: boolean; error?: string };
+    const data = (await res.json()) as {
+      token?: string;
+      username?: string;
+      isAdmin?: boolean;
+      communityEligible?: boolean;
+      error?: string;
+    };
     if (!res.ok) throw new Error(data.error ?? 'Login failed');
-    setFromToken(data.token!, data.username!, data.isAdmin ?? false);
+    setFromToken(data.token!, data.username!, data.isAdmin ?? false, data.communityEligible ?? false);
   }
 
   function logout() {
@@ -57,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!import.meta.env.DEV || token) return;
     devGetAdminToken()
-      .then((data) => setFromToken(data.token, data.username, data.isAdmin))
+      .then((data) => setFromToken(data.token, data.username, data.isAdmin, data.communityEligible))
       .catch((err) => console.error('Dev auto-login failed:', err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { getArchivedSessions } from '../api';
+import { getArchivedSessions, setSplasherWebhook } from '../api';
 import { useAuth } from '../context/AuthContext';
-import type { ArchivedSession } from '../types';
+import WebhookFieldsEditor from '../components/WebhookFieldsEditor';
+import type { ArchivedSession, SplasherWebhooks } from '../types';
 
 const s = {
   container: { maxWidth: 900, margin: '0 auto', padding: '2rem 1rem' },
@@ -142,6 +143,8 @@ const s = {
   activityCol: { display: 'flex', flexDirection: 'column' as const, gap: '3px' },
   activityCell: { width: 11, height: 11, borderRadius: 2 },
   activityLegend: { display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.6rem', fontSize: '0.7rem', color: '#6b7280' },
+  webhookCard: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.1rem', marginBottom: '0.5rem' },
+  webhookHint: { color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.75rem' },
 } as const;
 
 const ACTIVITY_WEEKS = 53;
@@ -286,8 +289,9 @@ interface Props {
 }
 
 export default function UserView({ username, onBack, onLoginRequired }: Props) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [sessions, setSessions] = useState<ArchivedSession[]>([]);
+  const [webhooks, setWebhooks] = useState<SplasherWebhooks>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -300,12 +304,29 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
     setLoading(true);
     setError(null);
     getArchivedSessions(username, token)
-      .then((data) => setSessions(data.sessions))
+      .then((data) => {
+        setSessions(data.sessions);
+        setWebhooks({
+          discordActiveWebhookUrl: data.discordActiveWebhookUrl,
+          discordHistoryWebhookUrl: data.discordHistoryWebhookUrl,
+        });
+      })
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load sessions.'))
       .finally(() => setLoading(false));
   }, [username, token, onLoginRequired]);
 
   const stats = calcStats(sessions);
+  const isOwnProfile = user?.username === username;
+
+  async function saveActiveWebhook(value: string) {
+    if (!token) return;
+    setWebhooks(await setSplasherWebhook(username, { activeWebhookUrl: value }, token));
+  }
+
+  async function saveHistoryWebhook(value: string) {
+    if (!token) return;
+    setWebhooks(await setSplasherWebhook(username, { historyWebhookUrl: value }, token));
+  }
 
   return (
     <div style={s.container}>
@@ -319,6 +340,24 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
       {!loading && !error && (
         <>
           <h2 style={s.heading}>{username}</h2>
+
+          {isOwnProfile && (
+            <>
+              <h3 style={s.subheading}>Discord webhooks</h3>
+              <div style={s.webhookCard}>
+                <WebhookFieldsEditor
+                  activeUrl={webhooks.discordActiveWebhookUrl}
+                  historyUrl={webhooks.discordHistoryWebhookUrl}
+                  onSaveActive={saveActiveWebhook}
+                  onSaveHistory={saveHistoryWebhook}
+                />
+                <p style={s.webhookHint}>
+                  Personal webhooks, additive with any community you belong to — your posts go
+                  to both.
+                </p>
+              </div>
+            </>
+          )}
 
           <div style={s.statsGrid}>
             <StatCard value={fmt(sessions.length)} label="Sessions" />

@@ -88,7 +88,7 @@ export default function SetupAccountView({ setupToken, onSuccess }: Props) {
     setLoading(true);
     try {
       const result = await setupAccount(setupToken, password);
-      setFromToken(result.token, result.username, false);
+      setFromToken(result.token, result.username, result.isAdmin, result.communityEligible);
       setDone(true);
       setTimeout(() => onSuccess?.(), 1500);
     } catch (err) {
