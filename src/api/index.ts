@@ -151,6 +151,19 @@ export async function adminDeleteSession(sessionId: string, token: string): Prom
   }
 }
 
+export async function adminSetCommunityEligibility(
+  username: string,
+  token: string,
+): Promise<{ message: string; communityEligible: boolean }> {
+  const res = await fetch(`${BASE}/admin/community-eligibility/${encodeURIComponent(username)}`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  const data = (await res.json()) as { message?: string; communityEligible?: boolean; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update community eligibility');
+  return data as { message: string; communityEligible: boolean };
+}
+
 // ─── Communities ──────────────────────────────────────────────────────────────
 
 export async function getMyCommunities(token: string): Promise<Community[]> {
@@ -250,6 +263,17 @@ export async function adminRemoveUserFromCommunity(
   if (!res.ok) {
     const data = (await res.json()) as { error?: string };
     throw new Error(data.error ?? 'Failed to remove splasher from community');
+  }
+}
+
+export async function adminDeleteCommunity(communityId: string, token: string): Promise<void> {
+  const res = await fetch(`${BASE}/admin/communities/${encodeURIComponent(communityId)}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    const data = (await res.json()) as { error?: string };
+    throw new Error(data.error ?? 'Failed to delete community');
   }
 }
 

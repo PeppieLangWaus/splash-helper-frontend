@@ -69,6 +69,7 @@ export interface AdminUser {
   username: string;
   isAdmin: boolean;
   setupLinkUsed: boolean;
+  communityEligible: boolean;
   createdAt: string;
 }
 

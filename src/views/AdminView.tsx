@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
-import { adminGetUsers, adminGetSessions, adminPromoteUser, adminDeleteUser, adminDeleteSession } from '../api';
+import {
+  adminGetUsers, adminGetSessions, adminPromoteUser, adminDeleteUser, adminDeleteSession,
+  adminSetCommunityEligibility, adminGetCommunities, adminDeleteCommunity,
+  adminAssignUsersToCommunity, adminRemoveUserFromCommunity, getCommunitySplashers,
+} from '../api';
 import { useAuth } from '../context/AuthContext';
-import type { AdminUser, ArchivedSession } from '../types';
+import type { AdminUser, ArchivedSession, Community, CommunitySplasher } from '../types';
 
 const s = {
   container: { maxWidth: 960, margin: '0 auto', padding: '2rem 1rem' },
@@ -28,6 +32,13 @@ const s = {
   secretInput: { padding: '0.45rem 0.65rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.875rem', flex: 1, maxWidth: 280, outline: 'none' },
   label: { fontSize: '0.875rem', fontWeight: 600, color: '#374151' },
   emptyMsg: { color: '#9ca3af', textAlign: 'center' as const, padding: '2rem' },
+  card: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.25rem', marginBottom: '1rem' },
+  cardHeader: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '0.75rem' },
+  cardTitle: { fontSize: '1.05rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.15rem' },
+  cardMeta: { color: '#9ca3af', fontSize: '0.8rem' },
+  memberRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid #f3f4f6', fontSize: '0.875rem' },
+  addRow: { display: 'flex', gap: '0.5rem', marginTop: '0.75rem' },
+  input: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.875rem', flex: 1, outline: 'none' },
 } as const;
 
 function fmt(n: number) { return n.toLocaleString(); }
@@ -37,13 +48,110 @@ interface Props {
   onSelectUser?: (username: string) => void;
 }
 
+function CommunityCard({
+  community,
+  showFeedback,
+  onDeleted,
+}: {
+  community: Community;
+  showFeedback: (type: 'error' | 'success', message: string) => void;
+  onDeleted: () => void;
+}) {
+  const { token } = useAuth();
+  const [splashers, setSplashers] = useState<CommunitySplasher[]>([]);
+  const [newUsername, setNewUsername] = useState('');
+
+  async function loadMembers() {
+    if (!token) return;
+    try {
+      setSplashers(await getCommunitySplashers(community._id, token));
+    } catch (err) {
+      showFeedback('error', err instanceof Error ? err.message : 'Failed to load members');
+    }
+  }
+
+  useEffect(() => { void loadMembers(); }, [community._id, token]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleAssign() {
+    if (!token || !newUsername.trim()) return;
+    try {
+      const result = await adminAssignUsersToCommunity(community._id, [newUsername.trim()], token);
+      if (result.notFound.length > 0) {
+        showFeedback('error', `User "${result.notFound.join(', ')}" not found`);
+      } else {
+        showFeedback('success', result.message);
+      }
+      setNewUsername('');
+      void loadMembers();
+    } catch (err) {
+      showFeedback('error', err instanceof Error ? err.message : 'Failed to assign splasher');
+    }
+  }
+
+  async function handleRemove(username: string) {
+    if (!token) return;
+    try {
+      await adminRemoveUserFromCommunity(community._id, username, token);
+      showFeedback('success', `Removed "${username}" from "${community.name}"`);
+      void loadMembers();
+    } catch (err) {
+      showFeedback('error', err instanceof Error ? err.message : 'Failed to remove splasher');
+    }
+  }
+
+  async function handleDelete() {
+    if (!token) return;
+    if (!confirm(`Delete community "${community.name}"? This does not delete its splashers.`)) return;
+    try {
+      await adminDeleteCommunity(community._id, token);
+      showFeedback('success', `Community "${community.name}" deleted`);
+      onDeleted();
+    } catch (err) {
+      showFeedback('error', err instanceof Error ? err.message : 'Delete failed');
+    }
+  }
+
+  return (
+    <div style={s.card}>
+      <div style={s.cardHeader}>
+        <div>
+          <div style={s.cardTitle}>{community.name}</div>
+          <div style={s.cardMeta}>
+            {splashers.length} splasher{splashers.length === 1 ? '' : 's'} · created {new Date(community.createdAt).toLocaleString()}
+          </div>
+        </div>
+        <button style={s.btnDanger} type="button" onClick={handleDelete}>Delete</button>
+      </div>
+
+      {splashers.map((sp) => (
+        <div key={sp._id} style={s.memberRow}>
+          <span>{sp.username}</span>
+          <button style={s.btnDanger} type="button" onClick={() => handleRemove(sp.username)}>Remove</button>
+        </div>
+      ))}
+
+      <div style={s.addRow}>
+        <input
+          style={s.input}
+          type="text"
+          placeholder="Username to add"
+          value={newUsername}
+          onChange={(e) => setNewUsername(e.target.value)}
+        />
+        <button style={s.btnAction} type="button" onClick={() => void handleAssign()}>Add</button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminView({ onSelectUser }: Props) {
   const { token } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [sessions, setSessions] = useState<ArchivedSession[]>([]);
+  const [communities, setCommunities] = useState<Community[]>([]);
   const [adminSecret, setAdminSecret] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'users' | 'sessions'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'sessions' | 'communities'>('users');
 
   function showFeedback(type: 'error' | 'success', message: string) {
     setFeedback({ type, message });
@@ -68,7 +176,21 @@ export default function AdminView({ onSelectUser }: Props) {
     }
   }
 
-  useEffect(() => { void loadUsers(); void loadSessions(); }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+  async function loadCommunities() {
+    if (!token) return;
+    try {
+      setCommunities(await adminGetCommunities(token));
+    } catch (err) {
+      showFeedback('error', err instanceof Error ? err.message : 'Failed to load communities');
+    }
+  }
+
+  useEffect(() => {
+    void loadUsers();
+    void loadSessions();
+    void loadCommunities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   async function handlePromote(username: string) {
     if (!token || !adminSecret) { showFeedback('error', 'Enter admin secret first'); return; }
@@ -78,6 +200,17 @@ export default function AdminView({ onSelectUser }: Props) {
       void loadUsers();
     } catch (err) {
       showFeedback('error', err instanceof Error ? err.message : 'Promote failed');
+    }
+  }
+
+  async function handleToggleCommunityEligibility(username: string) {
+    if (!token) return;
+    try {
+      const result = await adminSetCommunityEligibility(username, token);
+      showFeedback('success', result.message);
+      void loadUsers();
+    } catch (err) {
+      showFeedback('error', err instanceof Error ? err.message : 'Failed to update eligibility');
     }
   }
 
@@ -146,6 +279,9 @@ export default function AdminView({ onSelectUser }: Props) {
         <button style={tabStyle(activeTab === 'sessions')} onClick={() => setActiveTab('sessions')} type="button">
           Sessions ({sessions.length})
         </button>
+        <button style={tabStyle(activeTab === 'communities')} onClick={() => setActiveTab('communities')} type="button">
+          Communities ({communities.length})
+        </button>
       </div>
 
       {/* Users tab */}
@@ -160,6 +296,7 @@ export default function AdminView({ onSelectUser }: Props) {
                   <th style={s.th}>Username</th>
                   <th style={s.th}>Admin</th>
                   <th style={s.th}>Account set up</th>
+                  <th style={s.th}>Community Eligible</th>
                   <th style={s.th}>Created</th>
                   <th style={s.th}>Actions</th>
                 </tr>
@@ -174,6 +311,7 @@ export default function AdminView({ onSelectUser }: Props) {
                     </td>
                     <td style={s.td}><span style={s.badge(u.isAdmin)}>{u.isAdmin ? 'Yes' : 'No'}</span></td>
                     <td style={s.td}><span style={s.badge(u.setupLinkUsed)}>{u.setupLinkUsed ? 'Yes' : 'Pending'}</span></td>
+                    <td style={s.td}><span style={s.badge(u.communityEligible)}>{u.communityEligible ? 'Yes' : 'No'}</span></td>
                     <td style={s.td}>{new Date(u.createdAt).toLocaleString()}</td>
                     <td style={s.td}>
                       <button
@@ -183,6 +321,9 @@ export default function AdminView({ onSelectUser }: Props) {
                         title={adminSecret ? undefined : 'Enter admin secret first'}
                       >
                         {u.isAdmin ? 'Demote' : 'Promote'}
+                      </button>
+                      <button style={s.btnAction} type="button" onClick={() => handleToggleCommunityEligibility(u.username)}>
+                        {u.communityEligible ? 'Revoke community' : 'Allow community'}
                       </button>
                       <button style={s.btnDanger} type="button" onClick={() => handleDeleteUser(u.username)}>
                         Delete
@@ -249,6 +390,24 @@ export default function AdminView({ onSelectUser }: Props) {
                 </tbody>
               </table>
             </div>
+          )}
+        </>
+      )}
+
+      {/* Communities tab */}
+      {activeTab === 'communities' && (
+        <>
+          {communities.length === 0 ? (
+            <p style={s.emptyMsg}>No communities found.</p>
+          ) : (
+            communities.map((community) => (
+              <CommunityCard
+                key={community._id}
+                community={community}
+                showFeedback={showFeedback}
+                onDeleted={() => void loadCommunities()}
+              />
+            ))
           )}
         </>
       )}
