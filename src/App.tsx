@@ -4,6 +4,7 @@ import UploadView from './views/UploadView';
 import AllSplashersView from './views/AllSplashersView';
 import UserView from './views/UserView';
 import LoginView from './views/LoginView';
+import ForgotPasswordView from './views/ForgotPasswordView';
 import SetupAccountView from './views/SetupAccountView';
 import AdminView from './views/AdminView';
 import CommunityView from './views/CommunityView';
@@ -14,6 +15,7 @@ type View =
   | { name: 'upload' }
   | { name: 'user'; username: string }
   | { name: 'login' }
+  | { name: 'forgot-password' }
   | { name: 'admin' }
   | { name: 'community' }
   | { name: 'dev' };
@@ -86,7 +88,21 @@ function AppInner() {
   }
 
   if (view.name === 'login') {
-    return <LoginView onSuccess={() => setView({ name: 'active' })} />;
+    return (
+      <LoginView
+        onSuccess={() => setView({ name: 'active' })}
+        onForgotPassword={() => setView({ name: 'forgot-password' })}
+      />
+    );
+  }
+
+  if (view.name === 'forgot-password') {
+    return (
+      <ForgotPasswordView
+        onSuccess={() => setView({ name: 'active' })}
+        onBack={() => setView({ name: 'login' })}
+      />
+    );
   }
 
   return (
