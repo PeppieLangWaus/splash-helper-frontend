@@ -51,13 +51,25 @@ const s = {
     color: '#991b1b',
     fontSize: '0.875rem',
   },
+  forgotBtn: {
+    display: 'block',
+    marginTop: '0.85rem',
+    background: 'none',
+    border: 'none',
+    color: '#2563eb',
+    fontWeight: 600,
+    fontSize: '0.82rem',
+    cursor: 'pointer',
+    padding: 0,
+  },
 } as const;
 
 interface Props {
   onSuccess?: () => void;
+  onForgotPassword?: () => void;
 }
 
-export default function LoginView({ onSuccess }: Props) {
+export default function LoginView({ onSuccess, onForgotPassword }: Props) {
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -112,6 +124,11 @@ export default function LoginView({ onSuccess }: Props) {
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
+        {onForgotPassword && (
+          <button type="button" style={s.forgotBtn} onClick={onForgotPassword}>
+            Forgot password?
+          </button>
+        )}
       </div>
     </div>
   );
