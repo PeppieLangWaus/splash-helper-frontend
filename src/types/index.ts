@@ -37,11 +37,19 @@ export interface Splasher {
   sessions: SplashEntry[];
 }
 
+/** A community a splasher belongs to that has a public Discord invite configured. */
+export interface ActiveSessionCommunity {
+  communityId: string;
+  communityName: string;
+  discordInviteUrl: string;
+}
+
 /** Active session currently in-memory on the server */
 export interface ActiveSession {
   username: string;
   sessionData: SessionData | null;
   lastUpdate: number;
+  communities?: ActiveSessionCommunity[];
 }
 
 /** Archived session stored in MongoDB */
@@ -81,7 +89,24 @@ export interface Community {
   memberUserIds: string[];
   discordActiveWebhookUrl?: string;
   discordHistoryWebhookUrl?: string;
+  discordInviteUrl?: string;
+  apiToken: string;
   createdAt: string;
+}
+
+/** Lightweight community entry from GET /communities (id + name only). */
+export interface CommunitySummary {
+  _id: string;
+  name: string;
+}
+
+/** A community's hourly-rate tier. Every community always has exactly one isDefault rank. */
+export interface Rank {
+  _id: string;
+  communityId: string;
+  name: string;
+  hourlyRate: number;
+  isDefault: boolean;
 }
 
 /** Splasher (User) record returned from GET /communities/:id/splashers */
@@ -90,6 +115,7 @@ export interface CommunitySplasher {
   username: string;
   discordActiveWebhookUrl?: string;
   discordHistoryWebhookUrl?: string;
+  rank: { id: string; name: string; hourlyRate: number } | null;
 }
 
 /** A splasher's own personal webhook overrides, additive with any community webhook. */

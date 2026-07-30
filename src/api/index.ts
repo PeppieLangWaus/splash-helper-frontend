@@ -1,4 +1,14 @@
-import type { ActiveSession, ArchivedSession, AdminUser, SplashEntry, Community, CommunitySplasher, SplasherWebhooks } from '../types';
+import type {
+  ActiveSession,
+  ArchivedSession,
+  AdminUser,
+  SplashEntry,
+  Community,
+  CommunitySummary,
+  CommunitySplasher,
+  SplasherWebhooks,
+  Rank,
+} from '../types';
 
 /** Body shape for every webhook PUT endpoint: either field may be omitted to leave it
  *  unchanged, or set to '' to clear it. */
@@ -97,7 +107,7 @@ export async function getActiveSessions(): Promise<ActiveSession[]> {
 export async function getArchivedSessions(
   username: string,
   token: string,
-): Promise<{ username: string; sessions: ArchivedSession[] } & SplasherWebhooks> {
+): Promise<{ username: string; sessions: ArchivedSession[]; token?: string } & SplasherWebhooks> {
   const res = await fetch(`${BASE}/splashers/${encodeURIComponent(username)}`, {
     headers: authHeaders(token),
   });
@@ -106,10 +116,11 @@ export async function getArchivedSessions(
     sessions?: ArchivedSession[];
     discordActiveWebhookUrl?: string;
     discordHistoryWebhookUrl?: string;
+    token?: string;
     error?: string;
   };
   if (!res.ok) throw new Error(data.error ?? `Failed to fetch sessions for "${username}"`);
-  return data as { username: string; sessions: ArchivedSession[] } & SplasherWebhooks;
+  return data as { username: string; sessions: ArchivedSession[]; token?: string } & SplasherWebhooks;
 }
 
 export async function setSplasherWebhook(
@@ -234,6 +245,121 @@ export async function getCommunitySplashers(communityId: string, token: string):
   const data = (await res.json()) as { splashers?: CommunitySplasher[]; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to fetch splashers');
   return data.splashers ?? [];
+}
+
+export async function getAllCommunities(token: string): Promise<CommunitySummary[]> {
+  const res = await fetch(`${BASE}/communities`, { headers: authHeaders(token) });
+  const data = (await res.json()) as { communities?: CommunitySummary[]; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to fetch communities');
+  return data.communities ?? [];
+}
+
+export async function applyToCommunity(communityId: string, token: string): Promise<{ status: 'added' | 'pending' }> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/apply`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  const data = (await res.json()) as { status?: 'added' | 'pending'; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to apply');
+  return { status: data.status! };
+}
+
+export async function regenerateCommunityApiToken(communityId: string, token: string): Promise<string> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/api-token/regenerate`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  const data = (await res.json()) as { apiToken?: string; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to regenerate API token');
+  return data.apiToken!;
+}
+
+export async function setCommunityDiscordInvite(
+  communityId: string,
+  discordInviteUrl: string,
+  token: string,
+): Promise<Community> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/discord-invite`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ discordInviteUrl }),
+  });
+  const data = (await res.json()) as { community?: Community; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update Discord invite link');
+  return data.community!;
+}
+
+// ─── Ranks ─────────────────────────────────────────────────────────────────────
+
+export async function getCommunityRanks(communityId: string, token: string): Promise<Rank[]> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/ranks`, {
+    headers: authHeaders(token),
+  });
+  const data = (await res.json()) as { ranks?: Rank[]; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to fetch ranks');
+  return data.ranks ?? [];
+}
+
+export async function createCommunityRank(
+  communityId: string,
+  name: string,
+  hourlyRate: number,
+  token: string,
+): Promise<Rank> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/ranks`, {
+    method: 'POST',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, hourlyRate }),
+  });
+  const data = (await res.json()) as { rank?: Rank; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to create rank');
+  return data.rank!;
+}
+
+export async function updateCommunityRank(
+  communityId: string,
+  rankId: string,
+  updates: { name?: string; hourlyRate?: number },
+  token: string,
+): Promise<Rank> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/ranks/${encodeURIComponent(rankId)}`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  });
+  const data = (await res.json()) as { rank?: Rank; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update rank');
+  return data.rank!;
+}
+
+export async function deleteCommunityRank(communityId: string, rankId: string, token: string): Promise<void> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/ranks/${encodeURIComponent(rankId)}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    const data = (await res.json()) as { error?: string };
+    throw new Error(data.error ?? 'Failed to delete rank');
+  }
+}
+
+export async function setCommunityMemberRank(
+  communityId: string,
+  username: string,
+  rankId: string,
+  token: string,
+): Promise<{ username: string; rank: { id: string; name: string; hourlyRate: number } }> {
+  const res = await fetch(
+    `${BASE}/communities/${encodeURIComponent(communityId)}/members/${encodeURIComponent(username)}/rank`,
+    {
+      method: 'PUT',
+      headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rankId }),
+    },
+  );
+  const data = (await res.json()) as { username?: string; rank?: { id: string; name: string; hourlyRate: number }; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to assign rank');
+  return { username: data.username!, rank: data.rank! };
 }
 
 export async function setCommunityMemberWebhook(

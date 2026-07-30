@@ -8,6 +8,7 @@ import ForgotPasswordView from './views/ForgotPasswordView';
 import SetupAccountView from './views/SetupAccountView';
 import AdminView from './views/AdminView';
 import CommunityView from './views/CommunityView';
+import AccountSettingsView from './views/AccountSettingsView';
 import DevSessionsPanel from './views/DevSessionsPanel';
 
 type View =
@@ -18,6 +19,7 @@ type View =
   | { name: 'forgot-password' }
   | { name: 'admin' }
   | { name: 'community' }
+  | { name: 'settings' }
   | { name: 'dev' };
 
 const nav = {
@@ -150,6 +152,15 @@ function AppInner() {
             Admin
           </button>
         )}
+        {user && (
+          <button
+            style={nav.btn(view.name === 'settings')}
+            onClick={() => setView({ name: 'settings' })}
+            type="button"
+          >
+            Account Settings
+          </button>
+        )}
         {import.meta.env.DEV && (
           <button
             style={nav.btn(view.name === 'dev')}
@@ -199,6 +210,7 @@ function AppInner() {
         <AdminView onSelectUser={(username) => setView({ name: 'user', username })} />
       )}
       {view.name === 'community' && <CommunityView />}
+      {view.name === 'settings' && <AccountSettingsView />}
       {view.name === 'dev' && <DevSessionsPanel />}
     </div>
   );

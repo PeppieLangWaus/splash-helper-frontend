@@ -3,12 +3,18 @@ import {
   getMyCommunities,
   createCommunity,
   setCommunityWebhook,
+  setCommunityDiscordInvite,
   getCommunitySplashers,
   setCommunityMemberWebhook,
+  getCommunityRanks,
+  createCommunityRank,
+  updateCommunityRank,
+  deleteCommunityRank,
+  setCommunityMemberRank,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import WebhookFieldsEditor from '../components/WebhookFieldsEditor';
-import type { Community, CommunitySplasher } from '../types';
+import type { Community, CommunitySplasher, Rank } from '../types';
 
 const s = {
   container: { maxWidth: 720, margin: '0 auto', padding: '2rem 1rem' },
@@ -30,6 +36,22 @@ const s = {
   toggleHint: { fontSize: '0.78rem', color: '#2563eb', fontWeight: 600 },
   splasherBody: { padding: '0 0.75rem 0.9rem' },
   emptyMsg: { color: '#9ca3af', textAlign: 'center' as const, padding: '1.5rem' },
+  rankRow: { display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' },
+  rankBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '0.15rem 0.5rem',
+    borderRadius: 12,
+    fontSize: '0.72rem',
+    fontWeight: 600,
+    background: '#e0e7ff',
+    color: '#4338ca',
+  },
+  rankNameInput: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.82rem', width: 140 },
+  rankRateInput: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.82rem', width: 90 },
+  rankSelect: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.82rem' },
+  btnSmall: { padding: '0.35rem 0.7rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, color: '#1d4ed8', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 },
+  btnSmallDanger: { padding: '0.35rem 0.7rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 },
 } as const;
 
 function CommunityWebhookForm({
@@ -67,9 +89,187 @@ function CommunityWebhookForm({
   );
 }
 
-function MemberWebhookRow({ communityId, splasher, onSaved }: {
+function CommunityInviteForm({
+  community,
+  onSaved,
+}: {
+  community: Community;
+  onSaved: (updated: Community) => void;
+}) {
+  const { token } = useAuth();
+  const [value, setValue] = useState(community.discordInviteUrl ?? '');
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+
+  function flash(type: 'error' | 'success', message: string) {
+    setFeedback({ type, message });
+    setTimeout(() => setFeedback(null), 2500);
+  }
+
+  async function handleSave() {
+    if (!token) return;
+    setSaving(true);
+    try {
+      const updated = await setCommunityDiscordInvite(community._id, value.trim(), token);
+      onSaved(updated);
+      flash('success', value.trim() ? 'Saved' : 'Cleared');
+    } catch (err) {
+      flash('error', err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
+        Discord invite link
+      </label>
+      <div style={s.rankRow}>
+        <input
+          style={{ ...s.input, marginBottom: 0 }}
+          type="text"
+          placeholder="https://discord.gg/..."
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          disabled={saving}
+        />
+        <button style={s.btnSmall} type="button" onClick={handleSave} disabled={saving}>
+          Save
+        </button>
+      </div>
+      {feedback && (
+        <p style={{ ...s.fieldHint, color: feedback.type === 'error' ? '#991b1b' : '#065f46', marginTop: '0.3rem' }}>
+          {feedback.message}
+        </p>
+      )}
+      <p style={s.fieldHint}>
+        Shown alongside your splashers' names on the public active-sessions feed, linking out to
+        your server.
+      </p>
+    </div>
+  );
+}
+
+function RanksPanel({ communityId, onRanksChanged }: { communityId: string; onRanksChanged?: () => void }) {
+  const { token } = useAuth();
+  const [ranks, setRanks] = useState<Rank[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newName, setNewName] = useState('');
+  const [newRate, setNewRate] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  function load() {
+    if (!token) return;
+    getCommunityRanks(communityId, token).then(setRanks).finally(() => setLoading(false));
+  }
+
+  useEffect(load, [communityId, token]);
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!token || !newName.trim()) return;
+    const rate = Number(newRate);
+    if (!Number.isFinite(rate) || rate < 0) {
+      setError('Hourly rate must be a non-negative number');
+      return;
+    }
+    setError(null);
+    try {
+      const rank = await createCommunityRank(communityId, newName.trim(), rate, token);
+      setRanks((prev) => [...prev, rank]);
+      setNewName('');
+      setNewRate('');
+      onRanksChanged?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create rank');
+    }
+  }
+
+  async function handleRateChange(rank: Rank, rate: number) {
+    if (!token || !Number.isFinite(rate) || rate < 0) return;
+    const updated = await updateCommunityRank(communityId, rank._id, { hourlyRate: rate }, token);
+    setRanks((prev) => prev.map((r) => (r._id === updated._id ? updated : r)));
+    onRanksChanged?.();
+  }
+
+  async function handleDelete(rank: Rank) {
+    if (!token) return;
+    setError(null);
+    try {
+      await deleteCommunityRank(communityId, rank._id, token);
+      setRanks((prev) => prev.filter((r) => r._id !== rank._id));
+      onRanksChanged?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete rank');
+    }
+  }
+
+  if (loading) return <p style={s.fieldHint}>Loading ranks...</p>;
+
+  return (
+    <div>
+      {error && <div style={s.errorBox}>{error}</div>}
+      {ranks.map((rank) => (
+        <div key={rank._id} style={s.rankRow}>
+          <span style={s.rankBadge}>{rank.isDefault ? 'Default' : 'Custom'}</span>
+          <input
+            style={s.rankNameInput}
+            type="text"
+            defaultValue={rank.name}
+            onBlur={(e) => {
+              if (!token || !e.target.value.trim() || e.target.value.trim() === rank.name) return;
+              updateCommunityRank(communityId, rank._id, { name: e.target.value.trim() }, token).then((updated) =>
+                setRanks((prev) => prev.map((r) => (r._id === updated._id ? updated : r))),
+              );
+            }}
+          />
+          <input
+            style={s.rankRateInput}
+            type="number"
+            min={0}
+            step="0.01"
+            defaultValue={rank.hourlyRate}
+            onBlur={(e) => handleRateChange(rank, Number(e.target.value))}
+          />
+          <span style={s.fieldHint}>gp/hr</span>
+          {!rank.isDefault && (
+            <button style={s.btnSmallDanger} type="button" onClick={() => handleDelete(rank)}>
+              Delete
+            </button>
+          )}
+        </div>
+      ))}
+
+      <form style={{ ...s.rankRow, marginTop: '0.75rem' }} onSubmit={handleCreate}>
+        <input
+          style={s.rankNameInput}
+          type="text"
+          placeholder="New rank name"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+        />
+        <input
+          style={s.rankRateInput}
+          type="number"
+          min={0}
+          step="0.01"
+          placeholder="Rate"
+          value={newRate}
+          onChange={(e) => setNewRate(e.target.value)}
+        />
+        <button style={s.btnSmall} type="submit" disabled={!newName.trim()}>
+          Add rank
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function MemberWebhookRow({ communityId, splasher, ranks, onSaved }: {
   communityId: string;
   splasher: CommunitySplasher;
+  ranks: Rank[];
   onSaved: (updated: CommunitySplasher) => void;
 }) {
   const { token } = useAuth();
@@ -87,6 +287,12 @@ function MemberWebhookRow({ communityId, splasher, onSaved }: {
     onSaved({ ...splasher, ...result });
   }
 
+  async function handleRankChange(rankId: string) {
+    if (!token || !rankId) return;
+    const result = await setCommunityMemberRank(communityId, splasher.username, rankId, token);
+    onSaved({ ...splasher, rank: { ...result.rank } });
+  }
+
   const hasOverride = !!(splasher.discordActiveWebhookUrl || splasher.discordHistoryWebhookUrl);
 
   return (
@@ -94,12 +300,28 @@ function MemberWebhookRow({ communityId, splasher, onSaved }: {
       <div style={s.splasherHeader} onClick={() => setExpanded((v) => !v)}>
         <span style={s.splasherName}>
           {splasher.username}
+          {splasher.rank && <span style={{ ...s.rankBadge, marginLeft: '0.5rem' }}>{splasher.rank.name}</span>}
           {hasOverride && <span style={{ color: '#065f46', fontWeight: 600 }}> · personal webhook set</span>}
         </span>
-        <span style={s.toggleHint}>{expanded ? 'Hide' : 'Edit webhook'}</span>
+        <span style={s.toggleHint}>{expanded ? 'Hide' : 'Edit'}</span>
       </div>
       {expanded && (
         <div style={s.splasherBody}>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
+              Rank
+            </label>
+            <select
+              style={s.rankSelect}
+              value={splasher.rank?.id ?? ''}
+              onChange={(e) => handleRankChange(e.target.value)}
+            >
+              {!splasher.rank && <option value="">No rank assigned</option>}
+              {ranks.map((rank) => (
+                <option key={rank._id} value={rank._id}>{rank.name} ({rank.hourlyRate} gp/hr)</option>
+              ))}
+            </select>
+          </div>
           <WebhookFieldsEditor
             activeUrl={splasher.discordActiveWebhookUrl}
             historyUrl={splasher.discordHistoryWebhookUrl}
@@ -115,14 +337,21 @@ function MemberWebhookRow({ communityId, splasher, onSaved }: {
 function CommunitySplashersPanel({ communityId }: { communityId: string }) {
   const { token } = useAuth();
   const [splashers, setSplashers] = useState<CommunitySplasher[]>([]);
+  const [ranks, setRanks] = useState<Rank[]>([]);
   const [loading, setLoading] = useState(true);
+
+  function loadRanks() {
+    if (!token) return;
+    getCommunityRanks(communityId, token).then(setRanks).catch(() => {});
+  }
 
   useEffect(() => {
     if (!token) return;
     getCommunitySplashers(communityId, token)
       .then(setSplashers)
       .finally(() => setLoading(false));
-  }, [communityId, token]);
+    loadRanks();
+  }, [communityId, token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSaved(updated: CommunitySplasher) {
     setSplashers((prev) => prev.map((s2) => (s2._id === updated._id ? updated : s2)));
@@ -134,7 +363,13 @@ function CommunitySplashersPanel({ communityId }: { communityId: string }) {
   return (
     <div>
       {splashers.map((splasher) => (
-        <MemberWebhookRow key={splasher._id} communityId={communityId} splasher={splasher} onSaved={handleSaved} />
+        <MemberWebhookRow
+          key={splasher._id}
+          communityId={communityId}
+          splasher={splasher}
+          ranks={ranks}
+          onSaved={handleSaved}
+        />
       ))}
     </div>
   );
@@ -222,6 +457,12 @@ export default function CommunityView() {
             <div style={s.cardTitle}>{community.name}</div>
             <div style={s.cardMeta}>{community.memberUserIds.length} splasher{community.memberUserIds.length === 1 ? '' : 's'}</div>
             <CommunityWebhookForm community={community} onSaved={handleWebhookSaved} />
+
+            <h4 style={s.subheading}>Discord invite</h4>
+            <CommunityInviteForm community={community} onSaved={handleWebhookSaved} />
+
+            <h4 style={s.subheading}>Ranks</h4>
+            <RanksPanel communityId={community._id} />
 
             <h4 style={s.subheading}>Per-splasher overrides</h4>
             <CommunitySplashersPanel communityId={community._id} />
