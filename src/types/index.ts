@@ -71,10 +71,13 @@ export interface AuthUser {
   communityEligible: boolean;
 }
 
-/** User record returned from admin endpoints */
+/** User record returned from admin endpoints. Unlike GET /splashers/:username (which only
+ *  ever includes `token` for the splasher viewing their own data), admin endpoints trust the
+ *  requester's isAdmin flag and always include it — admins can look up any user's token. */
 export interface AdminUser {
   _id: string;
   username: string;
+  token: string;
   isAdmin: boolean;
   setupLinkUsed: boolean;
   communityEligible: boolean;
