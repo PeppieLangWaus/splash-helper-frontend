@@ -53,6 +53,16 @@ const s = {
   noData: { color: '#9ca3af', fontStyle: 'italic' as const, fontSize: '0.875rem' },
   errorBox: { padding: '0.75rem 1rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b' },
   emptyMsg: { color: '#9ca3af', textAlign: 'center' as const, padding: '3rem' },
+  communityLinks: { display: 'flex', flexWrap: 'wrap' as const, gap: '0.4rem', marginBottom: '0.65rem' },
+  communityLink: {
+    fontSize: '0.72rem',
+    fontWeight: 600,
+    color: '#4338ca',
+    textDecoration: 'none',
+    background: '#e0e7ff',
+    borderRadius: 10,
+    padding: '0.1rem 0.5rem',
+  },
 } as const;
 
 function fmt(n: number) { return n.toLocaleString(); }
@@ -74,6 +84,22 @@ function SessionCard({ session, onSelectUser }: { session: ActiveSession; onSele
       <button style={s.cardUsername} type="button" onClick={() => onSelectUser?.(session.username)}>
         {session.username}
       </button>
+      {session.communities && session.communities.length > 0 && (
+        <div style={s.communityLinks}>
+          {session.communities.map((c) => (
+            <a
+              key={c.communityId}
+              style={s.communityLink}
+              href={c.discordInviteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Splashing for {c.communityName} ↗
+            </a>
+          ))}
+        </div>
+      )}
       <div style={s.pill}>Live</div>
       {d ? (
         <>

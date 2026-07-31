@@ -39,6 +39,15 @@ const s = {
   memberRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid #f3f4f6', fontSize: '0.875rem' },
   addRow: { display: 'flex', gap: '0.5rem', marginTop: '0.75rem' },
   input: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.875rem', flex: 1, outline: 'none' },
+  tokenCell: { display: 'flex', alignItems: 'center', gap: '0.4rem' },
+  tokenCode: {
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+    fontSize: '0.78rem',
+    background: '#f9fafb',
+    border: '1px solid #e5e7eb',
+    borderRadius: 4,
+    padding: '0.15rem 0.4rem',
+  },
 } as const;
 
 function fmt(n: number) { return n.toLocaleString(); }
@@ -152,6 +161,7 @@ export default function AdminView({ onSelectUser }: Props) {
   const [adminSecret, setAdminSecret] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'users' | 'sessions' | 'communities'>('users');
+  const [revealedTokens, setRevealedTokens] = useState<Set<string>>(new Set());
 
   function showFeedback(type: 'error' | 'success', message: string) {
     setFeedback({ type, message });
@@ -211,6 +221,24 @@ export default function AdminView({ onSelectUser }: Props) {
       void loadUsers();
     } catch (err) {
       showFeedback('error', err instanceof Error ? err.message : 'Failed to update eligibility');
+    }
+  }
+
+  function toggleTokenRevealed(username: string) {
+    setRevealedTokens((prev) => {
+      const next = new Set(prev);
+      if (next.has(username)) next.delete(username);
+      else next.add(username);
+      return next;
+    });
+  }
+
+  async function handleCopyToken(token: string) {
+    try {
+      await navigator.clipboard.writeText(token);
+      showFeedback('success', 'Token copied to clipboard');
+    } catch {
+      showFeedback('error', 'Could not copy — clipboard access was denied');
     }
   }
 
@@ -294,6 +322,7 @@ export default function AdminView({ onSelectUser }: Props) {
               <thead>
                 <tr>
                   <th style={s.th}>Username</th>
+                  <th style={s.th}>Token</th>
                   <th style={s.th}>Admin</th>
                   <th style={s.th}>Account set up</th>
                   <th style={s.th}>Community Eligible</th>
@@ -308,6 +337,25 @@ export default function AdminView({ onSelectUser }: Props) {
                       <button style={s.usernameLink} type="button" onClick={() => onSelectUser?.(u.username)}>
                         {u.username}
                       </button>
+                    </td>
+                    <td style={s.td}>
+                      <div style={s.tokenCell}>
+                        {revealedTokens.has(u.username) ? (
+                          <>
+                            <code style={s.tokenCode}>{u.token}</code>
+                            <button style={s.btnAction} type="button" onClick={() => handleCopyToken(u.token)}>
+                              Copy
+                            </button>
+                            <button style={s.btnAction} type="button" onClick={() => toggleTokenRevealed(u.username)}>
+                              Hide
+                            </button>
+                          </>
+                        ) : (
+                          <button style={s.btnAction} type="button" onClick={() => toggleTokenRevealed(u.username)}>
+                            Show token
+                          </button>
+                        )}
+                      </div>
                     </td>
                     <td style={s.td}><span style={s.badge(u.isAdmin)}>{u.isAdmin ? 'Yes' : 'No'}</span></td>
                     <td style={s.td}><span style={s.badge(u.setupLinkUsed)}>{u.setupLinkUsed ? 'Yes' : 'Pending'}</span></td>
