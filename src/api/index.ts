@@ -8,6 +8,7 @@ import type {
   CommunitySplasher,
   SplasherWebhooks,
   Rank,
+  DiscordServerConfig,
 } from '../types';
 
 /** Body shape for every webhook PUT endpoint: either field may be omitted to leave it
@@ -287,6 +288,49 @@ export async function setCommunityDiscordInvite(
   const data = (await res.json()) as { community?: Community; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to update Discord invite link');
   return data.community!;
+}
+
+// ─── Discord config (/setup, editable from the website) ──────────────────────
+
+/** Body for PUT .../discord-config: every field optional, omitting one leaves it unchanged.
+ *  An empty string clears a channel id; an empty array clears a role id list. */
+export interface DiscordConfigUpdate {
+  supportRoleIds?: string[];
+  supportTicketChannelId?: string;
+  splasherLinkChannelId?: string;
+  historyChannelId?: string;
+  activeWorldsChannelId?: string;
+  autoAddSplashers?: boolean;
+  bankChannelId?: string;
+  bankManagerRoleIds?: string[];
+  minPayoutGp?: number;
+}
+
+export async function getCommunityDiscordConfig(
+  communityId: string,
+  token: string,
+): Promise<DiscordServerConfig | null> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/discord-config`, {
+    headers: authHeaders(token),
+  });
+  const data = (await res.json()) as { config?: DiscordServerConfig | null; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to fetch Discord config');
+  return data.config ?? null;
+}
+
+export async function setCommunityDiscordConfig(
+  communityId: string,
+  update: DiscordConfigUpdate,
+  token: string,
+): Promise<DiscordServerConfig> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/discord-config`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(update),
+  });
+  const data = (await res.json()) as { config?: DiscordServerConfig; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update Discord config');
+  return data.config!;
 }
 
 // ─── Ranks ─────────────────────────────────────────────────────────────────────

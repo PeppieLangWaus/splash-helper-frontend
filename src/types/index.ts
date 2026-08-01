@@ -126,3 +126,21 @@ export interface SplasherWebhooks {
   discordActiveWebhookUrl?: string;
   discordHistoryWebhookUrl?: string;
 }
+
+/** A community's `/setup` configuration — the same document the Discord bot's setup wizard
+ *  writes. null (via GET /communities/:id/discord-config) until /setup has been run once. */
+export interface DiscordServerConfig {
+  _id: string;
+  communityId: string;
+  guildId: string;
+  supportRoleIds: string[];
+  supportTicketChannelId?: string;
+  splasherLinkChannelId?: string;
+  historyChannelId?: string;
+  activeWorldsChannelId?: string;
+  autoAddSplashers: boolean;
+  bankChannelId?: string;
+  bankManagerRoleIds: string[];
+  minPayoutGp: number;
+  createdAt: string;
+}

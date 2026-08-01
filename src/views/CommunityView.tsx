@@ -11,10 +11,12 @@ import {
   updateCommunityRank,
   deleteCommunityRank,
   setCommunityMemberRank,
+  getCommunityDiscordConfig,
+  setCommunityDiscordConfig,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import WebhookFieldsEditor from '../components/WebhookFieldsEditor';
-import type { Community, CommunitySplasher, Rank } from '../types';
+import type { Community, CommunitySplasher, Rank, DiscordServerConfig } from '../types';
 
 const s = {
   container: { maxWidth: 720, margin: '0 auto', padding: '2rem 1rem' },
@@ -52,6 +54,9 @@ const s = {
   rankSelect: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.82rem' },
   btnSmall: { padding: '0.35rem 0.7rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, color: '#1d4ed8', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 },
   btnSmallDanger: { padding: '0.35rem 0.7rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 },
+  fieldGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' },
+  fieldLabel: { display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.3rem' },
+  checkboxRow: { display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: '#374151', fontWeight: 600, marginBottom: '0.75rem' },
 } as const;
 
 function CommunityWebhookForm({
@@ -146,6 +151,218 @@ function CommunityInviteForm({
       <p style={s.fieldHint}>
         Shown alongside your splashers' names on the public active-sessions feed, linking out to
         your server.
+      </p>
+    </div>
+  );
+}
+
+type DiscordConfigForm = {
+  supportTicketChannelId: string;
+  splasherLinkChannelId: string;
+  historyChannelId: string;
+  activeWorldsChannelId: string;
+  bankChannelId: string;
+  supportRoleIds: string;
+  bankManagerRoleIds: string;
+  autoAddSplashers: boolean;
+  minPayoutGp: string;
+};
+
+function toForm(config: DiscordServerConfig): DiscordConfigForm {
+  return {
+    supportTicketChannelId: config.supportTicketChannelId ?? '',
+    splasherLinkChannelId: config.splasherLinkChannelId ?? '',
+    historyChannelId: config.historyChannelId ?? '',
+    activeWorldsChannelId: config.activeWorldsChannelId ?? '',
+    bankChannelId: config.bankChannelId ?? '',
+    supportRoleIds: config.supportRoleIds.join(', '),
+    bankManagerRoleIds: config.bankManagerRoleIds.join(', '),
+    autoAddSplashers: config.autoAddSplashers,
+    minPayoutGp: String(config.minPayoutGp),
+  };
+}
+
+function parseIdList(value: string): string[] {
+  return value.split(',').map((v) => v.trim()).filter(Boolean);
+}
+
+function DiscordConfigPanel({ communityId }: { communityId: string }) {
+  const { token } = useAuth();
+  const [config, setConfig] = useState<DiscordServerConfig | null | undefined>(undefined);
+  const [form, setForm] = useState<DiscordConfigForm | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+
+  function flash(type: 'error' | 'success', message: string) {
+    setFeedback({ type, message });
+    setTimeout(() => setFeedback(null), 3000);
+  }
+
+  useEffect(() => {
+    if (!token) return;
+    getCommunityDiscordConfig(communityId, token)
+      .then((c) => {
+        setConfig(c);
+        setForm(c ? toForm(c) : null);
+      })
+      .catch((err) => flash('error', err instanceof Error ? err.message : 'Failed to load Discord config'));
+  }, [communityId, token]);
+
+  function setField<K extends keyof DiscordConfigForm>(key: K, value: DiscordConfigForm[K]) {
+    setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
+  }
+
+  async function handleSave() {
+    if (!token || !form) return;
+    const minPayoutGp = Number(form.minPayoutGp);
+    if (!Number.isFinite(minPayoutGp) || minPayoutGp < 0) {
+      flash('error', 'Minimum payout must be a non-negative number');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const updated = await setCommunityDiscordConfig(
+        communityId,
+        {
+          supportTicketChannelId: form.supportTicketChannelId.trim(),
+          splasherLinkChannelId: form.splasherLinkChannelId.trim(),
+          historyChannelId: form.historyChannelId.trim(),
+          activeWorldsChannelId: form.activeWorldsChannelId.trim(),
+          bankChannelId: form.bankChannelId.trim(),
+          supportRoleIds: parseIdList(form.supportRoleIds),
+          bankManagerRoleIds: parseIdList(form.bankManagerRoleIds),
+          autoAddSplashers: form.autoAddSplashers,
+          minPayoutGp,
+        },
+        token,
+      );
+      setConfig(updated);
+      setForm(toForm(updated));
+      flash('success', 'Saved');
+    } catch (err) {
+      flash('error', err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (config === undefined) return <p style={s.fieldHint}>Loading Discord setup...</p>;
+  if (config === null || !form) {
+    return (
+      <p style={s.fieldHint}>
+        This community isn't linked to a Discord server yet — run <code>/setup</code> there first.
+      </p>
+    );
+  }
+
+  return (
+    <div>
+      {feedback && (
+        <div style={feedback.type === 'error' ? s.errorBox : s.successBox}>{feedback.message}</div>
+      )}
+
+      <div style={s.fieldGrid}>
+        <label>
+          <span style={s.fieldLabel}>Support ticket channel ID</span>
+          <input
+            style={s.input}
+            type="text"
+            value={form.supportTicketChannelId}
+            onChange={(e) => setField('supportTicketChannelId', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+        <label>
+          <span style={s.fieldLabel}>Splasher-link ticket channel ID</span>
+          <input
+            style={s.input}
+            type="text"
+            value={form.splasherLinkChannelId}
+            onChange={(e) => setField('splasherLinkChannelId', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+        <label>
+          <span style={s.fieldLabel}>History channel ID</span>
+          <input
+            style={s.input}
+            type="text"
+            value={form.historyChannelId}
+            onChange={(e) => setField('historyChannelId', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+        <label>
+          <span style={s.fieldLabel}>Active worlds channel ID</span>
+          <input
+            style={s.input}
+            type="text"
+            value={form.activeWorldsChannelId}
+            onChange={(e) => setField('activeWorldsChannelId', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+        <label>
+          <span style={s.fieldLabel}>Bank channel ID</span>
+          <input
+            style={s.input}
+            type="text"
+            value={form.bankChannelId}
+            onChange={(e) => setField('bankChannelId', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+        <label>
+          <span style={s.fieldLabel}>Minimum /income payout (gp)</span>
+          <input
+            style={s.input}
+            type="number"
+            min={0}
+            value={form.minPayoutGp}
+            onChange={(e) => setField('minPayoutGp', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+      </div>
+
+      <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+        <span style={s.fieldLabel}>Support role IDs (comma-separated)</span>
+        <input
+          style={s.input}
+          type="text"
+          value={form.supportRoleIds}
+          onChange={(e) => setField('supportRoleIds', e.target.value)}
+          disabled={saving}
+        />
+      </label>
+      <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+        <span style={s.fieldLabel}>Bank manager role IDs (comma-separated)</span>
+        <input
+          style={s.input}
+          type="text"
+          value={form.bankManagerRoleIds}
+          onChange={(e) => setField('bankManagerRoleIds', e.target.value)}
+          disabled={saving}
+        />
+      </label>
+
+      <label style={s.checkboxRow}>
+        <input
+          type="checkbox"
+          checked={form.autoAddSplashers}
+          onChange={(e) => setField('autoAddSplashers', e.target.checked)}
+          disabled={saving}
+        />
+        Auto-add splashers who link or apply (otherwise staff approval is required)
+      </label>
+
+      <button style={s.btnSmall} type="button" onClick={handleSave} disabled={saving}>
+        Save
+      </button>
+      <p style={s.fieldHint}>
+        Copy channel and role IDs from Discord with Developer Mode enabled (right-click → Copy ID).
+        Leave a field blank to clear it.
       </p>
     </div>
   );
@@ -460,6 +677,9 @@ export default function CommunityView() {
 
             <h4 style={s.subheading}>Discord invite</h4>
             <CommunityInviteForm community={community} onSaved={handleWebhookSaved} />
+
+            <h4 style={s.subheading}>Discord setup</h4>
+            <DiscordConfigPanel communityId={community._id} />
 
             <h4 style={s.subheading}>Ranks</h4>
             <RanksPanel communityId={community._id} />
