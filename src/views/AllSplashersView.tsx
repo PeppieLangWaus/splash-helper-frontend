@@ -5,7 +5,7 @@ import './AllSplashersView.css';
 import Icon from '../components/Icon';
 import Tile from '../components/Tile';
 import worldsData from '../worldsData';
-import { formatRelativeTime } from '../utils/formatTime';
+import { formatRelativeTime, formatDurationMs } from '../utils/formatTime';
 
 function fmt(n: number) { return n.toLocaleString(); }
 function timeSince(ts: number) {
@@ -18,11 +18,7 @@ function timeSince(ts: number) {
 function fmtDuration(startIso: string) {
   const start = new Date(startIso).getTime();
   if (Number.isNaN(start)) return '—';
-  const sec = Math.max(0, Math.floor((Date.now() - start) / 1000));
-  const hours = Math.floor(sec / 3600);
-  const mins = Math.floor((sec % 3600) / 60);
-  if (hours > 0) return `${hours}h ${mins}m`;
-  return `${mins}m`;
+  return formatDurationMs(Date.now() - start);
 }
 
 const LOCATION_ICONS: Record<string, string> = {
@@ -131,7 +127,7 @@ function SessionCard({ session, onSelectUser }: { session: ActiveSession; onSele
               iconPosition="end"
             />
           </div>
-          <StatTile label="XP Gained" value={fmt(d.currentMagicXp - d.startMagicXp)} icon={{ name: 'magic' }} iconPosition="end" className="all-splashers-tile-wide" />
+          <StatTile label="XP Gained" value={fmt(d.currentMagicXp - d.startMagicXp)} icon={{ name: 'xp' }} iconPosition="end" className="all-splashers-tile-wide" />
           <div className="all-splashers-pair-row">
             <StatTile
               label="Knight type"

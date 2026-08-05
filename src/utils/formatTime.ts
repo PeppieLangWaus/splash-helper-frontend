@@ -25,3 +25,12 @@ export function formatRelativeTime(date: Date): string {
 
   return `${dayLabel} ${time}`;
 }
+
+/** Formats a duration given in milliseconds as "Xh Ym" (or just "Ym" under an hour). */
+export function formatDurationMs(ms: number): string {
+  const sec = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(sec / 3600);
+  const mins = Math.floor((sec % 3600) / 60);
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}

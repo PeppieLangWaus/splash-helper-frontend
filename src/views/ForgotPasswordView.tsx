@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { resetPassword } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { colors, fontSerif, shadow } from '../theme';
 
 const s = {
   wrapper: {
@@ -8,25 +9,27 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#f3f4f6',
+    background: colors.bg,
   },
   card: {
-    background: '#fff',
-    border: '1px solid #e5e7eb',
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
     borderRadius: 10,
     padding: '2rem',
     width: '100%',
     maxWidth: 400,
-    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    boxShadow: shadow,
   },
-  heading: { fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1f2937' },
-  subheading: { fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem', lineHeight: 1.5 },
-  label: { display: 'block', fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.35rem', color: '#374151' },
+  heading: { fontFamily: fontSerif, fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.5rem', color: colors.text },
+  subheading: { fontSize: '0.875rem', color: colors.textFaint, marginBottom: '1.5rem', lineHeight: 1.5 },
+  label: { display: 'block', fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.35rem', color: colors.textMuted },
   input: {
     width: '100%',
     padding: '0.55rem 0.75rem',
-    border: '1px solid #d1d5db',
+    background: colors.inputBg,
+    border: `1px solid ${colors.inputBorder}`,
     borderRadius: 6,
+    color: colors.text,
     fontSize: '0.9rem',
     outline: 'none',
     boxSizing: 'border-box' as const,
@@ -35,21 +38,21 @@ const s = {
   submitBtn: {
     width: '100%',
     padding: '0.65rem',
-    background: '#2563eb',
+    background: colors.accent,
     color: '#fff',
     border: 'none',
     borderRadius: 6,
-    fontWeight: 600,
+    fontWeight: 700,
     fontSize: '0.95rem',
     cursor: 'pointer',
   },
-  submitBtnDisabled: { background: '#93c5fd', cursor: 'not-allowed' },
+  submitBtnDisabled: { background: colors.borderStrong, color: colors.textDisabled, cursor: 'not-allowed' },
   backBtn: {
     width: '100%',
     marginTop: '0.75rem',
     background: 'none',
     border: 'none',
-    color: '#2563eb',
+    color: colors.link,
     fontWeight: 600,
     fontSize: '0.85rem',
     cursor: 'pointer',
@@ -58,22 +61,22 @@ const s = {
   errorBox: {
     marginBottom: '1rem',
     padding: '0.65rem 0.85rem',
-    background: '#fee2e2',
-    border: '1px solid #fca5a5',
+    background: colors.dangerSoft,
+    border: `1px solid ${colors.danger}`,
     borderRadius: 6,
-    color: '#991b1b',
+    color: colors.dangerText,
     fontSize: '0.875rem',
   },
   successBox: {
     marginBottom: '1rem',
     padding: '0.65rem 0.85rem',
-    background: '#d1fae5',
-    border: '1px solid #6ee7b7',
+    background: colors.successSoft,
+    border: `1px solid ${colors.success}`,
     borderRadius: 6,
-    color: '#065f46',
+    color: colors.successText,
     fontSize: '0.875rem',
   },
-  hint: { fontSize: '0.78rem', color: '#9ca3af', marginTop: '-0.6rem', marginBottom: '1rem' },
+  hint: { fontSize: '0.78rem', color: colors.textFaint, marginTop: '-0.6rem', marginBottom: '1rem' },
 } as const;
 
 interface Props {
@@ -162,7 +165,7 @@ export default function ForgotPasswordView({ onSuccess, onBack }: Props) {
               id="reset-confirm"
               style={{
                 ...s.input,
-                borderColor: confirm && !passwordsMatch ? '#ef4444' : '#d1d5db',
+                borderColor: confirm && !passwordsMatch ? colors.danger : colors.inputBorder,
               }}
               type="password"
               autoComplete="new-password"
@@ -171,7 +174,7 @@ export default function ForgotPasswordView({ onSuccess, onBack }: Props) {
               required
             />
             {confirm && !passwordsMatch && (
-              <p style={{ ...s.hint, color: '#ef4444', marginTop: '-0.6rem' }}>Passwords do not match</p>
+              <p style={{ ...s.hint, color: colors.dangerText, marginTop: '-0.6rem' }}>Passwords do not match</p>
             )}
             <button
               type="submit"

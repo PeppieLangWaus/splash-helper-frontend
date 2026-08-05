@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Surfaces */
+  --bg: #15110d;
+  --panel: #241b14;
+  --panel-alt: #2c2117;
+  --panel-hover: #33271a;
+
+  /* Borders */
+  --border: #3a2c20;
+  --border-strong: #5c4a38;
+
+  /* Inputs */
+  --input-bg: #2f2419;
+  --input-border: #1c140e;
+
+  /* Text */
+  --text: #f2e8d5;
+  --text-muted: #cbb896;
+  --text-faint: #a3906f;
+  --text-disabled: #7c6b52;
+
+  /* Accent (orange) */
+  --accent: #c2410c;
+  --accent-hover: #ea580c;
+  --accent-soft: rgba(194, 65, 12, 0.18);
+  --accent-text: #fb923c;
+  --link: #f0975a;
+
+  /* Semantic */
+  --danger: #b91c1c;
+  --danger-soft: rgba(220, 38, 38, 0.16);
+  --danger-text: #fca5a5;
+  --success: #15803d;
+  --success-soft: rgba(22, 163, 74, 0.16);
+  --success-text: #86efac;
+  --warning-soft: rgba(217, 119, 6, 0.18);
+  --warning-text: #fcd34d;
+
+  --font-serif: 'PT Serif', Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+a {
+  color: var(--link);
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 8px;
+  border: 3px solid var(--bg);
+}

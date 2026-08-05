@@ -13,31 +13,37 @@ import {
   setCommunityMemberRank,
   getCommunityDiscordConfig,
   setCommunityDiscordConfig,
+  getAllCommunities,
+  applyToCommunity,
+  regenerateCommunityApiToken,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import WebhookFieldsEditor from '../components/WebhookFieldsEditor';
-import type { Community, CommunitySplasher, Rank, DiscordServerConfig } from '../types';
+import CopyableField from '../components/CopyableField';
+import Menu from '../components/Menu';
+import type { Community, CommunitySplasher, Rank, DiscordServerConfig, CommunitySummary } from '../types';
+import { colors, fontSerif } from '../theme';
 
 const s = {
   container: { maxWidth: 720, margin: '0 auto', padding: '2rem 1rem' },
-  heading: { fontSize: '1.5rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.25rem' },
-  subtext: { color: '#6b7280', fontSize: '0.875rem', marginBottom: '1.5rem' },
-  errorBox: { padding: '0.65rem 0.85rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b', fontSize: '0.875rem', marginBottom: '1rem' },
-  successBox: { padding: '0.65rem 0.85rem', background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: 6, color: '#065f46', fontSize: '0.875rem', marginBottom: '1rem' },
+  heading: { fontFamily: fontSerif, fontSize: '1.6rem', fontWeight: 700, color: colors.text, marginBottom: '0.25rem' },
+  subtext: { color: colors.textFaint, fontSize: '0.875rem', marginBottom: '1.5rem' },
+  errorBox: { padding: '0.65rem 0.85rem', background: colors.dangerSoft, border: `1px solid ${colors.danger}`, borderRadius: 6, color: colors.dangerText, fontSize: '0.875rem', marginBottom: '1rem' },
+  successBox: { padding: '0.65rem 0.85rem', background: colors.successSoft, border: `1px solid ${colors.success}`, borderRadius: 6, color: colors.successText, fontSize: '0.875rem', marginBottom: '1rem' },
   createRow: { display: 'flex', gap: '0.5rem', marginBottom: '1.75rem' },
-  input: { padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.875rem', flex: 1, outline: 'none' },
-  btnPrimary: { padding: '0.5rem 1rem', background: '#1e3a5f', border: 'none', borderRadius: 6, color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600 },
-  card: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.25rem', marginBottom: '1rem' },
-  cardTitle: { fontSize: '1.05rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.15rem' },
-  cardMeta: { color: '#9ca3af', fontSize: '0.8rem', marginBottom: '1rem' },
-  fieldHint: { color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.75rem' },
-  subheading: { fontSize: '0.95rem', fontWeight: 700, color: '#374151', margin: '1.25rem 0 0.75rem' },
-  splasherRow: { border: '1px solid #f3f4f6', borderRadius: 6, marginBottom: '0.5rem' },
+  input: { padding: '0.5rem 0.7rem', background: colors.inputBg, border: `1px solid ${colors.inputBorder}`, borderRadius: 6, color: colors.text, fontSize: '0.875rem', flex: 1, outline: 'none' },
+  btnPrimary: { padding: '0.5rem 1rem', background: colors.accent, border: 'none', borderRadius: 6, color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 700 },
+  card: { background: colors.panel, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '1.25rem', marginBottom: '1rem' },
+  cardTitle: { fontFamily: fontSerif, fontSize: '1.05rem', fontWeight: 700, color: colors.text, marginBottom: '0.15rem' },
+  cardMeta: { color: colors.textFaint, fontSize: '0.8rem', marginBottom: '1rem' },
+  fieldHint: { color: colors.textFaint, fontSize: '0.78rem', marginTop: '0.75rem' },
+  subheading: { fontFamily: fontSerif, fontSize: '0.95rem', fontWeight: 700, color: colors.text, margin: '1.25rem 0 0.75rem' },
+  splasherRow: { border: `1px solid ${colors.border}`, borderRadius: 6, marginBottom: '0.5rem' },
   splasherHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.55rem 0.75rem', cursor: 'pointer' },
-  splasherName: { fontSize: '0.875rem', fontWeight: 600, color: '#374151' },
-  toggleHint: { fontSize: '0.78rem', color: '#2563eb', fontWeight: 600 },
+  splasherName: { fontSize: '0.875rem', fontWeight: 600, color: colors.textMuted },
+  toggleHint: { fontSize: '0.78rem', color: colors.link, fontWeight: 600 },
   splasherBody: { padding: '0 0.75rem 0.9rem' },
-  emptyMsg: { color: '#9ca3af', textAlign: 'center' as const, padding: '1.5rem' },
+  emptyMsg: { color: colors.textFaint, textAlign: 'center' as const, padding: '1.5rem' },
   rankRow: { display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' },
   rankBadge: {
     display: 'inline-flex',
@@ -46,17 +52,19 @@ const s = {
     borderRadius: 12,
     fontSize: '0.72rem',
     fontWeight: 600,
-    background: '#e0e7ff',
-    color: '#4338ca',
+    background: colors.accentSoft,
+    color: colors.accentText,
   },
-  rankNameInput: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.82rem', width: 140 },
-  rankRateInput: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.82rem', width: 90 },
-  rankSelect: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.82rem' },
-  btnSmall: { padding: '0.35rem 0.7rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, color: '#1d4ed8', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 },
-  btnSmallDanger: { padding: '0.35rem 0.7rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 },
+  rankNameInput: { padding: '0.4rem 0.6rem', background: colors.inputBg, border: `1px solid ${colors.inputBorder}`, borderRadius: 6, color: colors.text, fontSize: '0.82rem', width: 140 },
+  rankRateInput: { padding: '0.4rem 0.6rem', background: colors.inputBg, border: `1px solid ${colors.inputBorder}`, borderRadius: 6, color: colors.text, fontSize: '0.82rem', width: 90 },
+  rankSelect: { padding: '0.4rem 0.6rem', background: colors.inputBg, border: `1px solid ${colors.inputBorder}`, borderRadius: 6, color: colors.text, fontSize: '0.82rem' },
+  btnSmall: { padding: '0.35rem 0.7rem', background: colors.accentSoft, border: `1px solid ${colors.accent}`, borderRadius: 6, color: colors.accentText, cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 },
+  btnSmallDanger: { padding: '0.35rem 0.7rem', background: colors.dangerSoft, border: `1px solid ${colors.danger}`, borderRadius: 6, color: colors.dangerText, cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 },
   fieldGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' },
-  fieldLabel: { display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.3rem' },
-  checkboxRow: { display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: '#374151', fontWeight: 600, marginBottom: '0.75rem' },
+  fieldLabel: { display: 'block', fontSize: '0.8rem', fontWeight: 600, color: colors.textMuted, marginBottom: '0.3rem' },
+  applyRow: { display: 'flex', gap: '0.5rem' },
+  select: { padding: '0.5rem 0.7rem', background: colors.inputBg, border: `1px solid ${colors.inputBorder}`, borderRadius: 6, color: colors.text, fontSize: '0.875rem', flex: 1 },
+  checkboxRow: { display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: colors.textMuted, fontWeight: 600, marginBottom: '0.75rem' },
 } as const;
 
 function CommunityWebhookForm({
@@ -127,7 +135,7 @@ function CommunityInviteForm({
 
   return (
     <div>
-      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
+      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: colors.textMuted, marginBottom: '0.35rem' }}>
         Discord invite link
       </label>
       <div style={s.rankRow}>
@@ -144,7 +152,7 @@ function CommunityInviteForm({
         </button>
       </div>
       {feedback && (
-        <p style={{ ...s.fieldHint, color: feedback.type === 'error' ? '#991b1b' : '#065f46', marginTop: '0.3rem' }}>
+        <p style={{ ...s.fieldHint, color: feedback.type === 'error' ? colors.dangerText : colors.successText, marginTop: '0.3rem' }}>
           {feedback.message}
         </p>
       )}
@@ -429,7 +437,6 @@ function RanksPanel({ communityId, onRanksChanged }: { communityId: string; onRa
       {error && <div style={s.errorBox}>{error}</div>}
       {ranks.map((rank) => (
         <div key={rank._id} style={s.rankRow}>
-          <span style={s.rankBadge}>{rank.isDefault ? 'Default' : 'Custom'}</span>
           <input
             style={s.rankNameInput}
             type="text"
@@ -450,11 +457,29 @@ function RanksPanel({ communityId, onRanksChanged }: { communityId: string; onRa
             onBlur={(e) => handleRateChange(rank, Number(e.target.value))}
           />
           <span style={s.fieldHint}>gp/hr</span>
-          {!rank.isDefault && (
-            <button style={s.btnSmallDanger} type="button" onClick={() => handleDelete(rank)}>
-              Delete
-            </button>
-          )}
+          <Menu
+            items={[
+              // Hidden for the already-default rank (nothing to promote it to); disabled
+              // for every other rank until the backend gains a way to change the default —
+              // see Notes/Splash Helper/Backend/Features/Rank set-default endpoint.md.
+              ...(!rank.isDefault
+                ? [{
+                  label: 'Set as default',
+                  disabled: true,
+                  title: 'Coming soon — the backend needs a new endpoint to change the default rank.',
+                    onClick: () => {},
+                  }]
+                : []),
+              {
+                label: 'Delete',
+                danger: true,
+                disabled: rank.isDefault,
+                title: rank.isDefault ? "Can't delete the default rank" : undefined,
+                onClick: () => handleDelete(rank),
+              },
+            ]}
+          />
+          {rank.isDefault && <span style={s.rankBadge}>Default</span>}
         </div>
       ))}
 
@@ -518,14 +543,14 @@ function MemberWebhookRow({ communityId, splasher, ranks, onSaved }: {
         <span style={s.splasherName}>
           {splasher.username}
           {splasher.rank && <span style={{ ...s.rankBadge, marginLeft: '0.5rem' }}>{splasher.rank.name}</span>}
-          {hasOverride && <span style={{ color: '#065f46', fontWeight: 600 }}> · personal webhook set</span>}
+          {hasOverride && <span style={{ color: colors.successText, fontWeight: 600 }}> · personal webhook set</span>}
         </span>
         <span style={s.toggleHint}>{expanded ? 'Hide' : 'Edit'}</span>
       </div>
       {expanded && (
         <div style={s.splasherBody}>
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.35rem' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: colors.textMuted, marginBottom: '0.35rem' }}>
               Rank
             </label>
             <select
@@ -592,8 +617,93 @@ function CommunitySplashersPanel({ communityId }: { communityId: string }) {
   );
 }
 
-export default function CommunityView() {
+/** Shown to users without community-owner rights: joins them as a splasher for an
+ *  existing community. Moved here from Account Settings so it lives alongside everything
+ *  else community-related. */
+function ApplyToCommunityCard() {
   const { token } = useAuth();
+  const [allCommunities, setAllCommunities] = useState<CommunitySummary[]>([]);
+  const [applyTarget, setApplyTarget] = useState('');
+  const [applying, setApplying] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+
+  function showFeedback(type: 'error' | 'success', message: string) {
+    setFeedback({ type, message });
+    setTimeout(() => setFeedback(null), 3500);
+  }
+
+  useEffect(() => {
+    if (!token) return;
+    getAllCommunities(token).then(setAllCommunities).catch(() => {});
+  }, [token]);
+
+  async function handleApply() {
+    if (!token || !applyTarget) return;
+    setApplying(true);
+    try {
+      const result = await applyToCommunity(applyTarget, token);
+      showFeedback(
+        'success',
+        result.status === 'added' ? "You're now a splasher for that community!" : 'Application submitted — pending staff approval.',
+      );
+      setApplyTarget('');
+    } catch (err) {
+      showFeedback('error', err instanceof Error ? err.message : 'Failed to apply');
+    } finally {
+      setApplying(false);
+    }
+  }
+
+  return (
+    <div style={s.card}>
+      <div style={s.cardTitle}>Apply to a community</div>
+      {feedback && (
+        <div style={feedback.type === 'error' ? s.errorBox : s.successBox}>{feedback.message}</div>
+      )}
+      {allCommunities.length === 0 ? (
+        <p style={s.emptyMsg}>No communities available yet.</p>
+      ) : (
+        <div style={s.applyRow}>
+          <select
+            style={s.select}
+            value={applyTarget}
+            onChange={(e) => setApplyTarget(e.target.value)}
+            disabled={applying}
+          >
+            <option value="">Select a community…</option>
+            {allCommunities.map((c) => (
+              <option key={c._id} value={c._id}>{c.name}</option>
+            ))}
+          </select>
+          <button style={s.btnPrimary} type="button" onClick={handleApply} disabled={applying || !applyTarget}>
+            {applying ? 'Applying…' : 'Apply'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CommunityTokenField({ community, onRegenerated }: { community: Community; onRegenerated: (apiToken: string) => void }) {
+  const { token } = useAuth();
+
+  async function handleRegenerate() {
+    if (!token) return;
+    onRegenerated(await regenerateCommunityApiToken(community._id, token));
+  }
+
+  return (
+    <CopyableField
+      label="API token"
+      value={community.apiToken}
+      onRegenerate={handleRegenerate}
+      hint="Used by the Discord bot's /setup command, and any external access to this community's data."
+    />
+  );
+}
+
+export default function CommunityView() {
+  const { user, token } = useAuth();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState('');
@@ -638,9 +748,21 @@ export default function CommunityView() {
     setCommunities((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
   }
 
+  if (!user) return null;
+
+  if (!user.communityEligible) {
+    return (
+      <div style={s.container}>
+        <h2 style={s.heading}>Communities</h2>
+        <p style={s.subtext}>You're not a community owner — apply below to splash for one instead.</p>
+        <ApplyToCommunityCard />
+      </div>
+    );
+  }
+
   return (
     <div style={s.container}>
-      <h2 style={s.heading}>My Community</h2>
+      <h2 style={s.heading}>Communities</h2>
       <p style={s.subtext}>
         Manage the Discord webhooks your splashers' history and active sessions post to, and
         set personal overrides for individual members.
@@ -673,18 +795,24 @@ export default function CommunityView() {
           <div key={community._id} style={s.card}>
             <div style={s.cardTitle}>{community.name}</div>
             <div style={s.cardMeta}>{community.memberUserIds.length} splasher{community.memberUserIds.length === 1 ? '' : 's'}</div>
-            <CommunityWebhookForm community={community} onSaved={handleWebhookSaved} />
+
+            <CommunityTokenField
+              community={community}
+              onRegenerated={(apiToken) => setCommunities((prev) => prev.map((c) => (c._id === community._id ? { ...c, apiToken } : c)))}
+            />
 
             <h4 style={s.subheading}>Discord invite</h4>
             <CommunityInviteForm community={community} onSaved={handleWebhookSaved} />
 
-            <h4 style={s.subheading}>Discord setup</h4>
-            <DiscordConfigPanel communityId={community._id} />
-
             <h4 style={s.subheading}>Ranks</h4>
             <RanksPanel communityId={community._id} />
 
-            <h4 style={s.subheading}>Per-splasher overrides</h4>
+            <h4 style={s.subheading}>Discord setup</h4>
+            <DiscordConfigPanel communityId={community._id} />
+
+            <h4 style={s.subheading}>Webhooks</h4>
+            <CommunityWebhookForm community={community} onSaved={handleWebhookSaved} />
+            <p style={{ ...s.fieldLabel, marginTop: '1rem' }}>Per-splasher overrides</p>
             <CommunitySplashersPanel communityId={community._id} />
           </div>
         ))

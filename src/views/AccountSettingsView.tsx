@@ -1,32 +1,33 @@
-import { useEffect, useState } from 'react';
-import {
-  getArchivedSessions,
-  setSplasherWebhook,
-  getMyCommunities,
-  regenerateCommunityApiToken,
-  getAllCommunities,
-  applyToCommunity,
-} from '../api';
+import { useEffect, useRef, useState } from 'react';
+import { getArchivedSessions, setSplasherWebhook, uploadJson } from '../api';
 import { useAuth } from '../context/AuthContext';
 import WebhookFieldsEditor from '../components/WebhookFieldsEditor';
 import CopyableField from '../components/CopyableField';
-import type { Community, CommunitySummary, SplasherWebhooks } from '../types';
+import type { SplasherWebhooks, SplashEntry } from '../types';
+import { colors, fontSerif } from '../theme';
 
 const s = {
   container: { maxWidth: 720, margin: '0 auto', padding: '2rem 1rem' },
-  heading: { fontSize: '1.5rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.25rem' },
-  subtext: { color: '#6b7280', fontSize: '0.875rem', marginBottom: '1.5rem' },
-  card: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.25rem', marginBottom: '1rem' },
-  cardTitle: { fontSize: '1.05rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.9rem' },
-  fieldHint: { color: '#9ca3af', fontSize: '0.78rem', marginTop: '0.75rem' },
-  errorBox: { padding: '0.65rem 0.85rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b', fontSize: '0.875rem', marginBottom: '1rem' },
-  successBox: { padding: '0.65rem 0.85rem', background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: 6, color: '#065f46', fontSize: '0.875rem', marginBottom: '1rem' },
-  emptyMsg: { color: '#9ca3af', fontSize: '0.85rem' },
-  communityRow: { display: 'flex', flexDirection: 'column' as const, gap: '0.5rem', marginBottom: '1rem' },
-  communityName: { fontSize: '0.9rem', fontWeight: 600, color: '#374151' },
-  applyRow: { display: 'flex', gap: '0.5rem' },
-  select: { padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.875rem', flex: 1 },
-  btnPrimary: { padding: '0.5rem 1rem', background: '#1e3a5f', border: 'none', borderRadius: 6, color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600 },
+  heading: { fontFamily: fontSerif, fontSize: '1.6rem', fontWeight: 700, color: colors.text, marginBottom: '0.25rem' },
+  subtext: { color: colors.textFaint, fontSize: '0.875rem', marginBottom: '1.5rem' },
+  card: { background: colors.panel, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '1.25rem', marginBottom: '1rem' },
+  cardTitle: { fontFamily: fontSerif, fontSize: '1.05rem', fontWeight: 700, color: colors.text, marginBottom: '0.9rem' },
+  fieldHint: { color: colors.textFaint, fontSize: '0.78rem', marginTop: '0.75rem' },
+  errorBox: { padding: '0.65rem 0.85rem', background: colors.dangerSoft, border: `1px solid ${colors.danger}`, borderRadius: 6, color: colors.dangerText, fontSize: '0.875rem', marginBottom: '1rem' },
+  successBox: { padding: '0.65rem 0.85rem', background: colors.successSoft, border: `1px solid ${colors.success}`, borderRadius: 6, color: colors.successText, fontSize: '0.875rem', marginBottom: '1rem' },
+  emptyMsg: { color: colors.textFaint, fontSize: '0.85rem' },
+  btnRow: { display: 'flex', gap: '0.6rem', flexWrap: 'wrap' as const },
+  btnSecondary: {
+    padding: '0.5rem 1rem',
+    background: '#3e2816',
+    border: `1px solid ${colors.borderStrong}`,
+    borderRadius: 6,
+    color: colors.textMuted,
+    cursor: 'pointer',
+    fontSize: '0.875rem',
+    fontWeight: 600,
+  },
+  btnSecondaryDisabled: { cursor: 'not-allowed', opacity: 0.6 },
 } as const;
 
 export default function AccountSettingsView() {
@@ -35,13 +36,10 @@ export default function AccountSettingsView() {
   const [webhooks, setWebhooks] = useState<SplasherWebhooks>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const [ownedCommunities, setOwnedCommunities] = useState<Community[]>([]);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
-
-  const [allCommunities, setAllCommunities] = useState<CommunitySummary[]>([]);
-  const [applyTarget, setApplyTarget] = useState('');
-  const [applying, setApplying] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function showFeedback(type: 'error' | 'success', message: string) {
     setFeedback({ type, message });
@@ -64,16 +62,6 @@ export default function AccountSettingsView() {
       .finally(() => setLoading(false));
   }, [token, user]);
 
-  useEffect(() => {
-    if (!token) return;
-    getAllCommunities(token).then(setAllCommunities).catch(() => {});
-  }, [token]);
-
-  useEffect(() => {
-    if (!token || !user?.communityEligible) return;
-    getMyCommunities(token).then(setOwnedCommunities).catch(() => {});
-  }, [token, user]);
-
   async function saveActiveWebhook(value: string) {
     if (!token || !user) return;
     setWebhooks(await setSplasherWebhook(user.username, { activeWebhookUrl: value }, token));
@@ -84,27 +72,49 @@ export default function AccountSettingsView() {
     setWebhooks(await setSplasherWebhook(user.username, { historyWebhookUrl: value }, token));
   }
 
-  async function handleRegenerate(communityId: string) {
-    if (!token) return;
-    const apiToken = await regenerateCommunityApiToken(communityId, token);
-    setOwnedCommunities((prev) => prev.map((c) => (c._id === communityId ? { ...c, apiToken } : c)));
-    showFeedback('success', 'API token regenerated');
+  async function handleExport() {
+    if (!token || !user) return;
+    setExporting(true);
+    try {
+      const data = await getArchivedSessions(user.username, token);
+      const blob = new Blob([JSON.stringify(data.sessions, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `splash-sessions-${user.username}-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showFeedback('success', `Exported ${data.sessions.length} session${data.sessions.length === 1 ? '' : 's'}`);
+    } catch (err) {
+      showFeedback('error', err instanceof Error ? err.message : 'Export failed');
+    } finally {
+      setExporting(false);
+    }
   }
 
-  async function handleApply() {
-    if (!token || !applyTarget) return;
-    setApplying(true);
+  async function handleImportFile(file: File) {
+    setImporting(true);
     try {
-      const result = await applyToCommunity(applyTarget, token);
-      showFeedback(
-        'success',
-        result.status === 'added' ? "You're now a splasher for that community!" : 'Application submitted — pending staff approval.',
-      );
-      setApplyTarget('');
+      const text = await file.text();
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        showFeedback('error', 'Invalid JSON — could not parse the selected file.');
+        return;
+      }
+      if (!Array.isArray(parsed)) {
+        showFeedback('error', 'JSON must be an array of session entries.');
+        return;
+      }
+      const result = await uploadJson(parsed as SplashEntry[]);
+      showFeedback('success', result.message);
     } catch (err) {
-      showFeedback('error', err instanceof Error ? err.message : 'Failed to apply');
+      showFeedback('error', err instanceof Error ? err.message : 'Import failed.');
     } finally {
-      setApplying(false);
+      setImporting(false);
     }
   }
 
@@ -112,8 +122,8 @@ export default function AccountSettingsView() {
 
   return (
     <div style={s.container}>
-      <h2 style={s.heading}>Account Settings</h2>
-      <p style={s.subtext}>Your account details, webhooks, and community access.</p>
+      <h2 style={s.heading}>Account</h2>
+      <p style={s.subtext}>Your account details and webhooks.</p>
 
       {feedback && <div style={feedback.type === 'error' ? s.errorBox : s.successBox}>{feedback.message}</div>}
       {error && <div style={s.errorBox}>{error}</div>}
@@ -149,49 +159,42 @@ export default function AccountSettingsView() {
             </p>
           </div>
 
-          {user.communityEligible && (
-            <div style={s.card}>
-              <div style={s.cardTitle}>Your community API tokens</div>
-              {ownedCommunities.length === 0 ? (
-                <p style={s.emptyMsg}>You don't own any communities yet.</p>
-              ) : (
-                ownedCommunities.map((community) => (
-                  <div key={community._id} style={s.communityRow}>
-                    <span style={s.communityName}>{community.name}</span>
-                    <CopyableField
-                      label="API token"
-                      value={community.apiToken}
-                      onRegenerate={() => handleRegenerate(community._id)}
-                      hint="Used by the Discord bot's /setup command, and any external access to this community's data."
-                    />
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
           <div style={s.card}>
-            <div style={s.cardTitle}>Apply to a community</div>
-            {allCommunities.length === 0 ? (
-              <p style={s.emptyMsg}>No communities available yet.</p>
-            ) : (
-              <div style={s.applyRow}>
-                <select
-                  style={s.select}
-                  value={applyTarget}
-                  onChange={(e) => setApplyTarget(e.target.value)}
-                  disabled={applying}
-                >
-                  <option value="">Select a community…</option>
-                  {allCommunities.map((c) => (
-                    <option key={c._id} value={c._id}>{c.name}</option>
-                  ))}
-                </select>
-                <button style={s.btnPrimary} type="button" onClick={handleApply} disabled={applying || !applyTarget}>
-                  {applying ? 'Applying…' : 'Apply'}
-                </button>
-              </div>
-            )}
+            <div style={s.cardTitle}>Session data</div>
+            <div style={s.btnRow}>
+              <button
+                style={{ ...s.btnSecondary, ...(exporting ? s.btnSecondaryDisabled : {}) }}
+                type="button"
+                onClick={handleExport}
+                disabled={exporting}
+              >
+                {exporting ? 'Exporting…' : 'Export sessions'}
+              </button>
+              <button
+                style={{ ...s.btnSecondary, ...(importing ? s.btnSecondaryDisabled : {}) }}
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+              >
+                {importing ? 'Importing…' : 'Import sessions'}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/json,.json"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = '';
+                  if (file) void handleImportFile(file);
+                }}
+              />
+            </div>
+            <p style={s.fieldHint}>
+              Export downloads all of your archived sessions as a JSON file. Import uploads a
+              previously-exported (or plugin-generated) JSON file of session entries — duplicates
+              are skipped automatically.
+            </p>
           </div>
         </>
       )}
