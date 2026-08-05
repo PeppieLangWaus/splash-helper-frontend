@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { colors, fontSerif, shadow } from '../theme';
 
 const s = {
   wrapper: {
@@ -7,24 +8,26 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#f3f4f6',
+    background: colors.bg,
   },
   card: {
-    background: '#fff',
-    border: '1px solid #e5e7eb',
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
     borderRadius: 10,
     padding: '2rem',
     width: '100%',
     maxWidth: 380,
-    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    boxShadow: shadow,
   },
-  heading: { fontSize: '1.3rem', fontWeight: 700, marginBottom: '1.5rem', color: '#1f2937' },
-  label: { display: 'block', fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.35rem', color: '#374151' },
+  heading: { fontFamily: fontSerif, fontSize: '1.4rem', fontWeight: 700, marginBottom: '1.5rem', color: colors.text },
+  label: { display: 'block', fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.35rem', color: colors.textMuted },
   input: {
     width: '100%',
     padding: '0.55rem 0.75rem',
-    border: '1px solid #d1d5db',
+    background: colors.inputBg,
+    border: `1px solid ${colors.inputBorder}`,
     borderRadius: 6,
+    color: colors.text,
     fontSize: '0.9rem',
     outline: 'none',
     boxSizing: 'border-box' as const,
@@ -33,22 +36,22 @@ const s = {
   submitBtn: {
     width: '100%',
     padding: '0.65rem',
-    background: '#2563eb',
+    background: colors.accent,
     color: '#fff',
     border: 'none',
     borderRadius: 6,
-    fontWeight: 600,
+    fontWeight: 700,
     fontSize: '0.95rem',
     cursor: 'pointer',
   },
-  submitBtnDisabled: { background: '#93c5fd', cursor: 'not-allowed' },
+  submitBtnDisabled: { background: colors.borderStrong, color: colors.textDisabled, cursor: 'not-allowed' },
   errorBox: {
     marginBottom: '1rem',
     padding: '0.65rem 0.85rem',
-    background: '#fee2e2',
-    border: '1px solid #fca5a5',
+    background: colors.dangerSoft,
+    border: `1px solid ${colors.danger}`,
     borderRadius: 6,
-    color: '#991b1b',
+    color: colors.dangerText,
     fontSize: '0.875rem',
   },
   forgotBtn: {
@@ -56,7 +59,7 @@ const s = {
     marginTop: '0.85rem',
     background: 'none',
     border: 'none',
-    color: '#2563eb',
+    color: colors.link,
     fontWeight: 600,
     fontSize: '0.82rem',
     cursor: 'pointer',

@@ -1,23 +1,24 @@
 import { useState } from 'react';
+import { colors } from '../theme';
 
 const s = {
   wrap: { display: 'flex', flexDirection: 'column' as const, gap: '0.35rem' },
-  fieldLabel: { display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151' },
+  fieldLabel: { display: 'block', fontSize: '0.8rem', fontWeight: 600, color: colors.textMuted },
   row: { display: 'flex', gap: '0.5rem' },
   input: {
     padding: '0.5rem 0.7rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.inputBorder}`,
     borderRadius: 6,
     fontSize: '0.82rem',
     flex: 1,
     outline: 'none',
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-    background: '#f9fafb',
-    color: '#374151',
+    background: colors.inputBg,
+    color: colors.textMuted,
   },
-  btnSecondary: { padding: '0.5rem 0.9rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, color: '#1d4ed8', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap' as const },
-  btnDanger: { padding: '0.5rem 0.9rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap' as const },
-  hint: { color: '#9ca3af', fontSize: '0.78rem' },
+  btnSecondary: { padding: '0.5rem 0.9rem', background: colors.accentSoft, border: `1px solid ${colors.accent}`, borderRadius: 6, color: colors.accentText, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap' as const },
+  btnDanger: { padding: '0.5rem 0.9rem', background: colors.dangerSoft, border: `1px solid ${colors.danger}`, borderRadius: 6, color: colors.dangerText, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap' as const },
+  hint: { color: colors.textFaint, fontSize: '0.78rem' },
 } as const;
 
 interface Props {
@@ -89,7 +90,7 @@ export default function CopyableField({ label, value, hint, onRegenerate }: Prop
         )}
       </div>
       {confirming && (
-        <p style={{ ...s.hint, color: '#991b1b' }}>
+        <p style={{ ...s.hint, color: colors.dangerText }}>
           Regenerating invalidates the current value immediately — anything using it (like the
           Discord bot's /setup) will need the new one.
         </p>

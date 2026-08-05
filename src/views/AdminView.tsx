@@ -1,53 +1,119 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   adminGetUsers, adminGetSessions, adminPromoteUser, adminDeleteUser, adminDeleteSession,
   adminSetCommunityEligibility, adminGetCommunities, adminDeleteCommunity,
   adminAssignUsersToCommunity, adminRemoveUserFromCommunity, getCommunitySplashers,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useAdminSecret } from '../hooks/useAdminSecret';
+import Menu, { type MenuItem } from '../components/Menu';
+import { useContextMenu } from '../components/ContextMenu';
+import Modal from '../components/Modal';
 import type { AdminUser, ArchivedSession, Community, CommunitySplasher } from '../types';
+import { colors, fontSerif } from '../theme';
 
 const s = {
   container: { maxWidth: 960, margin: '0 auto', padding: '2rem 1rem' },
-  heading: { fontSize: '1.5rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.25rem' },
-  subheading: { fontSize: '1.1rem', fontWeight: 700, color: '#374151', margin: '1.75rem 0 0.75rem' },
+  heading: { fontFamily: fontSerif, fontSize: '1.6rem', fontWeight: 700, color: colors.text, marginBottom: '0.25rem' },
+  subheading: { fontFamily: fontSerif, fontSize: '1.15rem', fontWeight: 700, color: colors.text, margin: '1.75rem 0 0.75rem' },
   badge: (active: boolean) => ({
     display: 'inline-block',
     padding: '0.1rem 0.45rem',
     borderRadius: 4,
     fontSize: '0.72rem',
     fontWeight: 600,
-    background: active ? '#dbeafe' : '#f3f4f6',
-    color: active ? '#1d4ed8' : '#6b7280',
+    background: active ? colors.accentSoft : colors.panelAlt,
+    color: active ? colors.accentText : colors.textFaint,
   }),
-  table: { width: '100%', borderCollapse: 'collapse' as const, background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e7eb', fontSize: '0.875rem' },
-  th: { background: '#f9fafb', padding: '0.6rem 0.85rem', textAlign: 'left' as const, fontSize: '0.75rem', fontWeight: 700, color: '#374151', borderBottom: '1px solid #e5e7eb', textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const },
-  td: { padding: '0.6rem 0.85rem', color: '#374151', borderBottom: '1px solid #f3f4f6', verticalAlign: 'middle' as const },
-  btnDanger: { padding: '0.25rem 0.65rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 5, color: '#991b1b', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 },
-  btnAction: { padding: '0.25rem 0.65rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 5, color: '#1d4ed8', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, marginRight: '0.4rem' },
-  usernameLink: { background: 'none', border: 'none', padding: 0, color: '#2563eb', fontWeight: 600, cursor: 'pointer', fontSize: 'inherit' },
-  errorBox: { padding: '0.65rem 0.85rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b', fontSize: '0.875rem', marginBottom: '1rem' },
-  successBox: { padding: '0.65rem 0.85rem', background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: 6, color: '#065f46', fontSize: '0.875rem', marginBottom: '1rem' },
-  secretRow: { display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1rem' },
-  secretInput: { padding: '0.45rem 0.65rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.875rem', flex: 1, maxWidth: 280, outline: 'none' },
-  label: { fontSize: '0.875rem', fontWeight: 600, color: '#374151' },
-  emptyMsg: { color: '#9ca3af', textAlign: 'center' as const, padding: '2rem' },
-  card: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.25rem', marginBottom: '1rem' },
+  table: { width: '100%', borderCollapse: 'collapse' as const, background: colors.panel, borderRadius: 8, overflow: 'hidden', border: `1px solid ${colors.border}`, fontSize: '0.875rem' },
+  // Same as `table` but without its own rounded corners — used when the table is already
+  // nested inside a container (e.g. `userGroup`) that handles the rounding/clipping itself.
+  tableFlat: { width: '100%', borderCollapse: 'collapse' as const, background: colors.panel, borderTop: `1px solid ${colors.border}`, fontSize: '0.875rem' },
+  th: { background: colors.panelAlt, padding: '0.6rem 0.85rem', textAlign: 'left' as const, fontSize: '0.75rem', fontWeight: 700, color: colors.textMuted, borderBottom: `1px solid ${colors.border}`, textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const },
+  td: { padding: '0.6rem 0.85rem', color: colors.textMuted, borderBottom: `1px solid ${colors.border}`, verticalAlign: 'middle' as const },
+  btnDanger: { padding: '0.25rem 0.65rem', background: colors.dangerSoft, border: `1px solid ${colors.danger}`, borderRadius: 5, color: colors.dangerText, cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 },
+  btnAction: { padding: '0.25rem 0.65rem', background: colors.accentSoft, border: `1px solid ${colors.accent}`, borderRadius: 5, color: colors.accentText, cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, marginRight: '0.4rem' },
+  btnSecondary: { padding: '0.4rem 0.85rem', background: '#3e2816', border: `1px solid ${colors.borderStrong}`, borderRadius: 6, color: colors.textMuted, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 },
+  usernameLink: { background: 'none', border: 'none', padding: 0, color: colors.link, fontWeight: 600, cursor: 'pointer', fontSize: 'inherit' },
+  errorBox: { padding: '0.65rem 0.85rem', background: colors.dangerSoft, border: `1px solid ${colors.danger}`, borderRadius: 6, color: colors.dangerText, fontSize: '0.875rem', marginBottom: '1rem' },
+  successBox: { padding: '0.65rem 0.85rem', background: colors.successSoft, border: `1px solid ${colors.success}`, borderRadius: 6, color: colors.successText, fontSize: '0.875rem', marginBottom: '1rem' },
+  label: { fontSize: '0.875rem', fontWeight: 600, color: colors.textMuted },
+  emptyMsg: { color: colors.textFaint, textAlign: 'center' as const, padding: '2rem' },
+  card: { background: colors.panel, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '1.25rem', marginBottom: '1rem' },
   cardHeader: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '0.75rem' },
-  cardTitle: { fontSize: '1.05rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.15rem' },
-  cardMeta: { color: '#9ca3af', fontSize: '0.8rem' },
-  memberRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid #f3f4f6', fontSize: '0.875rem' },
+  cardTitle: { fontFamily: fontSerif, fontSize: '1.05rem', fontWeight: 700, color: colors.text, marginBottom: '0.15rem' },
+  cardMeta: { color: colors.textFaint, fontSize: '0.8rem' },
+  memberRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: `1px solid ${colors.border}`, fontSize: '0.875rem' },
   addRow: { display: 'flex', gap: '0.5rem', marginTop: '0.75rem' },
-  input: { padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.875rem', flex: 1, outline: 'none' },
+  input: { padding: '0.4rem 0.6rem', background: colors.inputBg, border: `1px solid ${colors.inputBorder}`, borderRadius: 6, color: colors.text, fontSize: '0.875rem', flex: 1, outline: 'none' },
   tokenCell: { display: 'flex', alignItems: 'center', gap: '0.4rem' },
   tokenCode: {
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
     fontSize: '0.78rem',
-    background: '#f9fafb',
-    border: '1px solid #e5e7eb',
+    color: colors.textMuted,
+    background: colors.panelAlt,
+    border: `1px solid ${colors.border}`,
     borderRadius: 4,
     padding: '0.15rem 0.4rem',
   },
+  suggestWrap: { position: 'relative' as const, flex: 1 },
+  suggestList: {
+    position: 'absolute' as const,
+    top: '100%',
+    left: 0,
+    right: 0,
+    marginTop: '0.2rem',
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 6,
+    boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+    zIndex: 20,
+    maxHeight: 180,
+    overflowY: 'auto' as const,
+  },
+  suggestItem: {
+    display: 'block',
+    width: '100%',
+    textAlign: 'left' as const,
+    background: 'none',
+    border: 'none',
+    padding: '0.4rem 0.65rem',
+    fontSize: '0.85rem',
+    color: colors.textMuted,
+    cursor: 'pointer',
+  },
+  userGroup: { border: `1px solid ${colors.border}`, borderRadius: 8, marginBottom: '0.75rem', overflow: 'hidden' },
+  userGroupHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.6rem',
+    padding: '0.55rem 0.85rem',
+    background: colors.panelAlt,
+    cursor: 'pointer',
+  },
+  userGroupTitle: { fontWeight: 700, color: colors.text, fontSize: '0.9rem' },
+  userGroupMeta: { color: colors.textFaint, fontSize: '0.78rem' },
+  chevron: (open: boolean) => ({
+    display: 'inline-block',
+    transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+    transition: 'transform 0.15s',
+    color: colors.textFaint,
+    fontSize: '0.75rem',
+  }),
+  bulkBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.6rem 0.85rem',
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 8,
+    marginBottom: '0.75rem',
+  },
+  modalHint: { color: colors.textFaint, fontSize: '0.82rem', marginBottom: '0.9rem' },
+  modalInput: { width: '100%', padding: '0.5rem 0.7rem', background: colors.inputBg, border: `1px solid ${colors.inputBorder}`, borderRadius: 6, color: colors.text, fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box' as const, marginBottom: '0.75rem' },
+  modalCheckRow: { display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: colors.textMuted, marginBottom: '1rem' },
+  modalActions: { display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' },
 } as const;
 
 function fmt(n: number) { return n.toLocaleString(); }
@@ -57,12 +123,94 @@ interface Props {
   onSelectUser?: (username: string) => void;
 }
 
+function AdminSecretModal({ onSubmit, onCancel }: { onSubmit: (secret: string, remember: boolean) => void; onCancel: () => void }) {
+  const [value, setValue] = useState('');
+  const [remember, setRemember] = useState(true);
+
+  return (
+    <Modal title="Admin secret required" onClose={onCancel}>
+      <p style={s.modalHint}>This action (promote/demote) requires the admin secret.</p>
+      <input
+        style={s.modalInput}
+        type="password"
+        placeholder="Admin secret"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        autoFocus
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && value) onSubmit(value, remember);
+        }}
+      />
+      <label style={s.modalCheckRow}>
+        <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+        Remember for this session (otherwise you'll be asked again next time)
+      </label>
+      <div style={s.modalActions}>
+        <button style={s.btnSecondary} type="button" onClick={onCancel}>Cancel</button>
+        <button style={s.btnAction} type="button" disabled={!value} onClick={() => onSubmit(value, remember)}>
+          Confirm
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+function UsernameAutocomplete({
+  users,
+  value,
+  onChange,
+  placeholder,
+}: {
+  users: AdminUser[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  const [focused, setFocused] = useState(false);
+  const query = value.trim().toLowerCase();
+  const suggestions = query
+    ? users.filter((u) => u.username.toLowerCase().includes(query)).slice(0, 8)
+    : [];
+
+  return (
+    <div style={s.suggestWrap}>
+      <input
+        style={s.input}
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setTimeout(() => setFocused(false), 120)}
+      />
+      {focused && suggestions.length > 0 && (
+        <div style={s.suggestList}>
+          {suggestions.map((u) => (
+            <button
+              key={u._id}
+              type="button"
+              style={s.suggestItem}
+              onMouseDown={() => onChange(u.username)}
+              onMouseEnter={(e) => { e.currentTarget.style.background = colors.panelHover; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
+            >
+              {u.username}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CommunityCard({
   community,
+  users,
   showFeedback,
   onDeleted,
 }: {
   community: Community;
+  users: AdminUser[];
   showFeedback: (type: 'error' | 'success', message: string) => void;
   onDeleted: () => void;
 }) {
@@ -140,13 +288,7 @@ function CommunityCard({
       ))}
 
       <div style={s.addRow}>
-        <input
-          style={s.input}
-          type="text"
-          placeholder="Username to add"
-          value={newUsername}
-          onChange={(e) => setNewUsername(e.target.value)}
-        />
+        <UsernameAutocomplete users={users} value={newUsername} onChange={setNewUsername} placeholder="Username to add" />
         <button style={s.btnAction} type="button" onClick={() => void handleAssign()}>Add</button>
       </div>
     </div>
@@ -158,10 +300,14 @@ export default function AdminView({ onSelectUser }: Props) {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [sessions, setSessions] = useState<ArchivedSession[]>([]);
   const [communities, setCommunities] = useState<Community[]>([]);
-  const [adminSecret, setAdminSecret] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'users' | 'sessions' | 'communities'>('users');
   const [revealedTokens, setRevealedTokens] = useState<Set<string>>(new Set());
+  const [collapsedUsers, setCollapsedUsers] = useState<Set<string>>(new Set());
+  const [selectedSessionIds, setSelectedSessionIds] = useState<Set<string>>(new Set());
+
+  const adminSecretMgr = useAdminSecret();
+  const contextMenu = useContextMenu();
 
   function showFeedback(type: 'error' | 'success', message: string) {
     setFeedback({ type, message });
@@ -202,15 +348,16 @@ export default function AdminView({ onSelectUser }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  async function handlePromote(username: string) {
-    if (!token || !adminSecret) { showFeedback('error', 'Enter admin secret first'); return; }
-    try {
-      const result = await adminPromoteUser(username, adminSecret, token);
-      showFeedback('success', result.message);
-      void loadUsers();
-    } catch (err) {
-      showFeedback('error', err instanceof Error ? err.message : 'Promote failed');
-    }
+  function handlePromote(username: string) {
+    if (!token) return;
+    adminSecretMgr.withSecret((secret) => {
+      adminPromoteUser(username, secret, token)
+        .then((result) => {
+          showFeedback('success', result.message);
+          void loadUsers();
+        })
+        .catch((err) => showFeedback('error', err instanceof Error ? err.message : 'Promote failed'));
+    });
   }
 
   async function handleToggleCommunityEligibility(username: string) {
@@ -267,14 +414,86 @@ export default function AdminView({ onSelectUser }: Props) {
     }
   }
 
+  async function handleBulkDeleteSessions() {
+    if (!token || selectedSessionIds.size === 0) return;
+    if (!confirm(`Delete ${selectedSessionIds.size} selected session(s)? This cannot be undone.`)) return;
+    const ids = [...selectedSessionIds];
+    let failures = 0;
+    for (const id of ids) {
+      try {
+        await adminDeleteSession(id, token);
+      } catch {
+        failures += 1;
+      }
+    }
+    setSelectedSessionIds(new Set());
+    void loadSessions();
+    showFeedback(
+      failures === 0 ? 'success' : 'error',
+      failures === 0 ? `Deleted ${ids.length} session(s)` : `Deleted ${ids.length - failures} of ${ids.length} — ${failures} failed`,
+    );
+  }
+
+  function userActions(u: AdminUser): MenuItem[] {
+    return [
+      { label: u.isAdmin ? 'Demote' : 'Promote', onClick: () => handlePromote(u.username) },
+      {
+        label: u.communityEligible ? 'Revoke community' : 'Allow community',
+        onClick: () => void handleToggleCommunityEligibility(u.username),
+      },
+      { label: 'Delete', danger: true, onClick: () => void handleDeleteUser(u.username) },
+    ];
+  }
+
+  function toggleUserCollapsed(username: string) {
+    setCollapsedUsers((prev) => {
+      const next = new Set(prev);
+      if (next.has(username)) next.delete(username);
+      else next.add(username);
+      return next;
+    });
+  }
+
+  function toggleSessionSelected(sessionId: string) {
+    setSelectedSessionIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(sessionId)) next.delete(sessionId);
+      else next.add(sessionId);
+      return next;
+    });
+  }
+
+  function toggleGroupSelected(ids: string[], checked: boolean) {
+    setSelectedSessionIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (checked) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }
+
+  const sessionsByUser = useMemo(() => {
+    const map = new Map<string, ArchivedSession[]>();
+    for (const entry of sessions) {
+      const arr = map.get(entry.username) ?? [];
+      arr.push(entry);
+      map.set(entry.username, arr);
+    }
+    for (const arr of map.values()) arr.sort((a, b) => b.createdTimestamp - a.createdTimestamp);
+    return [...map.entries()].sort((a, b) => b[1][0].createdTimestamp - a[1][0].createdTimestamp);
+  }, [sessions]);
+
   const tabStyle = (active: boolean) => ({
     padding: '0.45rem 1rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${active ? colors.accent : colors.borderStrong}`,
     borderRadius: 6,
-    background: active ? '#1e3a5f' : '#fff',
-    color: active ? '#fff' : '#374151',
+    background: active ? colors.accent : '#3e2816',
+    color: active ? '#fff' : colors.textMuted,
     cursor: 'pointer',
-    fontWeight: active ? 600 : 400,
+    fontFamily: fontSerif,
+    fontWeight: 700,
     fontSize: '0.875rem',
   });
 
@@ -285,19 +504,6 @@ export default function AdminView({ onSelectUser }: Props) {
       {feedback && (
         <div style={feedback.type === 'error' ? s.errorBox : s.successBox}>{feedback.message}</div>
       )}
-
-      {/* Admin secret for promote/demote */}
-      <div style={s.secretRow}>
-        <label style={s.label} htmlFor="admin-secret">Admin secret:</label>
-        <input
-          id="admin-secret"
-          style={s.secretInput}
-          type="password"
-          placeholder="Required for promote/demote"
-          value={adminSecret}
-          onChange={(e) => setAdminSecret(e.target.value)}
-        />
-      </div>
 
       {/* Tab bar */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
@@ -332,7 +538,7 @@ export default function AdminView({ onSelectUser }: Props) {
               </thead>
               <tbody>
                 {users.map((u) => (
-                  <tr key={u._id}>
+                  <tr key={u._id} onContextMenu={(e) => contextMenu.open(e, userActions(u))}>
                     <td style={s.td}>
                       <button style={s.usernameLink} type="button" onClick={() => onSelectUser?.(u.username)}>
                         {u.username}
@@ -352,7 +558,7 @@ export default function AdminView({ onSelectUser }: Props) {
                           </>
                         ) : (
                           <button style={s.btnAction} type="button" onClick={() => toggleTokenRevealed(u.username)}>
-                            Show token
+                            Show
                           </button>
                         )}
                       </div>
@@ -362,20 +568,7 @@ export default function AdminView({ onSelectUser }: Props) {
                     <td style={s.td}><span style={s.badge(u.communityEligible)}>{u.communityEligible ? 'Yes' : 'No'}</span></td>
                     <td style={s.td}>{new Date(u.createdAt).toLocaleString()}</td>
                     <td style={s.td}>
-                      <button
-                        style={s.btnAction}
-                        type="button"
-                        onClick={() => handlePromote(u.username)}
-                        title={adminSecret ? undefined : 'Enter admin secret first'}
-                      >
-                        {u.isAdmin ? 'Demote' : 'Promote'}
-                      </button>
-                      <button style={s.btnAction} type="button" onClick={() => handleToggleCommunityEligibility(u.username)}>
-                        {u.communityEligible ? 'Revoke community' : 'Allow community'}
-                      </button>
-                      <button style={s.btnDanger} type="button" onClick={() => handleDeleteUser(u.username)}>
-                        Delete
-                      </button>
+                      <Menu items={userActions(u)} />
                     </td>
                   </tr>
                 ))}
@@ -391,53 +584,89 @@ export default function AdminView({ onSelectUser }: Props) {
           {sessions.length === 0 ? (
             <p style={s.emptyMsg}>No archived sessions.</p>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={s.table}>
-                <thead>
-                  <tr>
-                    <th style={s.th}>Username</th>
-                    <th style={s.th}>Date</th>
-                    <th style={s.th}>Spell</th>
-                    <th style={s.th}>World</th>
-                    <th style={s.th}>Spells Cast</th>
-                    <th style={s.th}>XP Gained</th>
-                    <th style={s.th}>Rune Cost (gp)</th>
-                    <th style={s.th}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...sessions]
-                    .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
-                    .map((entry) => {
-                      const d = entry.session;
-                      return (
-                        <tr key={entry.sessionId}>
-                          <td style={s.td}>
-                            <button style={s.usernameLink} type="button" onClick={() => onSelectUser?.(entry.username)}>
-                              {entry.username}
-                            </button>
-                          </td>
-                          <td style={{ ...s.td, whiteSpace: 'nowrap' }}>{fmtDate(entry.createdTimestamp)}</td>
-                          <td style={s.td}>{d.spell}</td>
-                          <td style={s.td}>{d.world}</td>
-                          <td style={s.td}>{fmt(d.spellsCast)}</td>
-                          <td style={s.td}>{fmt(d.currentMagicXp - d.startMagicXp)}</td>
-                          <td style={s.td}>{fmt(d.runeCostGp)}</td>
-                          <td style={s.td}>
-                            <button
-                              style={s.btnDanger}
-                              type="button"
-                              onClick={() => handleDeleteSession(entry.sessionId)}
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
-            </div>
+            <>
+              {selectedSessionIds.size > 0 && (
+                <div style={s.bulkBar}>
+                  <span style={s.label}>{selectedSessionIds.size} selected</span>
+                  <button style={s.btnDanger} type="button" onClick={() => void handleBulkDeleteSessions()}>
+                    Delete selected
+                  </button>
+                  <button style={s.btnSecondary} type="button" onClick={() => setSelectedSessionIds(new Set())}>
+                    Clear selection
+                  </button>
+                </div>
+              )}
+              {sessionsByUser.map(([username, userSessions]) => {
+                const collapsed = collapsedUsers.has(username);
+                const ids = userSessions.map((entry) => entry.sessionId);
+                const allSelected = ids.length > 0 && ids.every((id) => selectedSessionIds.has(id));
+                return (
+                  <div key={username} style={s.userGroup}>
+                    <div style={s.userGroupHeader} onClick={() => toggleUserCollapsed(username)}>
+                      <span style={s.chevron(!collapsed)}>▶</span>
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => toggleGroupSelected(ids, e.target.checked)}
+                        title="Select all sessions for this user"
+                      />
+                      <span style={s.userGroupTitle}>{username}</span>
+                      <span style={s.userGroupMeta}>{userSessions.length} session{userSessions.length === 1 ? '' : 's'}</span>
+                    </div>
+                    {!collapsed && (
+                      <div style={{ overflowX: 'auto' }}>
+                        <table style={s.tableFlat}>
+                          <thead>
+                            <tr>
+                              <th style={s.th}></th>
+                              <th style={s.th}>Date</th>
+                              <th style={s.th}>Spell</th>
+                              <th style={s.th}>World</th>
+                              <th style={s.th}>Spells Cast</th>
+                              <th style={s.th}>XP Gained</th>
+                              <th style={s.th}>Rune Cost (gp)</th>
+                              <th style={s.th}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {userSessions.map((entry) => {
+                              const d = entry.session;
+                              return (
+                                <tr key={entry.sessionId}>
+                                  <td style={s.td}>
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedSessionIds.has(entry.sessionId)}
+                                      onChange={() => toggleSessionSelected(entry.sessionId)}
+                                    />
+                                  </td>
+                                  <td style={{ ...s.td, whiteSpace: 'nowrap' }}>{fmtDate(entry.createdTimestamp)}</td>
+                                  <td style={s.td}>{d.spell}</td>
+                                  <td style={s.td}>{d.world}</td>
+                                  <td style={s.td}>{fmt(d.spellsCast)}</td>
+                                  <td style={s.td}>{fmt(d.currentMagicXp - d.startMagicXp)}</td>
+                                  <td style={s.td}>{fmt(d.runeCostGp)}</td>
+                                  <td style={s.td}>
+                                    <button
+                                      style={s.btnDanger}
+                                      type="button"
+                                      onClick={() => handleDeleteSession(entry.sessionId)}
+                                    >
+                                      Delete
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </>
           )}
         </>
       )}
@@ -452,12 +681,19 @@ export default function AdminView({ onSelectUser }: Props) {
               <CommunityCard
                 key={community._id}
                 community={community}
+                users={users}
                 showFeedback={showFeedback}
                 onDeleted={() => void loadCommunities()}
               />
             ))
           )}
         </>
+      )}
+
+      {contextMenu.menu}
+
+      {adminSecretMgr.modalOpen && (
+        <AdminSecretModal onSubmit={adminSecretMgr.submit} onCancel={adminSecretMgr.cancel} />
       )}
     </div>
   );
