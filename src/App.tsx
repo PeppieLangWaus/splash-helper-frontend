@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AllSplashersView from './views/AllSplashersView';
 import UserView from './views/UserView';
@@ -9,6 +9,9 @@ import AdminView from './views/AdminView';
 import CommunityView from './views/CommunityView';
 import AccountSettingsView from './views/AccountSettingsView';
 import DevSessionsPanel from './views/DevSessionsPanel';
+import DiscordBotView from './views/DiscordBotView';
+import TermsOfServiceView from './views/TermsOfServiceView';
+import PrivacyPolicyView from './views/PrivacyPolicyView';
 import { colors, fontSerif } from './theme';
 
 type View =
@@ -19,6 +22,7 @@ type View =
   | { name: 'admin' }
   | { name: 'community' }
   | { name: 'settings' }
+  | { name: 'bot' }
   | { name: 'dev' };
 
 /** Maps a `View` to the URL path it should be reachable at, and back. Lets browser
@@ -33,6 +37,7 @@ function viewToPath(view: View): string {
     case 'admin': return '/admin';
     case 'community': return '/communities';
     case 'settings': return '/account';
+    case 'bot': return '/bot';
     case 'dev': return '/dev';
   }
 }
@@ -47,6 +52,7 @@ function pathToView(pathname: string): View {
     case '/admin': return { name: 'admin' };
     case '/communities': return { name: 'community' };
     case '/account': return { name: 'settings' };
+    case '/bot': return { name: 'bot' };
     case '/dev': return { name: 'dev' };
     default: return { name: 'active' };
   }
@@ -132,6 +138,11 @@ function AppInner() {
     }
   }, []);
 
+  // Standalone legal pages, e.g. linked from the Discord bot's settings —
+  // always reachable at their own URL, outside the nav/login-gated shell.
+  if (window.location.pathname === '/terms') return <TermsOfServiceView />;
+  if (window.location.pathname === '/privacy') return <PrivacyPolicyView />;
+
   // If a setup token is present, show the setup view
   if (setupToken) {
     return (
@@ -210,6 +221,13 @@ function AppInner() {
             Account
           </button>
         )}
+        <button
+          style={nav.btn(view.name === 'bot')}
+          onClick={() => navigate({ name: 'bot' })}
+          type="button"
+        >
+          Discord Bot
+        </button>
         {import.meta.env.DEV && (
           <button
             style={nav.btn(view.name === 'dev')}
@@ -259,6 +277,7 @@ function AppInner() {
       )}
       {view.name === 'community' && <CommunityView />}
       {view.name === 'settings' && <AccountSettingsView />}
+      {view.name === 'bot' && <DiscordBotView />}
       {view.name === 'dev' && <DevSessionsPanel />}
     </div>
   );
