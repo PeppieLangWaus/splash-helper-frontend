@@ -1,0 +1,289 @@
+/* OSRS-style chatbox built from public/assets/chatbox. Every background image below is used
+   at its native pixel size and tiled (never stretched) so it keeps its original aspect ratio. */
+
+.chatbox {
+  width: 519px;
+  max-width: 100%;
+  user-select: none;
+}
+
+/* ---- Chat window -------------------------------------------------------------------- */
+
+.chat-window {
+  position: relative;
+  height: 142px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 6px 6px 6px;
+  background-image: url(/assets/chatbox/background/main.png);
+  background-repeat: repeat;
+  background-size: 519px 142px;
+  image-rendering: pixelated;
+}
+
+.chat-window-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  display: flex;
+  gap: 0px;
+  border-bottom: 1px solid #4a4a48; /* divider above the input row */
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+}
+
+.chat-log-viewport {
+  flex: 1 1 auto;
+  margin-left: 3px;
+  margin-top: 1px;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox: hide native scrollbar, we render our own from sprites */
+}
+
+.chat-log-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100%;
+}
+
+.chat-line {
+  font-family: 'RuneScape', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 0px;
+  padding: 1px;
+  overflow-wrap: break-word;
+}
+
+.chat-line-time {
+  color: #000000;
+}
+
+.chat-line-username {
+  color: #000000;
+  font-weight: 400;
+}
+
+.chat-line-message {
+  color: #7a1f1f;
+}
+
+/* ---- Input row (non-functional; just shows who "would" be typing) -------------------- */
+
+.chat-input-row {
+  flex: 0 0 auto;
+  margin-left: 3px;
+  display: flex;
+  align-items: center;
+  height: 15px;
+}
+
+.chat-input-text {
+  font-family: 'RuneScape', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #000000;
+}
+
+.chat-input-cursor {
+  animation: chat-input-blink 1s steps(1) infinite;
+}
+
+@keyframes chat-input-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.chat-icon {
+  width: 13px;
+  height: 13px;
+  vertical-align: text-bottom;
+  margin: 0 1px 0 0;
+  image-rendering: auto;
+}
+
+/* Only rank icons get the outline — mod/ironman icons stay as-is. */
+.chat-icon-rank {
+  --top-offset: -.9px;
+  --right-offset: 1px;
+  --bottom-offset: 1px;
+  --left-offset: -.9px;
+  /* -webkit-filter: drop-shadow(2px 1px 0 black)
+                  drop-shadow(-1px -1px 0 black); */
+  filter: drop-shadow(0 var(--top-offset) 0 black) 
+          drop-shadow(var(--right-offset) 0 0 black) 
+          drop-shadow(0 var(--bottom-offset) 0 black) 
+          drop-shadow(var(--left-offset) 0 0 black);
+}
+
+/* ---- Scrollbar (chatbox/scroll) ------------------------------------------------------ */
+
+.chat-scrollbar {
+  flex: 0 0 16px;
+  width: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.chat-scrollbar-btn {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  image-rendering: pixelated;
+}
+
+.chat-scrollbar-btn-up {
+  background-image: url(/assets/chatbox/scroll/up.png);
+}
+
+.chat-scrollbar-btn-down {
+  background-image: url(/assets/chatbox/scroll/down.png);
+}
+
+.chat-scrollbar-track {
+  position: relative;
+  flex: 1 1 auto;
+  width: 16px;
+  cursor: pointer;
+  background-image: url(/assets/chatbox/scroll/background.png);
+  background-repeat: repeat-y;
+  background-size: 16px 5px;
+  image-rendering: pixelated;
+}
+
+.chat-scrollbar-thumb {
+  position: absolute;
+  left: 0;
+  width: 16px;
+  display: flex;
+  flex-direction: column;
+  cursor: grab;
+  touch-action: none;
+}
+
+.chat-scrollbar-thumb-top,
+.chat-scrollbar-thumb-bottom {
+  flex: 0 0 5px;
+  width: 16px;
+  height: 5px;
+  background-repeat: no-repeat;
+  background-size: 16px 5px;
+  image-rendering: pixelated;
+}
+
+.chat-scrollbar-thumb-top {
+  background-image: url(/assets/chatbox/scroll/top.png);
+}
+
+.chat-scrollbar-thumb-bottom {
+  background-image: url(/assets/chatbox/scroll/bottom.png);
+}
+
+.chat-scrollbar-thumb-middle {
+  flex: 1 1 auto;
+  min-height: 2px;
+  width: 16px;
+  background-image: url(/assets/chatbox/scroll/middle.png);
+  background-repeat: repeat-y;
+  background-size: 16px 5px;
+  image-rendering: pixelated;
+}
+
+/* ---- Controls (chatbox/background/controls.png + buttons) ---------------------------- */
+
+.chat-controls {
+  height: 23px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* gap: 2px;
+  padding: 0 4px; */
+  background-image: url(/assets/chatbox/background/controls.png);
+  background-repeat: repeat-x;
+  background-size: 519px 23px;
+  image-rendering: pixelated;
+}
+
+.chat-tab-btn {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 22px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-size: 56px 22px;
+  background-image: url(/assets/chatbox/buttons/normal/unselected.png);
+  background-color: rgba(0, 0, 0, 0);
+  image-rendering: pixelated;
+}
+
+.chat-tab-btn.is-selected {
+  background-image: url(/assets/chatbox/buttons/normal/selected.png);
+}
+
+.chat-tab-label {
+  font-family: 'RuneScape Plain 11';
+  font-size: 12px;
+  font-weight: 100;
+  line-height: 11px;
+  color: #ffffff;
+  text-shadow: 1px 1px black
+}
+
+.chat-tab-status {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: 'RuneScape Plain 11';
+  font-size: 9px;
+  font-weight: 100;
+  line-height: 9px;
+}
+
+.chat-tab-status-on {
+  color: #00ff00;
+}
+
+.chat-tab-status-filtered {
+  color: #ffff00;
+}
+
+.chat-report-btn {
+  flex: 0 0 79px;
+  width: 79px;
+  height: 22px;
+  /* margin-left: auto; */
+  border: none;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-size: 79px 22px;
+  background-image: url(/assets/chatbox/buttons/report/default.png);
+  background-color: rgba(0, 0, 0, 0);
+  image-rendering: pixelated;
+}
+
+.chat-report-btn:hover {
+  background-image: url(/assets/chatbox/buttons/report/hovered.png);
+}

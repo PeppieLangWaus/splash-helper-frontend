@@ -66,6 +66,13 @@
     padding: 3rem;
 }
 
+.all-splashers-chatbox {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+}
+
 .all-splashers-panel {
     flex: 0 0 auto;
     aspect-ratio: 407 / 549;
