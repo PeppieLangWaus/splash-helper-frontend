@@ -2,12 +2,8 @@ import { colors, fontSerif, shadow } from '../theme';
 
 const DISCORD_CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
 
-// View Channels + Send Messages + Embed Links + Read Message History.
-// Adjust if the bot ends up needing more (server owners can also grant more at invite time).
-const INVITE_PERMISSIONS = '84992';
-
 const inviteUrl = DISCORD_CLIENT_ID
-  ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(DISCORD_CLIENT_ID)}&scope=bot%20applications.commands&permissions=${INVITE_PERMISSIONS}`
+  ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(DISCORD_CLIENT_ID)}`
   : null;
 
 const s = {
