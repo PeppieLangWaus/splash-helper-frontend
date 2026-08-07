@@ -109,7 +109,7 @@ export default function PrivacyPolicyView() {
       <h2 style={s.h2}>9. Contact</h2>
       <p style={s.p}>
         Questions about this policy, or requests to access or delete your data, can be sent to{' '}
-        <a style={s.a} href="mailto:peppielangwaus@gmail.com">peppielangwaus@gmail.com</a>.
+        <a style={s.a} href="mailto:contact@splasher.help">contact@splasher.help</a>.
       </p>
 
       <p style={s.p}>
