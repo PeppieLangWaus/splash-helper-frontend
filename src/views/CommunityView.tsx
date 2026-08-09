@@ -13,6 +13,8 @@ import {
   setCommunityMemberRank,
   getCommunityDiscordConfig,
   setCommunityDiscordConfig,
+  getCommunityChatConfig,
+  setCommunityChatConfig,
   getAllCommunities,
   applyToCommunity,
   regenerateCommunityApiToken,
@@ -22,7 +24,9 @@ import WebhookFieldsEditor from '../components/WebhookFieldsEditor';
 import CopyableField from '../components/CopyableField';
 import Menu from '../components/Menu';
 import type { Community, CommunitySplasher, Rank, DiscordServerConfig, CommunitySummary } from '../types';
+import type { CommunityChatConfig } from '../types/chatbox';
 import { colors, fontSerif } from '../theme';
+import { logSystemEvent } from '../utils/systemLog';
 
 const s = {
   container: { maxWidth: 720, margin: '0 auto', padding: '2rem 1rem' },
@@ -371,6 +375,180 @@ function DiscordConfigPanel({ communityId }: { communityId: string }) {
       <p style={s.fieldHint}>
         Copy channel and role IDs from Discord with Developer Mode enabled (right-click → Copy ID).
         Leave a field blank to clear it.
+      </p>
+    </div>
+  );
+}
+
+const CHAT_RELAY_URLS = ['https://chat.splasher.help', 'https://chat.ardy.host'];
+
+type ChatConfigForm = {
+  friendsChatName: string;
+  friendsChatDisplayName: string;
+  clanChatName: string;
+  discordFriendsChatWebhookUrl: string;
+  discordClanChatWebhookUrl: string;
+};
+
+function toChatConfigForm(config: CommunityChatConfig): ChatConfigForm {
+  return {
+    friendsChatName: config.friendsChatName ?? '',
+    friendsChatDisplayName: config.friendsChatDisplayName ?? '',
+    clanChatName: config.clanChatName ?? '',
+    discordFriendsChatWebhookUrl: config.discordFriendsChatWebhookUrl ?? '',
+    discordClanChatWebhookUrl: config.discordClanChatWebhookUrl ?? '',
+  };
+}
+
+/**
+ * Lets the owner register this community's Friends/Clan Chat names (what the live chatbox on
+ * the site matches incoming relay messages against — see splash-helper-backend's
+ * services/chatRelay.ts) and, optionally, a Discord webhook to also post that chat to. Below
+ * that, the two relay URLs to paste into the RuneLite Discord Chat Logger plugin's webhook
+ * fields — the same URL works for both Friends Chat and Clan Chat.
+ */
+function ChatConfigPanel({ communityId }: { communityId: string }) {
+  const { token } = useAuth();
+  const [form, setForm] = useState<ChatConfigForm | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+
+  function flash(type: 'error' | 'success', message: string) {
+    setFeedback({ type, message });
+    setTimeout(() => setFeedback(null), 3000);
+  }
+
+  useEffect(() => {
+    if (!token) return;
+    getCommunityChatConfig(communityId, token)
+      .then((c) => setForm(toChatConfigForm(c)))
+      .catch((err) => flash('error', err instanceof Error ? err.message : 'Failed to load live chat settings'));
+  }, [communityId, token]);
+
+  function setField<K extends keyof ChatConfigForm>(key: K, value: ChatConfigForm[K]) {
+    setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
+  }
+
+  async function handleSave() {
+    if (!token || !form) return;
+    setSaving(true);
+    try {
+      const updated = await setCommunityChatConfig(
+        communityId,
+        {
+          friendsChatName: form.friendsChatName.trim(),
+          friendsChatDisplayName: form.friendsChatDisplayName.trim(),
+          clanChatName: form.clanChatName.trim(),
+          discordFriendsChatWebhookUrl: form.discordFriendsChatWebhookUrl.trim(),
+          discordClanChatWebhookUrl: form.discordClanChatWebhookUrl.trim(),
+        },
+        token,
+      );
+      setForm(toChatConfigForm(updated));
+      flash('success', 'Saved');
+      logSystemEvent('Updated live chat settings');
+    } catch (err) {
+      flash('error', err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (!form) return <p style={s.fieldHint}>Loading live chat settings...</p>;
+
+  return (
+    <div>
+      {feedback && (
+        <div style={feedback.type === 'error' ? s.errorBox : s.successBox}>{feedback.message}</div>
+      )}
+
+      <div style={s.fieldGrid}>
+        <label>
+          <span style={s.fieldLabel}>Friends Chat name</span>
+          <input
+            style={s.input}
+            type="text"
+            placeholder="e.g. Ardy Splash"
+            value={form.friendsChatName}
+            onChange={(e) => setField('friendsChatName', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+        <label>
+          <span style={s.fieldLabel}>Clan Chat name</span>
+          <input
+            style={s.input}
+            type="text"
+            placeholder="e.g. Ardy Splash CC"
+            value={form.clanChatName}
+            onChange={(e) => setField('clanChatName', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+      </div>
+
+      <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+        <span style={s.fieldLabel}>Friends Chat display name (optional)</span>
+        <input
+          style={s.input}
+          type="text"
+          placeholder={form.friendsChatName || 'Defaults to the Friends Chat name above'}
+          value={form.friendsChatDisplayName}
+          onChange={(e) => setField('friendsChatDisplayName', e.target.value)}
+          disabled={saving}
+        />
+      </label>
+      <p style={s.fieldHint}>
+        Your Friends Chat's in-game name is tied to your own RSN — set a display name here to
+        show something else (e.g. your community's name) in the chatbox's <code>[...]</code>
+        prefix instead.
+      </p>
+
+      <div style={s.fieldGrid}>
+        <label>
+          <span style={s.fieldLabel}>Friends Chat Discord webhook (optional)</span>
+          <input
+            style={s.input}
+            type="text"
+            placeholder="https://discord.com/api/webhooks/..."
+            value={form.discordFriendsChatWebhookUrl}
+            onChange={(e) => setField('discordFriendsChatWebhookUrl', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+        <label>
+          <span style={s.fieldLabel}>Clan Chat Discord webhook (optional)</span>
+          <input
+            style={s.input}
+            type="text"
+            placeholder="https://discord.com/api/webhooks/..."
+            value={form.discordClanChatWebhookUrl}
+            onChange={(e) => setField('discordClanChatWebhookUrl', e.target.value)}
+            disabled={saving}
+          />
+        </label>
+      </div>
+
+      <button style={s.btnSmall} type="button" onClick={handleSave} disabled={saving}>
+        Save
+      </button>
+      <p style={s.fieldHint}>
+        These must exactly match your in-game Friends Chat / Clan Chat names, and must be unique
+        across every community on Splash Helper — saving fails if another community already
+        registered the same name. Leave a Discord webhook blank to only show that chat on the
+        website without also posting it to Discord — each one is independent.
+      </p>
+
+      <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {CHAT_RELAY_URLS.map((url) => (
+          <CopyableField key={url} label="Relay URL" value={url} />
+        ))}
+      </div>
+      <p style={s.fieldHint}>
+        In RuneLite, install the <strong>Discord Chat Logger</strong> plugin and paste either
+        relay URL above into <em>both</em> its "Friends Chat webhook" and "Clan Chat webhook"
+        fields — no per-chat-type setup needed, and every member who does this feeds the same
+        live chat.
       </p>
     </div>
   );
@@ -737,6 +915,7 @@ export default function CommunityView() {
       setCommunities((prev) => [...prev, community]);
       setNewName('');
       showFeedback('success', `Created "${community.name}"`);
+      logSystemEvent(`Created community "${community.name}"`);
     } catch (err) {
       showFeedback('error', err instanceof Error ? err.message : 'Failed to create community');
     } finally {
@@ -809,6 +988,9 @@ export default function CommunityView() {
 
             <h4 style={s.subheading}>Discord setup</h4>
             <DiscordConfigPanel communityId={community._id} />
+
+            <h4 style={s.subheading}>Live chat</h4>
+            <ChatConfigPanel communityId={community._id} />
 
             <h4 style={s.subheading}>Webhooks</h4>
             <CommunityWebhookForm community={community} onSaved={handleWebhookSaved} />

@@ -1,24 +1,59 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChatMessage } from '../../types/chatbox';
 import { formatClockTime } from '../../utils/formatTime';
-import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS, RANK_ICONS } from './chatIcons';
+import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './chatIcons';
+import chatEmptyTips from '../../data/chatEmptyTips';
 
 const MIN_THUMB_HEIGHT = 12;
 const STEP_PX = 24;
+const EMPTY_TIP_COUNT = 3;
 
 function ChatLine({ msg }: { msg: ChatMessage }) {
   return (
     <div className="chat-line">
       <span className="chat-line-time">[{formatClockTime(new Date(msg.timestamp))}]</span>{' '}
+      {msg.icon && <img className="chat-icon" src={msg.icon} alt="" />}
       {msg.modStatus && (
         <img className="chat-icon" src={MOD_STATUS_ICONS[msg.modStatus]} alt={msg.modStatus} />
       )}
       {msg.ironmanStatus && (
         <img className="chat-icon" src={IRONMAN_STATUS_ICONS[msg.ironmanStatus]} alt={msg.ironmanStatus} />
       )}
-      {msg.rank && <img className="chat-icon chat-icon-rank" src={RANK_ICONS[msg.rank]} alt={msg.rank} />}
-      <span className="chat-line-username">{msg.username}:</span>{' '}
-      <span className="chat-line-message">{msg.message}</span>
+      {msg.rankIcon && <img className="chat-icon chat-icon-rank" src={msg.rankIcon} alt="rank" />}
+      {msg.prefix && (
+        <span className="chat-line-prefix" style={{ color: msg.prefix.color }}>
+          {msg.prefix.text}{' '}
+        </span>
+      )}
+      {msg.username && <span className="chat-line-username">{msg.username}:</span>}{msg.username && ' '}
+      {msg.segments ? (
+        msg.segments.map((seg, i) => (
+          <span key={i} className="chat-line-message" style={seg.color ? { color: seg.color } : undefined}>
+            {seg.text}
+          </span>
+        ))
+      ) : (
+        <span className="chat-line-message">{msg.message}</span>
+      )}
+    </div>
+  );
+}
+
+/** Shown in place of the log when the currently-filtered view has no messages yet (point 9) —
+ *  a few random feature tips, styled like chat lines but never persisted or limit-counted. */
+function ChatEmptyState() {
+  const tips = useMemo(() => {
+    const shuffled = [...chatEmptyTips].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.min(EMPTY_TIP_COUNT, shuffled.length));
+  }, []);
+
+  return (
+    <div className="chat-log-empty">
+      {tips.map((tip, i) => (
+        <div className="chat-line chat-line-tip" key={i}>
+          <span className="chat-line-message">{tip}</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -41,7 +76,8 @@ export default function ChatLog({ messages }: { messages: ChatMessage[] }) {
     const trackHeight = track.clientHeight;
 
     if (scrollHeight <= clientHeight + 1) {
-      setThumb({ top: 0, height: trackHeight, visible: false });
+      // Nothing to scroll — fill the whole track with the thumb instead of hiding it (point 2).
+      setThumb({ top: 0, height: trackHeight, visible: true });
       return;
     }
 
@@ -151,11 +187,15 @@ export default function ChatLog({ messages }: { messages: ChatMessage[] }) {
       </div>
 
       <div className="chat-log-viewport" ref={viewportRef} onScroll={handleViewportScroll}>
-        <div className="chat-log">
-          {messages.map((msg) => (
-            <ChatLine key={msg.id} msg={msg} />
-          ))}
-        </div>
+        {messages.length === 0 ? (
+          <ChatEmptyState />
+        ) : (
+          <div className="chat-log">
+            {messages.map((msg) => (
+              <ChatLine key={msg.id} msg={msg} />
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

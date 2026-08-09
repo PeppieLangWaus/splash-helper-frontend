@@ -5,6 +5,11 @@ import WebhookFieldsEditor from '../components/WebhookFieldsEditor';
 import CopyableField from '../components/CopyableField';
 import type { SplasherWebhooks, SplashEntry } from '../types';
 import { colors, fontSerif } from '../theme';
+import { applyMessageLimitToAllStores, getMessageLimit } from '../utils/chatStorage';
+import { logSystemEvent } from '../utils/systemLog';
+
+const MIN_CHAT_LOG_SIZE = 10;
+const MAX_CHAT_LOG_SIZE = 500;
 
 const s = {
   container: { maxWidth: 720, margin: '0 auto', padding: '2rem 1rem' },
@@ -40,6 +45,8 @@ export default function AccountSettingsView() {
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [chatLogSize, setChatLogSize] = useState(() => String(getMessageLimit()));
+  const [savingChatLogSize, setSavingChatLogSize] = useState(false);
 
   function showFeedback(type: 'error' | 'success', message: string) {
     setFeedback({ type, message });
@@ -65,11 +72,13 @@ export default function AccountSettingsView() {
   async function saveActiveWebhook(value: string) {
     if (!token || !user) return;
     setWebhooks(await setSplasherWebhook(user.username, { activeWebhookUrl: value }, token));
+    logSystemEvent('Updated active-sessions webhook');
   }
 
   async function saveHistoryWebhook(value: string) {
     if (!token || !user) return;
     setWebhooks(await setSplasherWebhook(user.username, { historyWebhookUrl: value }, token));
+    logSystemEvent('Updated session-history webhook');
   }
 
   async function handleExport() {
@@ -118,6 +127,23 @@ export default function AccountSettingsView() {
     }
   }
 
+  function handleSaveChatLogSize() {
+    const parsed = Number(chatLogSize);
+    if (!Number.isFinite(parsed) || parsed < MIN_CHAT_LOG_SIZE || parsed > MAX_CHAT_LOG_SIZE) {
+      showFeedback('error', `Chat log size must be between ${MIN_CHAT_LOG_SIZE} and ${MAX_CHAT_LOG_SIZE}.`);
+      return;
+    }
+    setSavingChatLogSize(true);
+    try {
+      applyMessageLimitToAllStores(Math.floor(parsed));
+      setChatLogSize(String(Math.floor(parsed)));
+      showFeedback('success', 'Saved');
+      logSystemEvent(`Changed chat log size to ${Math.floor(parsed)} messages`);
+    } finally {
+      setSavingChatLogSize(false);
+    }
+  }
+
   if (!user) return null;
 
   return (
@@ -156,6 +182,42 @@ export default function AccountSettingsView() {
             <p style={s.fieldHint}>
               Personal webhooks, additive with any community you belong to — your posts go to
               both.
+            </p>
+          </div>
+
+          <div style={s.card}>
+            <div style={s.cardTitle}>Chat log size</div>
+            <div style={s.btnRow}>
+              <input
+                type="number"
+                min={MIN_CHAT_LOG_SIZE}
+                max={MAX_CHAT_LOG_SIZE}
+                value={chatLogSize}
+                onChange={(e) => setChatLogSize(e.target.value)}
+                disabled={savingChatLogSize}
+                style={{
+                  width: 100,
+                  padding: '0.5rem 0.7rem',
+                  background: colors.inputBg,
+                  border: `1px solid ${colors.inputBorder}`,
+                  borderRadius: 6,
+                  color: colors.text,
+                  fontSize: '0.875rem',
+                }}
+              />
+              <button
+                style={{ ...s.btnSecondary, ...(savingChatLogSize ? s.btnSecondaryDisabled : {}) }}
+                type="button"
+                onClick={handleSaveChatLogSize}
+                disabled={savingChatLogSize}
+              >
+                Save
+              </button>
+            </div>
+            <p style={s.fieldHint}>
+              How many messages the chatbox keeps per feed (Game, Public, Private, Trade, and
+              each Friends/Clan Chat you watch) — stored on this device only, never sent to our
+              servers. Default is 100 for everyone, including when logged out.
             </p>
           </div>
 

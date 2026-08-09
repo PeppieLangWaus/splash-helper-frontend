@@ -1,0 +1,91 @@
+.chat-channel-menu {
+  position: absolute;
+  z-index: 20;
+  min-width: 220px;
+  max-width: min(320px, calc(100vw - 16px));
+  /* Safety net for the rare case a menu is taller than the viewport even after flipping —
+     it scrolls internally instead of running off-screen either way. */
+  max-height: min(320px, calc(100vh - 16px));
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  padding: 4px;
+  font-family: var(--font-sans);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* Buttons above it are pixel-art at their own scale; the menu's text should read normally. */
+  text-align: left;
+}
+
+/* Placement — see ChatChannelMenu.tsx's post-render viewport measurement. Defaults to
+   down/left (dropping below and flush with the left edge of the tab button); flips to
+   up/right when that would run off the bottom/right edge of the viewport. */
+.chat-channel-menu--down {
+  top: 100%;
+  bottom: auto;
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+
+.chat-channel-menu--up {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 2px;
+}
+
+.chat-channel-menu--left {
+  left: 0;
+  right: auto;
+}
+
+.chat-channel-menu--right {
+  left: auto;
+  right: 0;
+}
+
+.chat-channel-menu-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  padding: 4px 8px 2px;
+}
+
+.chat-channel-menu-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 8px;
+  max-width: 220px;
+  white-space: normal;
+}
+
+.chat-channel-menu-item {
+  all: unset;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  padding: 5px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.chat-channel-menu-item:hover,
+.chat-channel-menu-item:focus-visible {
+  background: var(--panel-hover);
+}
+
+.chat-channel-menu-item.is-selected {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.chat-channel-menu-clear {
+  border-top: 1px solid var(--border);
+  margin-top: 2px;
+  padding-top: 6px;
+  color: var(--text-muted);
+}

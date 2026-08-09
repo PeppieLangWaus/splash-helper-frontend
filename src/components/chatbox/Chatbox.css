@@ -7,6 +7,21 @@
   user-select: none;
 }
 
+.chat-live-status {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.chat-live-status .is-connected {
+  color: var(--success-text);
+}
+
+.chat-live-status .is-disconnected {
+  color: var(--warning-text);
+}
+
 /* ---- Chat window -------------------------------------------------------------------- */
 
 .chat-window {
@@ -23,6 +38,7 @@
 }
 
 .chat-window-body {
+  position: relative; /* anchors the drop-shadow overlay below */
   flex: 1 1 auto;
   min-height: 0;
   box-sizing: border-box;
@@ -31,6 +47,27 @@
   border-bottom: 1px solid #4a4a48; /* divider above the input row */
   padding-bottom: 0px;
   margin-bottom: 0px;
+}
+
+/* background/main.png has a soft inner shadow hugging its top/left edge (the frame's light
+   source reads as coming from the bottom-right). This overlay recreates that same shadow on top
+   of the log/scrollbar content (see the `z-index`, and that it's declared after — i.e. painted
+   over — its siblings) so icons/text visually run underneath it near the top-left corner,
+   instead of the shadow looking like it stops at the log's edge. Purely decorative — never
+   intercepts clicks/scroll. */
+.chat-window-body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.32) 0%,
+    rgba(0, 0, 0, 0.16) 10%,
+    rgba(0, 0, 0, 0.06) 18%,
+    rgba(0, 0, 0, 0) 32%
+  );
 }
 
 .chat-log-viewport {
@@ -54,11 +91,25 @@
   min-height: 100%;
 }
 
+.chat-empty-hint {
+  flex: 1 1 auto;
+  margin-left: 3px;
+  margin-top: 1px;
+  font-family: 'RuneScape', sans-serif;
+  font-size: 16px;
+  line-height: 16px;
+  color: #7a1f1f;
+}
+
 .chat-line {
   font-family: 'RuneScape', sans-serif;
   font-weight: 400;
   font-size: 16px;
-  line-height: 0px;
+  /* Was 0px, which collapsed each line's box down to just its 2px padding while the actual
+     16px-tall glyphs still rendered at full height — every line after the first spilled up
+     into the one above it. Matching line-height to font-size gives each line room for its own
+     glyphs, leaving the same tight ~2px gap between rows the 0px value was presumably going for. */
+  line-height: 16px;
   padding: 1px;
   overflow-wrap: break-word;
 }
@@ -74,6 +125,24 @@
 
 .chat-line-message {
   color: #7a1f1f;
+}
+
+.chat-line-prefix {
+  font-weight: 400;
+}
+
+/* ---- Empty-state feature tips (point 9) ----------------------------------------------- */
+
+.chat-log-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100%;
+}
+
+.chat-line-tip .chat-line-message {
+  color: #5c5346;
+  font-style: italic;
 }
 
 /* ---- Input row (non-functional; just shows who "would" be typing) -------------------- */
@@ -220,6 +289,7 @@
 }
 
 .chat-tab-btn {
+  position: relative; /* anchors the right-click ChatChannelMenu popup (see ChatControls) */
   flex: 0 0 56px;
   width: 56px;
   height: 22px;
@@ -227,7 +297,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* flex-start (not center) + a fixed top pad, so the label sits at the same height on every
+     tab whether or not it has a status line below it — "All" has no status line, and with
+     `center` it would otherwise drop to the middle of the button instead of lining up. */
+  justify-content: flex-start;
+  padding-top: 1px;
+  gap: 1px; /* 1px vertical gap between the label and its On/Filtered status line */
   border: none;
   cursor: pointer;
   background-repeat: no-repeat;
@@ -237,17 +312,33 @@
   image-rendering: pixelated;
 }
 
+.chat-tab-btn:hover {
+  background-image: url(/assets/chatbox/buttons/normal/unselected_hover.png);
+
+}
+
 .chat-tab-btn.is-selected {
   background-image: url(/assets/chatbox/buttons/normal/selected.png);
 }
 
+.chat-tab-btn.is-selected:hover {
+  background-image: url(/assets/chatbox/buttons/normal/selected_hover.png);
+}
+
+/* "All" has no status line beneath it, so it centers vertically instead of sitting at the
+   fixed top offset the other (two-line) tabs use. */
+.chat-tab-btn.chat-tab-btn--no-status {
+  justify-content: center;
+  padding-top: 0;
+}
+
+/* Label/status text is now rendered onto a <canvas> by PixelText (see PixelText.tsx) instead
+   of as DOM text — font-family/size/color/shadow all live there now, since drawing to canvas
+   and hard-thresholding the alpha channel is what actually gets rid of the anti-aliasing blur
+   that no combination of CSS font-size/weight/text-shadow could fix. These wrappers just
+   handle layout. */
 .chat-tab-label {
-  font-family: 'RuneScape Plain 11';
-  font-size: 12px;
-  font-weight: 100;
-  line-height: 11px;
-  color: #ffffff;
-  text-shadow: 1px 1px black
+  display: flex;
 }
 
 .chat-tab-status {
@@ -256,18 +347,7 @@
   padding: 0;
   margin: 0;
   cursor: pointer;
-  font-family: 'RuneScape Plain 11';
-  font-size: 9px;
-  font-weight: 100;
-  line-height: 9px;
-}
-
-.chat-tab-status-on {
-  color: #00ff00;
-}
-
-.chat-tab-status-filtered {
-  color: #ffff00;
+  display: flex;
 }
 
 .chat-report-btn {
@@ -275,6 +355,10 @@
   width: 79px;
   height: 22px;
   /* margin-left: auto; */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   cursor: pointer;
   background-repeat: no-repeat;
