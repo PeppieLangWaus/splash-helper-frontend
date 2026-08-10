@@ -44,7 +44,6 @@
   box-sizing: border-box;
   display: flex;
   gap: 0px;
-  border-bottom: 1px solid #4a4a48; /* divider above the input row */
   padding-bottom: 0px;
   margin-bottom: 0px;
 }
@@ -102,6 +101,11 @@
 }
 
 .chat-line {
+  display: flex;
+  /* Aligns the header's text baseline with the body's, so the message's first line sits level
+     with the timestamp/prefix/username exactly as it did before the header/body split below. */
+  align-items: baseline;
+  flex-wrap: nowrap;
   font-family: 'RuneScape', sans-serif;
   font-weight: 400;
   font-size: 16px;
@@ -109,9 +113,25 @@
      16px-tall glyphs still rendered at full height — every line after the first spilled up
      into the one above it. Matching line-height to font-size gives each line room for its own
      glyphs, leaving the same tight ~2px gap between rows the 0px value was presumably going for. */
-  line-height: 16px;
-  padding: 1px;
+  line-height: 15px;
+  padding: 0 1px 0 1px;
+}
+
+/* Timestamp/icons/prefix/username, as one non-wrapping unit — see .chat-line-body below for why
+   the line is split into these two flex items. */
+.chat-line-header {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* The actual message text. As a flex item, its own box starts right after the header and spans
+   the rest of the line's width — so when its content wraps, the wrapped line begins at the
+   body's own left edge (i.e. where the message started), not back at the far left of the log. */
+.chat-line-body {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow-wrap: break-word;
+  padding-left: 3px;
 }
 
 .chat-line-time {
@@ -121,14 +141,40 @@
 .chat-line-username {
   color: #000000;
   font-weight: 400;
+  padding-right: 1px;
 }
 
+/* Base/fallback message-body color — still used by Trade, which has no color of its own. Every
+   other kind that reaches this fallback path (fc/cc/private) overrides it below. */
 .chat-line-message {
   color: #7a1f1f;
 }
 
+.chat-line-message--fc {
+  color: #EF5050;
+}
+
+.chat-line-message--cc {
+  color: #940202;
+}
+
+.chat-line-message--private {
+  color: #2c2c2c;
+}
+
 .chat-line-prefix {
   font-weight: 400;
+}
+
+/* Fixed prefix format for every `[...]` tag (info/System/Worlds/fc/cc) — black brackets around
+   a blue label, so the brackets read as structural punctuation (matching the black
+   timestamp/username) while the label itself keeps the tag's own accent color. */
+.chat-line-prefix-bracket {
+  color: #000000;
+}
+
+.chat-line-prefix-text {
+  color: #0000FF;
 }
 
 /* ---- Empty-state feature tips (point 9) ----------------------------------------------- */
@@ -145,37 +191,61 @@
   font-style: italic;
 }
 
-/* ---- Input row (non-functional; just shows who "would" be typing) -------------------- */
+/* ---- Input row (the `::command` console — see Chatbox.tsx's ChatInputRow) ------------ */
 
 .chat-input-row {
   flex: 0 0 auto;
   margin-left: 3px;
+  padding-bottom: 2px;
   display: flex;
   align-items: center;
-  height: 15px;
+  height: 17px;
+  border-top: 1px solid #4a4a48
 }
 
 .chat-input-text {
-  font-family: 'RuneScape', sans-serif;
+  font-family: 'RuneScape';
   font-weight: 400;
   font-size: 16px;
   color: #000000;
+  white-space: nowrap;
 }
 
+.chat-input-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-family: 'RuneScape', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #0000FF;
+  /* The real text caret is a thin blinking "|" that doesn't match the box's pixel-art look —
+     hidden in favor of the static "*" marker next to the field (.chat-input-cursor). */
+  caret-color: transparent;
+}
+
+/* Static cursor marker — deliberately not animated (see .chat-input-field's caret-color above
+   for why this replaces the native caret instead of just sitting alongside it). */
 .chat-input-cursor {
-  animation: chat-input-blink 1s steps(1) infinite;
-}
-
-@keyframes chat-input-blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+  font-family: 'RuneScape', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  color: #0000FF;
 }
 
 .chat-icon {
   width: 13px;
   height: 13px;
-  vertical-align: text-bottom;
-  margin: 0 1px 0 0;
+  /* `text-bottom` anchored to the font's full descent line, which sits ~2-3px below where the
+     text actually visually centers for this font (most glyphs here have no descenders) — icons
+     read as hanging low. `baseline` (the default) puts icons much closer to the glyphs' own
+     vertical center instead. */
+  vertical-align: baseline;
+  margin: 0 2px 0 0;
   image-rendering: auto;
 }
 

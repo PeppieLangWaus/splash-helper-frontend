@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../types/chatbox';
-import { CHAT_BLUE } from '../components/chatbox/chatColors';
+import { CHAT_INFO } from '../components/chatbox/chatColors';
 import chatInfoMessages from '../data/chatInfoMessages';
 import {
   INFO_KEY,
@@ -30,9 +30,8 @@ function buildMessage(text: string): ChatMessage {
     kind: 'info',
     message: text,
     icon: '/assets/chatbox/icons/info/msg.png',
-    prefix: { text: '[info]', color: CHAT_BLUE },
-    // "use blue letters" (point 1) — the whole line is blue, not just the [info] tag.
-    segments: [{ text, color: CHAT_BLUE }],
+    prefix: { text: 'Info' },
+    segments: [{ text, color: CHAT_INFO }],
   };
 }
 

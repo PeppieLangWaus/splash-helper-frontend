@@ -1,5 +1,4 @@
 import type { ChatMessage } from '../types/chatbox';
-import { CHAT_BLUE } from '../components/chatbox/chatColors';
 import { PRIVATE_KEY, appendStoredMessage, publishStoredMessage } from './chatStorage';
 
 let seq = 0;
@@ -16,7 +15,7 @@ export function logSystemEvent(text: string): void {
     kind: 'private',
     message: text,
     icon: '/assets/chatbox/icons/info/info.png',
-    prefix: { text: '[System]', color: CHAT_BLUE },
+    prefix: { text: 'System' },
   };
   appendStoredMessage(PRIVATE_KEY, message);
   publishStoredMessage(PRIVATE_KEY, message);

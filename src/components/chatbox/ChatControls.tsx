@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ChatChannel, ChatChannelListing, ChatTabStates, LiveChatChannelType, TabState } from '../../types/chatbox';
+import type { ChatChannel, ChatChannelListing, ChatTabStates, LiveChatChannelType } from '../../types/chatbox';
 import PixelText from './PixelText';
 import ChatChannelMenu from './ChatChannelMenu';
 import { TAB_STATE_COLORS } from './chatColors';
+import { TAB_STATE_LABEL } from './chatFilter';
 
 const TABS: { id: ChatChannel; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -21,24 +22,19 @@ const LIVE_CHANNEL_TYPE_BY_TAB: Partial<Record<ChatChannel, LiveChatChannelType>
   clan: 'cc',
 };
 
-const STATE_LABEL: Record<TabState, string> = { on: 'On', filtered: 'Filtered', off: 'Off' };
-
-export interface ChatSelection {
-  communityId: string;
-  channelType: LiveChatChannelType;
-}
-
 interface Props {
   selected: ChatChannel;
   onSelect: (channel: ChatChannel) => void;
   onReport: () => void;
   tabStates: ChatTabStates;
   onToggleTabState: (tab: ChatChannel) => void;
-  /** Communities available to watch, and the current pick per type — right-clicking "Channel"/
-   *  "Clan" opens a menu built from these (see useChatChannels / Chatbox). */
+  /** Every linked community (already watched automatically — see useChatFeeds) — right-clicking
+   *  "Channel"/"Clan" opens a menu built from these (see useChatChannels / Chatbox). */
   chatChannels: ChatChannelListing[];
-  chatSelections: { fc: ChatSelection | null; cc: ChatSelection | null };
-  onSelectChatChannel: (channelType: LiveChatChannelType, selection: ChatSelection | null) => void;
+  /** The viewer's own Filtered-list pick per type, a subset of `chatChannels` (see
+   *  chatFilter.ts / the chatbox-multi-link feature notes). */
+  chatSelected: { fc: Set<string>; cc: Set<string> };
+  onToggleChatSelection: (channelType: LiveChatChannelType, communityId: string) => void;
 }
 
 /** The chatbox's bottom bar: 7 channel-filter tabs (only one selected at a time) plus a
@@ -54,8 +50,8 @@ export default function ChatControls({
   tabStates,
   onToggleTabState,
   chatChannels,
-  chatSelections,
-  onSelectChatChannel,
+  chatSelected,
+  onToggleChatSelection,
 }: Props) {
   const [menuFor, setMenuFor] = useState<LiveChatChannelType | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -113,13 +109,13 @@ export default function ChatControls({
               <button
                 type="button"
                 className="chat-tab-status"
-                aria-label={`${tab.label}: ${STATE_LABEL[state]}, click to toggle`}
+                aria-label={`${tab.label}: ${TAB_STATE_LABEL[state]}, click to toggle`}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleTabState(tab.id);
                 }}
               >
-                <PixelText text={STATE_LABEL[state]} fontSize={12} color={TAB_STATE_COLORS[state]} />
+                <PixelText text={TAB_STATE_LABEL[state]} fontSize={12} color={TAB_STATE_COLORS[state]} />
               </button>
             )}
 
@@ -127,15 +123,8 @@ export default function ChatControls({
               <ChatChannelMenu
                 channelType={channelType}
                 channels={chatChannels}
-                selected={chatSelections[channelType]}
-                onSelect={(sel) => {
-                  onSelectChatChannel(channelType, sel);
-                  setMenuFor(null);
-                }}
-                onClear={() => {
-                  onSelectChatChannel(channelType, null);
-                  setMenuFor(null);
-                }}
+                selected={chatSelected[channelType]}
+                onToggle={(communityId) => onToggleChatSelection(channelType, communityId)}
               />
             )}
           </div>

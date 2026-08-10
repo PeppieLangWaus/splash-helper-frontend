@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatMessage, LiveChatChannelType } from '../types/chatbox';
 import { getRankIcon } from '../components/chatbox/chatIcons';
-import { appendStoredMessage, ccKey, fcKey, loadStoredMessages } from '../utils/chatStorage';
+import { appendStoredMessage, ccKey, fcKey, loadStoredMessages, subscribeToStoredMessages } from '../utils/chatStorage';
 
 // Same origin as the REST API, just ws(s):// instead of http(s):// — the backend's WebSocket
 // server (see splash-helper-backend's websocket/server.ts) accepts connections on any path.
@@ -163,6 +163,15 @@ export function useChatFeed(communityId: string | null, channelType: LiveChatCha
     const ws = wsRef.current;
     if (ws) sendSubscribe(ws);
   }, [communityId, channelType, sendSubscribe]);
+
+  // Picks up out-of-band changes to this channel's stored history — currently only the `::clear`
+  // chat command (see utils/chatCommands.ts), which wipes localStorage directly rather than going
+  // through appendStoredMessage/setMessages above.
+  useEffect(() => subscribeToStoredMessages((detail) => {
+    if (communityId && channelType && detail.key === storageKey(communityId, channelType)) {
+      setMessages(loadStoredMessages(detail.key));
+    }
+  }), [communityId, channelType]);
 
   return { messages, connected };
 }

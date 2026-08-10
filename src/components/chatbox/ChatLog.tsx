@@ -8,33 +8,69 @@ const MIN_THUMB_HEIGHT = 12;
 const STEP_PX = 24;
 const EMPTY_TIP_COUNT = 3;
 
-function ChatLine({ msg }: { msg: ChatMessage }) {
+/** Strips a legacy `[...]`-wrapped prefix down to its bare label. Chat history persists
+ *  indefinitely in localStorage (see utils/chatStorage.ts), and `prefix.text` used to include
+ *  its own brackets before ChatLine started wrapping labels in brackets itself — without this,
+ *  any message stored under the old format renders doubled, e.g. "[[System]]". */
+function prefixLabel(text: string): string {
+  return text.startsWith('[') && text.endsWith(']') ? text.slice(1, -1) : text;
+}
+
+/** Per-kind message-body color, for kinds that never set `segments` (fc/cc/private — trade falls
+ *  back to the base .chat-line-message color, unset here). info/public always set `segments`
+ *  instead, coloring themselves per-segment — see useInfoMessages.ts/usePublicSessionEvents.ts. */
+const MESSAGE_KIND_CLASS: Partial<Record<ChatMessage['kind'], string>> = {
+  fc: 'chat-line-message--fc',
+  cc: 'chat-line-message--cc',
+  private: 'chat-line-message--private',
+};
+
+function ChatLine({ msg, showTimestamps }: { msg: ChatMessage; showTimestamps: boolean }) {
   return (
     <div className="chat-line">
-      <span className="chat-line-time">[{formatClockTime(new Date(msg.timestamp))}]</span>{' '}
-      {msg.icon && <img className="chat-icon" src={msg.icon} alt="" />}
-      {msg.modStatus && (
-        <img className="chat-icon" src={MOD_STATUS_ICONS[msg.modStatus]} alt={msg.modStatus} />
-      )}
-      {msg.ironmanStatus && (
-        <img className="chat-icon" src={IRONMAN_STATUS_ICONS[msg.ironmanStatus]} alt={msg.ironmanStatus} />
-      )}
-      {msg.rankIcon && <img className="chat-icon chat-icon-rank" src={msg.rankIcon} alt="rank" />}
-      {msg.prefix && (
-        <span className="chat-line-prefix" style={{ color: msg.prefix.color }}>
-          {msg.prefix.text}{' '}
-        </span>
-      )}
-      {msg.username && <span className="chat-line-username">{msg.username}:</span>}{msg.username && ' '}
-      {msg.segments ? (
-        msg.segments.map((seg, i) => (
-          <span key={i} className="chat-line-message" style={seg.color ? { color: seg.color } : undefined}>
-            {seg.text}
+      {/* Everything up to the message body itself is grouped into one non-wrapping header item —
+          see .chat-line-header/.chat-line-body in Chatbox.css. Splitting the line into these two
+          flex items (rather than one long run of inline content) is what makes a wrapped message
+          continue at the same horizontal position its first line started at, instead of back at
+          the far left of the whole chat log. */}
+      <span className="chat-line-header">
+        {showTimestamps && (
+          <>
+            <span className="chat-line-time">[{formatClockTime(new Date(msg.timestamp))}]</span>{' '}
+          </>
+        )}
+        {msg.icon && <img className="chat-icon" src={msg.icon} alt="" />}
+        {msg.prefix && (
+          <span className="chat-line-prefix">
+            <span className="chat-line-prefix-bracket">[</span>
+            <span className="chat-line-prefix-text">{prefixLabel(msg.prefix.text)}</span>
+            <span className="chat-line-prefix-bracket">]</span>{' '}
           </span>
-        ))
-      ) : (
-        <span className="chat-line-message">{msg.message}</span>
-      )}
+        )}
+        {/* Sender-status icons (mod/ironman/rank) sit right before the username they describe,
+            after the channel prefix — not before it. */}
+        {msg.modStatus && (
+          <img className="chat-icon" src={MOD_STATUS_ICONS[msg.modStatus]} alt={msg.modStatus} />
+        )}
+        {msg.ironmanStatus && (
+          <img className="chat-icon" src={IRONMAN_STATUS_ICONS[msg.ironmanStatus]} alt={msg.ironmanStatus} />
+        )}
+        {msg.rankIcon && <img className="chat-icon chat-icon-rank" src={msg.rankIcon} alt="rank" />}
+        {msg.username && <span className="chat-line-username">{msg.username}:</span>}{msg.username && ' '}
+      </span>
+      <span className="chat-line-body">
+        {msg.segments ? (
+          msg.segments.map((seg, i) => (
+            <span key={i} className="chat-line-message" style={seg.color ? { color: seg.color } : undefined}>
+              {seg.text}
+            </span>
+          ))
+        ) : (
+          <span className={`chat-line-message ${MESSAGE_KIND_CLASS[msg.kind] ?? ''}`}>
+            {msg.message}
+          </span>
+        )}
+      </span>
     </div>
   );
 }
@@ -51,7 +87,9 @@ function ChatEmptyState() {
     <div className="chat-log-empty">
       {tips.map((tip, i) => (
         <div className="chat-line chat-line-tip" key={i}>
-          <span className="chat-line-message">{tip}</span>
+          <span className="chat-line-body">
+            <span className="chat-line-message">{tip}</span>
+          </span>
         </div>
       ))}
     </div>
@@ -59,8 +97,10 @@ function ChatEmptyState() {
 }
 
 /** The chat log's message list plus a custom scrollbar built from the `chatbox/scroll` sprites
- *  (native `overflow` scrollbars are hidden — see `.chat-log-viewport` in Chatbox.css). */
-export default function ChatLog({ messages }: { messages: ChatMessage[] }) {
+ *  (native `overflow` scrollbars are hidden — see `.chat-log-viewport` in Chatbox.css).
+ *  `showTimestamps` is the `::settings timestamp on|off` chat command's own setting (see
+ *  hooks/useChatSettings.ts) — defaults on, matching the chatbox's original behavior. */
+export default function ChatLog({ messages, showTimestamps = true }: { messages: ChatMessage[]; showTimestamps?: boolean }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState({ top: 0, height: MIN_THUMB_HEIGHT, visible: false });
@@ -192,7 +232,7 @@ export default function ChatLog({ messages }: { messages: ChatMessage[] }) {
         ) : (
           <div className="chat-log">
             {messages.map((msg) => (
-              <ChatLine key={msg.id} msg={msg} />
+              <ChatLine key={msg.id} msg={msg} showTimestamps={showTimestamps} />
             ))}
           </div>
         )}

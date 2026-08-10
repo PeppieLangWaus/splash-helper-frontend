@@ -587,3 +587,12 @@ export async function devRemoveFakeSession(username: string): Promise<void> {
     throw new Error(data.error ?? 'Failed to remove fake session');
   }
 }
+
+/** Wipes every collection in the dev database and clears in-memory active sessions —
+ *  see the backend's POST /dev/reset for details. */
+export async function devReset(): Promise<{ message: string; collectionsCleared: string[] }> {
+  const res = await fetch(`${BASE}/dev/reset`, { method: 'POST' });
+  const data = (await res.json()) as { message?: string; collectionsCleared?: string[]; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to reset dev data');
+  return { message: data.message ?? 'Dev data reset', collectionsCleared: data.collectionsCleared ?? [] };
+}

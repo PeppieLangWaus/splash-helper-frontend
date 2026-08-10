@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../types/chatbox';
 import { getActiveSessions } from '../api';
-import { CHAT_BLUE, CHAT_GREEN, CHAT_ORANGE } from '../components/chatbox/chatColors';
+import { CHAT_GREEN, CHAT_ORANGE } from '../components/chatbox/chatColors';
 import {
   PUBLIC_KEY,
   appendStoredMessage,
@@ -20,7 +20,7 @@ function buildMessage(username: string, world: number): ChatMessage {
     kind: 'public',
     message: `[Worlds] ${username} has started splashing over at W${world}!`,
     icon: '/assets/icons/world.png',
-    prefix: { text: '[Worlds]', color: CHAT_BLUE },
+    prefix: { text: 'Worlds' },
     segments: [
       { text: username, color: CHAT_ORANGE },
       { text: ' has started splashing over at ' },

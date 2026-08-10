@@ -55,6 +55,15 @@
   padding: 4px 8px 2px;
 }
 
+.chat-channel-menu-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 0 8px 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
 .chat-channel-menu-empty {
   font-size: 12px;
   color: var(--text-muted);
@@ -81,11 +90,4 @@
 .chat-channel-menu-item.is-selected {
   color: var(--accent-text);
   font-weight: 600;
-}
-
-.chat-channel-menu-clear {
-  border-top: 1px solid var(--border);
-  margin-top: 2px;
-  padding-top: 6px;
-  color: var(--text-muted);
 }

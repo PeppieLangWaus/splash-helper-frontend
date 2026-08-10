@@ -1,30 +1,72 @@
-import { useMemo, useState } from 'react';
-import type { ChatChannel, ChatMessage, LiveChatChannelType } from '../../types/chatbox';
+import { useMemo, useRef, useState } from 'react';
+import type { ChatChannel, ChatMessage, ChatTabStates, LiveChatChannelType } from '../../types/chatbox';
 import { useAuth } from '../../context/AuthContext';
 import { useChatChannels } from '../../hooks/useChatChannels';
-import { useChatFeed } from '../../hooks/useChatFeed';
+import { useChatFeeds } from '../../hooks/useChatFeeds';
 import { useInfoMessages } from '../../hooks/useInfoMessages';
+import { useCommandLog } from '../../hooks/useCommandLog';
 import { usePublicSessionEvents } from '../../hooks/usePublicSessionEvents';
 import { usePrivateLog } from '../../hooks/usePrivateLog';
 import { useTradeLog } from '../../hooks/useTradeLog';
 import { useAccountActivityEvents } from '../../hooks/useAccountActivityEvents';
+import { useChatSettings } from '../../hooks/useChatSettings';
 import ChatLog from './ChatLog';
-import ChatControls, { type ChatSelection } from './ChatControls';
+import ChatControls from './ChatControls';
 import ReportModal from './ReportModal';
-import { CHAT_BLUE } from './chatColors';
 import { DEFAULT_TAB_STATES, nextTabState, visibleMessages } from './chatFilter';
+import { runChatCommand } from './chatCommands';
+import { CC_SELECTED_KEY, FC_SELECTED_KEY, loadSelectedIds, saveSelectedIds } from '../../utils/chatStorage';
 import './Chatbox.css';
 
-/** The chat-input look-alike pinned under the divider — purely decorative for now, no typing. */
-function ChatInputRow() {
+interface ChatInputRowProps {
+  tabStates: ChatTabStates;
+  onToggleTabState: (tab: ChatChannel) => void;
+  /** Owned by Chatbox (not this component) so a click anywhere in `.chat-window` — not just on
+   *  the input itself — can focus it; see Chatbox's own onClick below. */
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}
+
+/** The chat-input row pinned under the divider — a `::command` console (see chatCommands.ts),
+ *  not a real chat: nothing typed here is ever broadcast. Enter parses and runs the line, always
+ *  replying on the Game tab, then clears the field. The `*` next to it is a static cursor marker
+ *  (not the real caret, which is hidden via `caret-color` in Chatbox.css) — it doesn't blink and
+ *  is always shown, matching the box's original decorative look but without the distracting
+ *  blinking native caret once there's actually something to type into. */
+function ChatInputRow({ tabStates, onToggleTabState, inputRef }: ChatInputRowProps) {
   const { user } = useAuth();
-  const name = user?.username ?? 'ardy hosts';
+  const name = user?.username ?? 'Ardy Hosts';
+  const [value, setValue] = useState('');
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    switch (e.key) {
+      case 'Enter':
+        const text = value
+        setValue('');
+        runChatCommand(text, { tabStates, toggleTabState: onToggleTabState });        
+        break;
+      case 'Backspace':
+        setValue(value.slice(0, value.length - 1));
+        break;
+      default:
+        return;
+    }
+  }
 
   return (
     <div className="chat-input-row">
-      <span className="chat-input-text">
-        {name}: <span className="chat-input-cursor">*</span>
-      </span>
+      <label htmlFor='chat-input' className="chat-input-text">{name}: </label>
+      <input
+        ref={inputRef}
+        id='chat-input'
+        className="chat-input-field"
+        type="text"
+        value={value + "*"}
+        onChange={(e) => setValue(e.target.value.replace("*", ""))}
+        onKeyDown={handleKeyDown}
+        autoComplete="off"
+        spellCheck={false}
+        aria-label="Chat command input"
+      />
     </div>
   );
 }
@@ -38,59 +80,75 @@ interface Props {
   className?: string;
 }
 
+/** One `Channel — N linked ● live` (or `Clan — …`) summary line for the header — omitted
+ *  entirely by the caller when nothing of that type is linked. */
+function LiveStatusLine({ label, connected }: { label: string; connected: Record<string, boolean> }) {
+  const total = Object.keys(connected).length;
+  const up = Object.values(connected).filter(Boolean).length;
+  const allConnected = up === total;
+  return (
+    <span>
+      {label} — {total} linked
+      <span className={allConnected ? 'is-connected' : 'is-disconnected'}>
+        {allConnected ? ' ● live' : ` ○ ${up}/${total} live`}
+      </span>
+    </span>
+  );
+}
+
 export default function Chatbox({ messages: messagesOverride, className }: Props) {
   const [channel, setChannel] = useState<ChatChannel>('all');
   const [windowOpen, setWindowOpen] = useState(true);
   const [reportOpen, setReportOpen] = useState(false);
-  const [fcSelection, setFcSelection] = useState<ChatSelection | null>(null);
-  const [ccSelection, setCcSelection] = useState<ChatSelection | null>(null);
+  const [fcSelected, setFcSelected] = useState<Set<string>>(() => loadSelectedIds(FC_SELECTED_KEY));
+  const [ccSelected, setCcSelected] = useState<Set<string>>(() => loadSelectedIds(CC_SELECTED_KEY));
   const [tabStates, setTabStates] = useState(DEFAULT_TAB_STATES);
+  const chatInputRef = useRef<HTMLInputElement>(null);
 
   // Only needed in live mode — an explicit `messages` override skips the picker and every local
   // feed entirely, so all of this stays idle when unused.
   const live = messagesOverride === undefined;
   const { channels } = useChatChannels();
-  const { messages: fcMessagesRaw, connected: fcConnected } = useChatFeed(
-    live ? (fcSelection?.communityId ?? null) : null,
-    live ? 'fc' : null,
-  );
-  const { messages: ccMessagesRaw, connected: ccConnected } = useChatFeed(
-    live ? (ccSelection?.communityId ?? null) : null,
-    live ? 'cc' : null,
-  );
+  // Every *linked* community's fc/cc feed is watched continuously, regardless of the Channel/Clan
+  // tab's own state — see useChatFeeds. Only display filtering (chatFilter.ts) is state-aware.
+  const { messages: fcMessages, connected: fcConnected } = useChatFeeds(live ? channels : [], 'fc');
+  const { messages: ccMessages, connected: ccConnected } = useChatFeeds(live ? channels : [], 'cc');
   const infoMessages = useInfoMessages();
+  const commandMessages = useCommandLog();
   const publicMessages = usePublicSessionEvents();
   const { messages: privateMessages, loggedIn: privateLoggedIn } = usePrivateLog();
   const { messages: tradeMessages, loggedIn: tradeLoggedIn } = useTradeLog();
   // Generates the real archived-session/payout entries the two hooks above read back — see its
   // doc comment for why this has to poll rather than push.
   useAccountActivityEvents();
+  const { timestamps: showTimestamps } = useChatSettings();
 
-  const fcListing = fcSelection ? channels.find((c) => c.communityId === fcSelection.communityId) : undefined;
-  const ccListing = ccSelection ? channels.find((c) => c.communityId === ccSelection.communityId) : undefined;
-  const fcLabel = fcListing ? (fcListing.friendsChatDisplayName ?? fcListing.friendsChatName) : null;
-  const ccLabel = ccListing ? ccListing.clanChatName : null;
+  const mergedMessages = useMemo(
+    () =>
+      [
+        ...fcMessages,
+        ...ccMessages,
+        ...infoMessages,
+        ...commandMessages,
+        ...publicMessages,
+        ...(privateLoggedIn ? privateMessages : []),
+        ...(tradeLoggedIn ? tradeMessages : []),
+      ].sort((a, b) => a.timestamp - b.timestamp),
+    [
+      fcMessages,
+      ccMessages,
+      infoMessages,
+      commandMessages,
+      publicMessages,
+      privateMessages,
+      privateLoggedIn,
+      tradeMessages,
+      tradeLoggedIn,
+    ],
+  );
 
-  // Re-stamped from the *current* channel listing on every merge (not baked in when a message
-  // first arrives) so renaming a Friends Chat display name relabels its whole history live.
-  const mergedMessages = useMemo(() => {
-    const fcTagged = fcLabel
-      ? fcMessagesRaw.map((m) => ({ ...m, prefix: { text: `[${fcLabel}]`, color: CHAT_BLUE } }))
-      : fcMessagesRaw;
-    const ccTagged = ccLabel
-      ? ccMessagesRaw.map((m) => ({ ...m, prefix: { text: `[${ccLabel}]`, color: CHAT_BLUE } }))
-      : ccMessagesRaw;
-    return [
-      ...fcTagged,
-      ...ccTagged,
-      ...infoMessages,
-      ...publicMessages,
-      ...(privateLoggedIn ? privateMessages : []),
-      ...(tradeLoggedIn ? tradeMessages : []),
-    ].sort((a, b) => a.timestamp - b.timestamp);
-  }, [fcMessagesRaw, ccMessagesRaw, fcLabel, ccLabel, infoMessages, publicMessages, privateMessages, privateLoggedIn, tradeMessages, tradeLoggedIn]);
-
-  const messages = messagesOverride ?? visibleMessages(mergedMessages, channel, tabStates);
+  const messages =
+    messagesOverride ?? visibleMessages(mergedMessages, channel, tabStates, { channel: fcSelected, clan: ccSelected });
 
   // Picking a new tab switches channel and (re)opens the window; clicking the tab that's
   // already selected toggles the window closed/open instead, matching OSRS's own chatbox.
@@ -107,64 +165,48 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
     setTabStates((prev) => ({ ...prev, [tab]: nextTabState(tab, prev[tab]) }));
   }
 
-  // Picking a chat from the right-click menu also flips that tab to Filtered ("enable the
-  // filter state" — point 3); clearing it resets back to On since there's no longer a specific
-  // chat to filter down to.
-  function handleSelectChatChannel(channelType: LiveChatChannelType, selection: ChatSelection | null) {
-    const tab: ChatChannel = channelType === 'fc' ? 'channel' : 'clan';
-    if (channelType === 'fc') setFcSelection(selection);
-    else setCcSelection(selection);
-    setTabStates((prev) => ({ ...prev, [tab]: selection ? 'filtered' : 'on' }));
+  // Checking/unchecking a community in the right-click menu only edits the viewer's own local
+  // Filtered selection — every linked community is already being watched regardless (see
+  // useChatFeeds), and this doesn't touch the tab's own On/Filtered/Off status, which stays a
+  // separate, independently-toggled concern (the tab's status line).
+  function handleToggleChatSelection(channelType: LiveChatChannelType, communityId: string) {
+    const [selected, setSelected, key] =
+      channelType === 'fc' ? ([fcSelected, setFcSelected, FC_SELECTED_KEY] as const) : ([ccSelected, setCcSelected, CC_SELECTED_KEY] as const);
+    const next = new Set(selected);
+    if (next.has(communityId)) next.delete(communityId);
+    else next.add(communityId);
+    setSelected(next);
+    saveSelectedIds(key, next);
   }
 
   const needsLogin =
     live && ((channel === 'private' && !privateLoggedIn) || (channel === 'trade' && !tradeLoggedIn));
-  const needsChatPick = !live
-    ? null
-    : channel === 'channel' && !fcSelection
-      ? 'Friends Chat'
-      : channel === 'clan' && !ccSelection
-        ? 'Clan Chat'
-        : null;
+
+  const hasFcLinks = live && Object.keys(fcConnected).length > 0;
+  const hasCcLinks = live && Object.keys(ccConnected).length > 0;
 
   return (
     <div className={`chatbox ${className ?? ''}`}>
-      {live && (fcSelection || ccSelection) && (
+      {(hasFcLinks || hasCcLinks) && (
         <div className="chat-live-status">
-          {fcSelection && (
-            <span>
-              Channel — {fcListing?.communityName ?? '…'}
-              {fcLabel ? ` — ${fcLabel}` : ''}
-              <span className={fcConnected ? 'is-connected' : 'is-disconnected'}>
-                {fcConnected ? ' ● live' : ' ○ reconnecting…'}
-              </span>
-            </span>
-          )}
-          {fcSelection && ccSelection && ' · '}
-          {ccSelection && (
-            <span>
-              Clan — {ccListing?.communityName ?? '…'}
-              {ccLabel ? ` — ${ccLabel}` : ''}
-              <span className={ccConnected ? 'is-connected' : 'is-disconnected'}>
-                {ccConnected ? ' ● live' : ' ○ reconnecting…'}
-              </span>
-            </span>
-          )}
+          {hasFcLinks && <LiveStatusLine label="Channel" connected={fcConnected} />}
+          {hasFcLinks && hasCcLinks && ' · '}
+          {hasCcLinks && <LiveStatusLine label="Clan" connected={ccConnected} />}
         </div>
       )}
 
       {windowOpen && (
-        <div className="chat-window">
+        // Clicking anywhere in the window — the log, its scrollbar, the input row itself —
+        // focuses the command input, same as clicking directly into it.
+        <div className="chat-window" onClick={() => chatInputRef.current?.focus()}>
           <div className="chat-window-body">
             {needsLogin ? (
               <div className="chat-empty-hint">Log in to use this feature.</div>
-            ) : needsChatPick ? (
-              <div className="chat-empty-hint">Right-click "{channel === 'channel' ? 'Channel' : 'Clan'}" below to watch a community's live {needsChatPick}.</div>
             ) : (
-              <ChatLog messages={messages} />
+              <ChatLog messages={messages} showTimestamps={showTimestamps} />
             )}
           </div>
-          <ChatInputRow />
+          <ChatInputRow tabStates={tabStates} onToggleTabState={handleToggleTabState} inputRef={chatInputRef} />
         </div>
       )}
       <ChatControls
@@ -174,8 +216,8 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
         tabStates={tabStates}
         onToggleTabState={handleToggleTabState}
         chatChannels={channels}
-        chatSelections={{ fc: fcSelection, cc: ccSelection }}
-        onSelectChatChannel={handleSelectChatChannel}
+        chatSelected={{ fc: fcSelected, cc: ccSelected }}
+        onToggleChatSelection={handleToggleChatSelection}
       />
 
       {reportOpen && (

@@ -11,13 +11,45 @@ export const INFO_KEY = `${KEY_PREFIX}info`;
 export const PUBLIC_KEY = `${KEY_PREFIX}public`;
 export const PRIVATE_KEY = `${KEY_PREFIX}private`;
 export const TRADE_KEY = `${KEY_PREFIX}trade`;
+/** Command-console replies (see utils/chatCommands.ts) — a separate feed from INFO_KEY's
+ *  periodic tips so `::clear info` and `::clear system` can target either independently, even
+ *  though both surface on the Game tab (see chatFilter.ts's KIND_TO_TAB). */
+export const SYSTEM_KEY = `${KEY_PREFIX}system`;
+
+const FC_PREFIX = `${KEY_PREFIX}fc:`;
+const CC_PREFIX = `${KEY_PREFIX}cc:`;
 
 export function fcKey(communityId: string): string {
-  return `${KEY_PREFIX}fc:${communityId}`;
+  return `${FC_PREFIX}${communityId}`;
 }
 
 export function ccKey(communityId: string): string {
-  return `${KEY_PREFIX}cc:${communityId}`;
+  return `${CC_PREFIX}${communityId}`;
+}
+
+/** A viewer's locally-persisted Filtered-list selection (which linked communities' fc/cc chats
+ *  they've picked to narrow down to) — see the chatbox-multi-link feature notes for the
+ *  linked-vs-selected distinction. Community IDs only; never sent to the backend. */
+export const FC_SELECTED_KEY = `${KEY_PREFIX}selected:fc`;
+export const CC_SELECTED_KEY = `${KEY_PREFIX}selected:cc`;
+
+export function loadSelectedIds(key: string): Set<string> {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? new Set(parsed.filter((v): v is string => typeof v === 'string')) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+export function saveSelectedIds(key: string, ids: Set<string>): void {
+  try {
+    localStorage.setItem(key, JSON.stringify([...ids]));
+  } catch {
+    // Storage unavailable — the selection just won't survive a reload.
+  }
 }
 
 /** Per-feed message cap — "100 messages ... for each type and per fc/cc chat feed", editable
@@ -71,6 +103,32 @@ export function appendStoredMessage(key: string, message: ChatMessage): ChatMess
   return trimmed;
 }
 
+/** Wipes one feed's stored history (used by the `::clear` chat command — see
+ *  utils/chatCommands.ts) and notifies anything currently watching that key. */
+export function clearStoredMessages(key: string): void {
+  saveMessages(key, []);
+  publishStoredMessagesChanged(key);
+}
+
+/** Wipes every stored feed whose key starts with `prefix` — used for `::clear channel`/`::clear
+ *  clan`, which need to reach every linked community's per-community fc/cc key (fcKey/ccKey
+ *  above), not just one fixed key. */
+export function clearStoredMessagesByPrefix(prefix: string): void {
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(prefix)) keys.push(k);
+    }
+    keys.forEach(clearStoredMessages);
+  } catch {
+    // Storage unavailable — nothing to clear.
+  }
+}
+
+export const FC_KEY_PREFIX = FC_PREFIX;
+export const CC_KEY_PREFIX = CC_PREFIX;
+
 /** Re-trims every already-stored feed to a newly-changed limit — called from Account Settings'
  *  save handler so lowering the limit takes effect immediately instead of waiting for each
  *  feed's next message. */
@@ -98,11 +156,20 @@ const CHAT_MESSAGE_EVENT = 'chat:message';
 
 export interface ChatMessageEventDetail {
   key: string;
-  message: ChatMessage;
+  /** Unset for a plain "reload this key from storage" notification (see
+   *  publishStoredMessagesChanged) — every subscriber below only re-reads storage keyed off
+   *  `key` and never actually looks at this field, so it's fine for it to be absent. */
+  message?: ChatMessage;
 }
 
 export function publishStoredMessage(key: string, message: ChatMessage): void {
   window.dispatchEvent(new CustomEvent<ChatMessageEventDetail>(CHAT_MESSAGE_EVENT, { detail: { key, message } }));
+}
+
+/** Tells anything watching `key` to re-read it from storage, without a specific new message to
+ *  carry — used after clearStoredMessages/clearStoredMessagesByPrefix. */
+export function publishStoredMessagesChanged(key: string): void {
+  window.dispatchEvent(new CustomEvent<ChatMessageEventDetail>(CHAT_MESSAGE_EVENT, { detail: { key } }));
 }
 
 export function subscribeToStoredMessages(handler: (detail: ChatMessageEventDetail) => void): () => void {

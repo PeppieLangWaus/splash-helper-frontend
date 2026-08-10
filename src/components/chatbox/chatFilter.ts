@@ -5,10 +5,15 @@ export const KIND_TO_TAB: Record<ChatMessageKind, ChatChannel> = {
   fc: 'channel',
   cc: 'clan',
   info: 'game',
+  system: 'game',
   public: 'public',
   private: 'private',
   trade: 'trade',
 };
+
+/** Display label for a tab's status line — shared between ChatControls' own status button and
+ *  the `::toggle` chat command's confirmation reply (see utils/chatCommands.ts). */
+export const TAB_STATE_LABEL: Record<TabState, string> = { on: 'On', filtered: 'Filtered', off: 'Off' };
 
 /** Channel/Clan cycle through all three states; every other tab only ever has On/Off. */
 export function tabSupportsFiltered(tab: ChatChannel): boolean {
@@ -36,21 +41,47 @@ export const DEFAULT_TAB_STATES: ChatTabStates = {
   trade: 'on',
 };
 
+/** The viewer's locally-picked Filtered subset, per fc/cc tab — community IDs, not messages. See
+ *  the chatbox-multi-link feature notes for how "linked" (every community with a name registered)
+ *  differs from "selected" (this — the viewer's own narrowed-down pick). */
+export interface ChatSelectedIds {
+  channel: Set<string>;
+  clan: Set<string>;
+}
+
 /**
- * The All tab shows every message whose own tab is currently On — Filtered and Off both exclude
- * it from All (point 7.2's "if fc/cc button have the filtered state it should only show the
- * selected chat's messages" — under this app's one-community-per-type live feed, that reduces to
- * "not shown in All"). Any other selected tab shows only its own kind, ignoring its own state —
- * point 7.3's explicit rule for Game, generalized to every tab by 7.2's "same goes for buttons
- * with On or Off states".
+ * Game/Public/Private/Trade only ever go On/Off, and their own tab always shows their own kind
+ * regardless of that state (point 7.3) — Off there only means "excluded from All".
+ *
+ * Channel/Clan additionally support Filtered: every linked community's Friends/Clan Chat is
+ * subscribed to continuously (see useChatFeeds), and the tab's status decides what's visible from
+ * that set. On shows every linked chat (in All and in the tab itself), Filtered shows just the
+ * viewer's selected ones (in All and in the tab, matched by each message's `communityId`), and
+ * Off shows none of them anywhere, including its own tab.
  */
 export function visibleMessages(
   messages: ChatMessage[],
   selectedTab: ChatChannel,
   tabStates: ChatTabStates,
+  selectedIds: ChatSelectedIds,
 ): ChatMessage[] {
+  function passesFcCc(tab: 'channel' | 'clan', m: ChatMessage): boolean {
+    const state = tabStates[tab];
+    if (state === 'off') return false;
+    if (state === 'on') return true;
+    const ids = tab === 'channel' ? selectedIds.channel : selectedIds.clan;
+    return !!m.communityId && ids.has(m.communityId);
+  }
+
   if (selectedTab === 'all') {
-    return messages.filter((m) => tabStates[KIND_TO_TAB[m.kind]] === 'on');
+    return messages.filter((m) => {
+      const tab = KIND_TO_TAB[m.kind];
+      if (tab === 'channel' || tab === 'clan') return passesFcCc(tab, m);
+      return tabStates[tab] === 'on';
+    });
+  }
+  if (selectedTab === 'channel' || selectedTab === 'clan') {
+    return messages.filter((m) => KIND_TO_TAB[m.kind] === selectedTab && passesFcCc(selectedTab, m));
   }
   return messages.filter((m) => KIND_TO_TAB[m.kind] === selectedTab);
 }
