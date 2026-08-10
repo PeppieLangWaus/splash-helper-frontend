@@ -64,6 +64,21 @@ export interface ArchivedSession {
   finalizedTimestamp: number;
   syncedToServer: boolean;
   session: SessionData;
+  /** The splasher's rank/rate in each community they belonged to, frozen at finalization —
+   *  keyed by communityId. Only present on sessions fetched via GET /splashers/:username; used
+   *  client-side to compute per-session earnings for the chatbox's Trade tab (see
+   *  hooks/useAccountActivityEvents.ts) the same way GET /communities/:id/sessions does
+   *  server-side. */
+  earningsSnapshot?: Record<string, { rankId: string; rankName: string; hourlyRate: number }>;
+}
+
+/** One of the caller's own payout tickets in a community — GET /communities/:id/my-payouts. */
+export interface PayoutTicket {
+  id: string;
+  amountGp: number;
+  status: 'pending' | 'completed' | 'rejected';
+  createdAt: number;
+  resolvedAt: number | null;
 }
 
 /** Authenticated user info decoded from JWT */

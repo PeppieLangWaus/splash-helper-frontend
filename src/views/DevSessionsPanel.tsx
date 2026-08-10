@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getActiveSessions, devAddFakeSession, devTickFakeSession, devRemoveFakeSession } from '../api';
+import { getActiveSessions, devAddFakeSession, devTickFakeSession, devRemoveFakeSession, devReset } from '../api';
 import type { ActiveSession } from '../types';
 import { colors, fontSerif } from '../theme';
 
@@ -29,6 +29,19 @@ const s = {
     fontWeight: 700,
   },
   errorBox: { padding: '0.75rem 1rem', background: colors.dangerSoft, border: `1px solid ${colors.danger}`, borderRadius: 6, color: colors.dangerText, marginBottom: '1rem' },
+  headerRow: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' },
+  resetBtn: {
+    flexShrink: 0,
+    padding: '0.5rem 1rem',
+    background: colors.dangerSoft,
+    color: colors.dangerText,
+    border: `1px solid ${colors.danger}`,
+    borderRadius: 6,
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    fontWeight: 700,
+  },
+  resetStatus: { fontSize: '0.8rem', color: colors.textFaint, marginBottom: '1rem' },
   row: {
     display: 'flex',
     alignItems: 'center',
@@ -68,6 +81,8 @@ export default function DevSessionsPanel() {
   const [sessions, setSessions] = useState<ActiveSession[]>([]);
   const [username, setUsername] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
+  const [resetStatus, setResetStatus] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -116,14 +131,41 @@ export default function DevSessionsPanel() {
     }
   }
 
+  async function handleReset() {
+    if (!window.confirm('Wipe every collection in the dev database and clear all active sessions? This cannot be undone.')) {
+      return;
+    }
+    setError(null);
+    setResetStatus(null);
+    setResetting(true);
+    try {
+      const { collectionsCleared } = await devReset();
+      setResetStatus(`Reset complete — cleared: ${collectionsCleared.join(', ') || 'nothing to clear'}.`);
+      setUsername('');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset dev data.');
+    } finally {
+      setResetting(false);
+    }
+  }
+
   return (
     <div style={s.container}>
-      <h2 style={s.heading}>Dev: Fake Active Sessions</h2>
-      <p style={s.note}>
-        Injects sessions directly into the backend's in-memory session map (no real plugin connection
-        required). Only available when the backend is not running with NODE_ENV=production.
-      </p>
+      <div style={s.headerRow}>
+        <div>
+          <h2 style={s.heading}>Dev: Fake Active Sessions</h2>
+          <p style={s.note}>
+            Injects sessions directly into the backend's in-memory session map (no real plugin connection
+            required). Only available when the backend is not running with NODE_ENV=production.
+          </p>
+        </div>
+        <button style={s.resetBtn} type="button" disabled={resetting} onClick={() => void handleReset()}>
+          {resetting ? 'Resetting…' : 'Reset dev data'}
+        </button>
+      </div>
 
+      {resetStatus && <p style={s.resetStatus}>{resetStatus}</p>}
       {error && <div style={s.errorBox}>{error}</div>}
 
       <div style={s.form}>

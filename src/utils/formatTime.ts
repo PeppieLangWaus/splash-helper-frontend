@@ -34,3 +34,10 @@ export function formatDurationMs(ms: number): string {
   if (hours > 0) return `${hours}h ${mins}m`;
   return `${mins}m`;
 }
+
+/** Formats a date as a 24-hour clock time, e.g. "10:49" — used for OSRS-style chat timestamps. */
+export function formatClockTime(date: Date): string {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}

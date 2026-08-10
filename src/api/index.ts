@@ -9,7 +9,9 @@ import type {
   SplasherWebhooks,
   Rank,
   DiscordServerConfig,
+  PayoutTicket,
 } from '../types';
+import type { ChatChannelListing, CommunityChatConfig } from '../types/chatbox';
 
 /** Body shape for every webhook PUT endpoint: either field may be omitted to leave it
  *  unchanged, or set to '' to clear it. */
@@ -92,6 +94,17 @@ export async function resetPassword(
     isAdmin: data.isAdmin ?? false,
     communityEligible: data.communityEligible ?? false,
   };
+}
+
+// ─── Public live chat relay ───────────────────────────────────────────────────
+
+/** Every community with at least one registered Friends/Clan Chat name, for the chatbox's
+ *  community picker. Public — no auth required, matching GET /chat-channels on the backend. */
+export async function getPublicChatChannels(): Promise<ChatChannelListing[]> {
+  const res = await fetch(`${BASE}/chat-channels`);
+  if (!res.ok) throw new Error('Failed to fetch chat channels');
+  const data = (await res.json()) as { channels?: ChatChannelListing[] };
+  return data.channels ?? [];
 }
 
 // ─── Public splashers ─────────────────────────────────────────────────────────
@@ -248,6 +261,21 @@ export async function getCommunitySplashers(communityId: string, token: string):
   return data.splashers ?? [];
 }
 
+/** The caller's own payout ticket history in a community — powers the chatbox's Trade tab (see
+ *  hooks/useAccountActivityEvents.ts). Self-scoped server-side, so this works for any community
+ *  the user has ever requested a payout in, not just ones they own. */
+export async function getMyPayouts(
+  communityId: string,
+  token: string,
+): Promise<{ communityName: string; payouts: PayoutTicket[] }> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/my-payouts`, {
+    headers: authHeaders(token),
+  });
+  const data = (await res.json()) as { communityName?: string; payouts?: PayoutTicket[]; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to fetch payout history');
+  return { communityName: data.communityName ?? '', payouts: data.payouts ?? [] };
+}
+
 export async function getAllCommunities(token: string): Promise<CommunitySummary[]> {
   const res = await fetch(`${BASE}/communities`, { headers: authHeaders(token) });
   const data = (await res.json()) as { communities?: CommunitySummary[]; error?: string };
@@ -288,6 +316,41 @@ export async function setCommunityDiscordInvite(
   const data = (await res.json()) as { community?: Community; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to update Discord invite link');
   return data.community!;
+}
+
+// ─── Live chat relay config (chat.splasher.help / chat.ardy.host) ────────────
+
+export async function getCommunityChatConfig(communityId: string, token: string): Promise<CommunityChatConfig> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/chat-config`, {
+    headers: authHeaders(token),
+  });
+  const data = (await res.json()) as CommunityChatConfig & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to fetch chat settings');
+  return data;
+}
+
+/** Every field is optional — omit one to leave it unchanged, or send '' to clear it. */
+export interface ChatConfigUpdate {
+  friendsChatName?: string;
+  friendsChatDisplayName?: string;
+  clanChatName?: string;
+  discordFriendsChatWebhookUrl?: string;
+  discordClanChatWebhookUrl?: string;
+}
+
+export async function setCommunityChatConfig(
+  communityId: string,
+  update: ChatConfigUpdate,
+  token: string,
+): Promise<CommunityChatConfig> {
+  const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/chat-config`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(update),
+  });
+  const data = (await res.json()) as CommunityChatConfig & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update chat settings');
+  return data;
 }
 
 // ─── Discord config (/setup, editable from the website) ──────────────────────
@@ -523,4 +586,13 @@ export async function devRemoveFakeSession(username: string): Promise<void> {
     const data = (await res.json()) as { error?: string };
     throw new Error(data.error ?? 'Failed to remove fake session');
   }
+}
+
+/** Wipes every collection in the dev database and clears in-memory active sessions —
+ *  see the backend's POST /dev/reset for details. */
+export async function devReset(): Promise<{ message: string; collectionsCleared: string[] }> {
+  const res = await fetch(`${BASE}/dev/reset`, { method: 'POST' });
+  const data = (await res.json()) as { message?: string; collectionsCleared?: string[]; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to reset dev data');
+  return { message: data.message ?? 'Dev data reset', collectionsCleared: data.collectionsCleared ?? [] };
 }

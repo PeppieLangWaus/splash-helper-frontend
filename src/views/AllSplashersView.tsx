@@ -4,6 +4,7 @@ import type { ActiveSession } from '../types';
 import './AllSplashersView.css';
 import Icon from '../components/Icon';
 import Tile from '../components/Tile';
+import Chatbox from '../components/chatbox/Chatbox';
 import worldsData from '../worldsData';
 import { formatRelativeTime, formatDurationMs } from '../utils/formatTime';
 
@@ -211,6 +212,8 @@ export default function AllSplashersView({ onSelectUser }: Props) {
           ))}
         </div>
       )}
+
+      <Chatbox className="all-splashers-chatbox" />
     </div>
   );
 }

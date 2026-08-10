@@ -96,7 +96,7 @@ export default function TermsOfServiceView() {
       <h2 style={s.h2}>9. Contact</h2>
       <p style={s.p}>
         Questions about these Terms? Contact us at{' '}
-        <a style={s.a} href="mailto:peppielangwaus@gmail.com">peppielangwaus@gmail.com</a>.
+        <a style={s.a} href="mailto:contact@splasher.help">contact@splasher.help</a>.
       </p>
 
       <p style={s.p}>
