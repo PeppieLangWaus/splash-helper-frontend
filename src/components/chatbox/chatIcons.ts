@@ -25,6 +25,287 @@ export const RANK_ICONS: Record<ChatRank, string> = {
   smiley: '/assets/chatbox/icons/rank/smiley.png',
 };
 
+/** Every OSRS Clan rank title with a dedicated icon (public/assets/chatbox/icons/clan) — the 4
+ *  fixed non-Guest sentinel ranks (Jmod/Owner/Deputy Owner/Administrator) plus the 264
+ *  clan-customisable titles, per
+ *  https://oldschool.runescape.wiki/w/Clan_Settings#Rank_Titles. Keyed lowercase; look up via
+ *  getClanTitleIcon rather than indexing this directly. Two notes on the source dump this was
+ *  built from: Guest has no icon in it (the in-game Guest icon is a different size than every
+ *  other rank icon and wasn't captured), and `oak` / `lumberjack` share pixel-identical artwork
+ *  upstream, so which of the pair got which filename was an arbitrary tie-break — swap them if
+ *  that turns out backwards. */
+export const CLAN_TITLE_ICONS: Record<string, string> = {
+  'achiever': '/assets/chatbox/icons/clan/achiever.png',
+  'adamant': '/assets/chatbox/icons/clan/adamant.png',
+  'adept': '/assets/chatbox/icons/clan/adept.png',
+  'administrator': '/assets/chatbox/icons/clan/administrator.png',
+  'admiral': '/assets/chatbox/icons/clan/admiral.png',
+  'adventurer': '/assets/chatbox/icons/clan/adventurer.png',
+  'air': '/assets/chatbox/icons/clan/air.png',
+  'anchor': '/assets/chatbox/icons/clan/anchor.png',
+  'apothecary': '/assets/chatbox/icons/clan/apothecary.png',
+  'archer': '/assets/chatbox/icons/clan/archer.png',
+  'armadylean': '/assets/chatbox/icons/clan/armadylean.png',
+  'artillery': '/assets/chatbox/icons/clan/artillery.png',
+  'artisan': '/assets/chatbox/icons/clan/artisan.png',
+  'asgarnian': '/assets/chatbox/icons/clan/asgarnian.png',
+  'assassin': '/assets/chatbox/icons/clan/assassin.png',
+  'assistant': '/assets/chatbox/icons/clan/assistant.png',
+  'astral': '/assets/chatbox/icons/clan/astral.png',
+  'athlete': '/assets/chatbox/icons/clan/athlete.png',
+  'attacker': '/assets/chatbox/icons/clan/attacker.png',
+  'bandit': '/assets/chatbox/icons/clan/bandit.png',
+  'bandosian': '/assets/chatbox/icons/clan/bandosian.png',
+  'barbarian': '/assets/chatbox/icons/clan/barbarian.png',
+  'battlemage': '/assets/chatbox/icons/clan/battlemage.png',
+  'beast': '/assets/chatbox/icons/clan/beast.png',
+  'berserker': '/assets/chatbox/icons/clan/berserker.png',
+  'blisterwood': '/assets/chatbox/icons/clan/blisterwood.png',
+  'blood': '/assets/chatbox/icons/clan/blood.png',
+  'blue': '/assets/chatbox/icons/clan/blue.png',
+  'bob': '/assets/chatbox/icons/clan/bob.png',
+  'body': '/assets/chatbox/icons/clan/body.png',
+  'brassican': '/assets/chatbox/icons/clan/brassican.png',
+  'brawler': '/assets/chatbox/icons/clan/brawler.png',
+  'brigadier': '/assets/chatbox/icons/clan/brigadier.png',
+  'brigand': '/assets/chatbox/icons/clan/brigand.png',
+  'bronze': '/assets/chatbox/icons/clan/bronze.png',
+  'bruiser': '/assets/chatbox/icons/clan/bruiser.png',
+  'bulwark': '/assets/chatbox/icons/clan/bulwark.png',
+  'burglar': '/assets/chatbox/icons/clan/burglar.png',
+  'burnt': '/assets/chatbox/icons/clan/burnt.png',
+  'cadet': '/assets/chatbox/icons/clan/cadet.png',
+  'captain': '/assets/chatbox/icons/clan/captain.png',
+  'carry': '/assets/chatbox/icons/clan/carry.png',
+  'champion': '/assets/chatbox/icons/clan/champion.png',
+  'chaos': '/assets/chatbox/icons/clan/chaos.png',
+  'cleric': '/assets/chatbox/icons/clan/cleric.png',
+  'collector': '/assets/chatbox/icons/clan/collector.png',
+  'colonel': '/assets/chatbox/icons/clan/colonel.png',
+  'commander': '/assets/chatbox/icons/clan/commander.png',
+  'competitor': '/assets/chatbox/icons/clan/competitor.png',
+  'completionist': '/assets/chatbox/icons/clan/completionist.png',
+  'constructor': '/assets/chatbox/icons/clan/constructor.png',
+  'cook': '/assets/chatbox/icons/clan/cook.png',
+  'coordinator': '/assets/chatbox/icons/clan/coordinator.png',
+  'corporal': '/assets/chatbox/icons/clan/corporal.png',
+  'cosmic': '/assets/chatbox/icons/clan/cosmic.png',
+  'councillor': '/assets/chatbox/icons/clan/councillor.png',
+  'crafter': '/assets/chatbox/icons/clan/crafter.png',
+  'crew': '/assets/chatbox/icons/clan/crew.png',
+  'crusader': '/assets/chatbox/icons/clan/crusader.png',
+  'cutpurse': '/assets/chatbox/icons/clan/cutpurse.png',
+  'death': '/assets/chatbox/icons/clan/death.png',
+  'defender': '/assets/chatbox/icons/clan/defender.png',
+  'defiler': '/assets/chatbox/icons/clan/defiler.png',
+  'deputy owner': '/assets/chatbox/icons/clan/deputy-owner.png',
+  'destroyer': '/assets/chatbox/icons/clan/destroyer.png',
+  'diamond': '/assets/chatbox/icons/clan/diamond.png',
+  'diseased': '/assets/chatbox/icons/clan/diseased.png',
+  'doctor': '/assets/chatbox/icons/clan/doctor.png',
+  'dogsbody': '/assets/chatbox/icons/clan/dogsbody.png',
+  'dragon': '/assets/chatbox/icons/clan/dragon.png',
+  'dragonstone': '/assets/chatbox/icons/clan/dragonstone.png',
+  'druid': '/assets/chatbox/icons/clan/druid.png',
+  'duellist': '/assets/chatbox/icons/clan/duellist.png',
+  'earth': '/assets/chatbox/icons/clan/earth.png',
+  'elite': '/assets/chatbox/icons/clan/elite.png',
+  'emerald': '/assets/chatbox/icons/clan/emerald.png',
+  'enforcer': '/assets/chatbox/icons/clan/enforcer.png',
+  'epic': '/assets/chatbox/icons/clan/epic.png',
+  'executive': '/assets/chatbox/icons/clan/executive.png',
+  'expert': '/assets/chatbox/icons/clan/expert.png',
+  'explorer': '/assets/chatbox/icons/clan/explorer.png',
+  'farmer': '/assets/chatbox/icons/clan/farmer.png',
+  'feeder': '/assets/chatbox/icons/clan/feeder.png',
+  'fighter': '/assets/chatbox/icons/clan/fighter.png',
+  'fire': '/assets/chatbox/icons/clan/fire.png',
+  'firemaker': '/assets/chatbox/icons/clan/firemaker.png',
+  'firestarter': '/assets/chatbox/icons/clan/firestarter.png',
+  'fisher': '/assets/chatbox/icons/clan/fisher.png',
+  'fletcher': '/assets/chatbox/icons/clan/fletcher.png',
+  'forager': '/assets/chatbox/icons/clan/forager.png',
+  'fremennik': '/assets/chatbox/icons/clan/fremennik.png',
+  'gamer': '/assets/chatbox/icons/clan/gamer.png',
+  'gatherer': '/assets/chatbox/icons/clan/gatherer.png',
+  'general': '/assets/chatbox/icons/clan/general.png',
+  'gnome child': '/assets/chatbox/icons/clan/gnome-child.png',
+  'gnome elder': '/assets/chatbox/icons/clan/gnome-elder.png',
+  'goblin': '/assets/chatbox/icons/clan/goblin.png',
+  'gold': '/assets/chatbox/icons/clan/gold.png',
+  'goon': '/assets/chatbox/icons/clan/goon.png',
+  'green': '/assets/chatbox/icons/clan/green.png',
+  'grey': '/assets/chatbox/icons/clan/grey.png',
+  'guardian': '/assets/chatbox/icons/clan/guardian.png',
+  'guthixian': '/assets/chatbox/icons/clan/guthixian.png',
+  'harpoon': '/assets/chatbox/icons/clan/harpoon.png',
+  'healer': '/assets/chatbox/icons/clan/healer.png',
+  'hellcat': '/assets/chatbox/icons/clan/hellcat.png',
+  'helper': '/assets/chatbox/icons/clan/helper.png',
+  'herbologist': '/assets/chatbox/icons/clan/herbologist.png',
+  'hero': '/assets/chatbox/icons/clan/hero.png',
+  'hoarder': '/assets/chatbox/icons/clan/hoarder.png',
+  'holy': '/assets/chatbox/icons/clan/holy.png',
+  'hunter': '/assets/chatbox/icons/clan/hunter.png',
+  'ignitor': '/assets/chatbox/icons/clan/ignitor.png',
+  'illusionist': '/assets/chatbox/icons/clan/illusionist.png',
+  'imp': '/assets/chatbox/icons/clan/imp.png',
+  'infantry': '/assets/chatbox/icons/clan/infantry.png',
+  'inquisitor': '/assets/chatbox/icons/clan/inquisitor.png',
+  'iron': '/assets/chatbox/icons/clan/iron.png',
+  'jade': '/assets/chatbox/icons/clan/jade.png',
+  'jmod': '/assets/chatbox/icons/clan/jmod.png',
+  'justiciar': '/assets/chatbox/icons/clan/justiciar.png',
+  'kandarin': '/assets/chatbox/icons/clan/kandarin.png',
+  'karamjan': '/assets/chatbox/icons/clan/karamjan.png',
+  'kharidian': '/assets/chatbox/icons/clan/kharidian.png',
+  'kitten': '/assets/chatbox/icons/clan/kitten.png',
+  'knight': '/assets/chatbox/icons/clan/knight.png',
+  'labourer': '/assets/chatbox/icons/clan/labourer.png',
+  'law': '/assets/chatbox/icons/clan/law.png',
+  'leader': '/assets/chatbox/icons/clan/leader.png',
+  'learner': '/assets/chatbox/icons/clan/learner.png',
+  'legacy': '/assets/chatbox/icons/clan/legacy.png',
+  'legend': '/assets/chatbox/icons/clan/legend.png',
+  'legionnaire': '/assets/chatbox/icons/clan/legionnaire.png',
+  'lieutenant': '/assets/chatbox/icons/clan/lieutenant.png',
+  'looter': '/assets/chatbox/icons/clan/looter.png',
+  'lumberjack': '/assets/chatbox/icons/clan/lumberjack.png',
+  'magic': '/assets/chatbox/icons/clan/magic.png',
+  'magician': '/assets/chatbox/icons/clan/magician.png',
+  'major': '/assets/chatbox/icons/clan/major.png',
+  'maple': '/assets/chatbox/icons/clan/maple.png',
+  'marshal': '/assets/chatbox/icons/clan/marshal.png',
+  'master': '/assets/chatbox/icons/clan/master.png',
+  'maxed': '/assets/chatbox/icons/clan/maxed.png',
+  'mediator': '/assets/chatbox/icons/clan/mediator.png',
+  'medic': '/assets/chatbox/icons/clan/medic.png',
+  'mentor': '/assets/chatbox/icons/clan/mentor.png',
+  'merchant': '/assets/chatbox/icons/clan/merchant.png',
+  'mind': '/assets/chatbox/icons/clan/mind.png',
+  'miner': '/assets/chatbox/icons/clan/miner.png',
+  'minion': '/assets/chatbox/icons/clan/minion.png',
+  'misthalinian': '/assets/chatbox/icons/clan/misthalinian.png',
+  'mithril': '/assets/chatbox/icons/clan/mithril.png',
+  'moderator': '/assets/chatbox/icons/clan/moderator.png',
+  'monarch': '/assets/chatbox/icons/clan/monarch.png',
+  'morytanian': '/assets/chatbox/icons/clan/morytanian.png',
+  'mystic': '/assets/chatbox/icons/clan/mystic.png',
+  'myth': '/assets/chatbox/icons/clan/myth.png',
+  'natural': '/assets/chatbox/icons/clan/natural.png',
+  'nature': '/assets/chatbox/icons/clan/nature.png',
+  'necromancer': '/assets/chatbox/icons/clan/necromancer.png',
+  'ninja': '/assets/chatbox/icons/clan/ninja.png',
+  'noble': '/assets/chatbox/icons/clan/noble.png',
+  'novice': '/assets/chatbox/icons/clan/novice.png',
+  'nurse': '/assets/chatbox/icons/clan/nurse.png',
+  'oak': '/assets/chatbox/icons/clan/oak.png',
+  'officer': '/assets/chatbox/icons/clan/officer.png',
+  'onyx': '/assets/chatbox/icons/clan/onyx.png',
+  'opal': '/assets/chatbox/icons/clan/opal.png',
+  'oracle': '/assets/chatbox/icons/clan/oracle.png',
+  'orange': '/assets/chatbox/icons/clan/orange.png',
+  'owner': '/assets/chatbox/icons/clan/owner.png',
+  'page': '/assets/chatbox/icons/clan/page.png',
+  'paladin': '/assets/chatbox/icons/clan/paladin.png',
+  'pawn': '/assets/chatbox/icons/clan/pawn.png',
+  'pilgrim': '/assets/chatbox/icons/clan/pilgrim.png',
+  'pine': '/assets/chatbox/icons/clan/pine.png',
+  'pink': '/assets/chatbox/icons/clan/pink.png',
+  'prefect': '/assets/chatbox/icons/clan/prefect.png',
+  'priest': '/assets/chatbox/icons/clan/priest.png',
+  'private': '/assets/chatbox/icons/clan/private.png',
+  'prodigy': '/assets/chatbox/icons/clan/prodigy.png',
+  'proselyte': '/assets/chatbox/icons/clan/proselyte.png',
+  'prospector': '/assets/chatbox/icons/clan/prospector.png',
+  'protector': '/assets/chatbox/icons/clan/protector.png',
+  'pure': '/assets/chatbox/icons/clan/pure.png',
+  'purple': '/assets/chatbox/icons/clan/purple.png',
+  'pyromancer': '/assets/chatbox/icons/clan/pyromancer.png',
+  'quester': '/assets/chatbox/icons/clan/quester.png',
+  'racer': '/assets/chatbox/icons/clan/racer.png',
+  'raider': '/assets/chatbox/icons/clan/raider.png',
+  'ranger': '/assets/chatbox/icons/clan/ranger.png',
+  'record-chaser': '/assets/chatbox/icons/clan/record-chaser.png',
+  'recruit': '/assets/chatbox/icons/clan/recruit.png',
+  'recruiter': '/assets/chatbox/icons/clan/recruiter.png',
+  'red': '/assets/chatbox/icons/clan/red.png',
+  'red topaz': '/assets/chatbox/icons/clan/red-topaz.png',
+  'rogue': '/assets/chatbox/icons/clan/rogue.png',
+  'ruby': '/assets/chatbox/icons/clan/ruby.png',
+  'rune': '/assets/chatbox/icons/clan/rune.png',
+  'runecrafter': '/assets/chatbox/icons/clan/runecrafter.png',
+  'sage': '/assets/chatbox/icons/clan/sage.png',
+  'sapphire': '/assets/chatbox/icons/clan/sapphire.png',
+  'saradominist': '/assets/chatbox/icons/clan/saradominist.png',
+  'saviour': '/assets/chatbox/icons/clan/saviour.png',
+  'scavenger': '/assets/chatbox/icons/clan/scavenger.png',
+  'scholar': '/assets/chatbox/icons/clan/scholar.png',
+  'scourge': '/assets/chatbox/icons/clan/scourge.png',
+  'scout': '/assets/chatbox/icons/clan/scout.png',
+  'scribe': '/assets/chatbox/icons/clan/scribe.png',
+  'seer': '/assets/chatbox/icons/clan/seer.png',
+  'senator': '/assets/chatbox/icons/clan/senator.png',
+  'sentry': '/assets/chatbox/icons/clan/sentry.png',
+  'serenist': '/assets/chatbox/icons/clan/serenist.png',
+  'sergeant': '/assets/chatbox/icons/clan/sergeant.png',
+  'shaman': '/assets/chatbox/icons/clan/shaman.png',
+  'sheriff': '/assets/chatbox/icons/clan/sheriff.png',
+  'short green guy': '/assets/chatbox/icons/clan/short-green-guy.png',
+  'skiller': '/assets/chatbox/icons/clan/skiller.png',
+  'skulled': '/assets/chatbox/icons/clan/skulled.png',
+  'slayer': '/assets/chatbox/icons/clan/slayer.png',
+  'smiter': '/assets/chatbox/icons/clan/smiter.png',
+  'smith': '/assets/chatbox/icons/clan/smith.png',
+  'smuggler': '/assets/chatbox/icons/clan/smuggler.png',
+  'sniper': '/assets/chatbox/icons/clan/sniper.png',
+  'soul': '/assets/chatbox/icons/clan/soul.png',
+  'specialist': '/assets/chatbox/icons/clan/specialist.png',
+  'speed-runner': '/assets/chatbox/icons/clan/speed-runner.png',
+  'spellcaster': '/assets/chatbox/icons/clan/spellcaster.png',
+  'squire': '/assets/chatbox/icons/clan/squire.png',
+  'staff': '/assets/chatbox/icons/clan/staff.png',
+  'steel': '/assets/chatbox/icons/clan/steel.png',
+  'strider': '/assets/chatbox/icons/clan/strider.png',
+  'striker': '/assets/chatbox/icons/clan/striker.png',
+  'summoner': '/assets/chatbox/icons/clan/summoner.png',
+  'superior': '/assets/chatbox/icons/clan/superior.png',
+  'supervisor': '/assets/chatbox/icons/clan/supervisor.png',
+  'teacher': '/assets/chatbox/icons/clan/teacher.png',
+  'templar': '/assets/chatbox/icons/clan/templar.png',
+  'therapist': '/assets/chatbox/icons/clan/therapist.png',
+  'thief': '/assets/chatbox/icons/clan/thief.png',
+  'tirannian': '/assets/chatbox/icons/clan/tirannian.png',
+  'trialist': '/assets/chatbox/icons/clan/trialist.png',
+  'trickster': '/assets/chatbox/icons/clan/trickster.png',
+  'tzkal': '/assets/chatbox/icons/clan/tzkal.png',
+  'tztok': '/assets/chatbox/icons/clan/tztok.png',
+  'unholy': '/assets/chatbox/icons/clan/unholy.png',
+  'vagrant': '/assets/chatbox/icons/clan/vagrant.png',
+  'vanguard': '/assets/chatbox/icons/clan/vanguard.png',
+  'walker': '/assets/chatbox/icons/clan/walker.png',
+  'wanderer': '/assets/chatbox/icons/clan/wanderer.png',
+  'warden': '/assets/chatbox/icons/clan/warden.png',
+  'warlock': '/assets/chatbox/icons/clan/warlock.png',
+  'warrior': '/assets/chatbox/icons/clan/warrior.png',
+  'water': '/assets/chatbox/icons/clan/water.png',
+  'wild': '/assets/chatbox/icons/clan/wild.png',
+  'willow': '/assets/chatbox/icons/clan/willow.png',
+  'wily': '/assets/chatbox/icons/clan/wily.png',
+  'wintumber': '/assets/chatbox/icons/clan/wintumber.png',
+  'witch': '/assets/chatbox/icons/clan/witch.png',
+  'wizard': '/assets/chatbox/icons/clan/wizard.png',
+  'worker': '/assets/chatbox/icons/clan/worker.png',
+  'wrath': '/assets/chatbox/icons/clan/wrath.png',
+  'xerician': '/assets/chatbox/icons/clan/xerician.png',
+  'yellow': '/assets/chatbox/icons/clan/yellow.png',
+  'yew': '/assets/chatbox/icons/clan/yew.png',
+  'zamorakian': '/assets/chatbox/icons/clan/zamorakian.png',
+  'zarosian': '/assets/chatbox/icons/clan/zarosian.png',
+  'zealot': '/assets/chatbox/icons/clan/zealot.png',
+  'zenyte': '/assets/chatbox/icons/clan/zenyte.png',
+};
+
 // ── Numeric rank attribute → icon ──────────────────────────────────────────────
 //
 // The relay's chat events carry a Friends/Clan Chat rank as the raw numeric value RuneLite
@@ -49,14 +330,81 @@ export const FC_RANK_ICONS: Record<number, string> = {
 
 /** RuneLite's `ClanRank` (runelite-api/.../clan/ClanRank.java) only fixes 5 sentinel ranks by
  *  number: -1 GUEST, 100 ADMINISTRATOR, 125 DEPUTY_OWNER, 126 OWNER, 127 JMOD. The other ~94 clan
- *  ranks (1-99) are per-clan configurable titles with no fixed name, so only OWNER — the one
- *  value whose name matches an existing icon — is mapped; the rest render no icon. */
+ *  ranks (1-99) are per-clan configurable titles — the relay only sends the numeric value, not
+ *  the title text a clan actually assigned it, so those can't be resolved to one of the
+ *  CLAN_TITLE_ICONS below yet and render no icon. GUEST has no icon in the dump either (see
+ *  CLAN_TITLE_ICONS' doc comment), so of the 5 sentinels only the remaining four are mapped. */
 export const CC_RANK_ICONS: Record<number, string> = {
-  126: RANK_ICONS.owner,
+  100: CLAN_TITLE_ICONS.administrator,
+  125: CLAN_TITLE_ICONS['deputy owner'],
+  126: CLAN_TITLE_ICONS.owner,
+  127: CLAN_TITLE_ICONS.jmod,
 };
 
 /** Resolves a channel's raw numeric rank attribute to an icon path, or undefined if that value
  *  has no mapped icon (see FC_RANK_ICONS / CC_RANK_ICONS for why). */
 export function getRankIcon(channelType: LiveChatChannelType, rank: number): string | undefined {
   return channelType === 'fc' ? FC_RANK_ICONS[rank] : CC_RANK_ICONS[rank];
+}
+
+/** Looks up a Clan rank's icon by its title text (case-insensitive) — e.g. `getClanTitleIcon('Deputy
+ *  Owner')`. Use this once an actual title string is available for a rank, rather than just the
+ *  numeric value CC_RANK_ICONS keys off of. Returns undefined for titles with no icon (e.g. a
+ *  clan hasn't actually got 264 titles memorized — this covers every title OSRS offers). */
+export function getClanTitleIcon(title: string): string | undefined {
+  return CLAN_TITLE_ICONS[title.trim().toLowerCase()];
+}
+
+// ── Name-embedded status icons (mod/ironman) ────────────────────────────────────────────
+//
+// The game itself (not the relay) embeds a sender's mod/ironman status directly into the chat
+// name as one or more leading `<img=N>` tags — e.g. `<img=2>SomeUsername` for a regular Ironman,
+// `<img=41>AnotherUsername` for a Group Ironman. `N` is Jagex's fixed `IconID` enum value (see
+// RuneLite's runelite-api/.../IconID.java, the canonical list of every icon index the game uses
+// in chat): PLAYER_MODERATOR=0, JAGEX_MODERATOR=1, IRONMAN=2, ULTIMATE_IRONMAN=3,
+// HARDCORE_IRONMAN=10, GROUP_IRONMAN=41, HARDCORE_GROUP_IRONMAN=42, UNRANKED_GROUP_IRONMAN=43
+// (the other indices in that enum are DMM/bounty-hunter/league icons OSRS's live FC/CC chat never
+// sends, so they're not mapped here). A name carries at most one of each kind — Jagex doesn't
+// stack e.g. a mod crown and an ironman helm — but nothing stops parsing both if it ever did.
+const ICON_ID_MOD_STATUS: Record<number, ModStatus> = {
+  0: 'pmod',
+  1: 'jmod',
+};
+
+const ICON_ID_IRONMAN_STATUS: Record<number, IronmanStatus> = {
+  2: 'im',
+  3: 'uim',
+  10: 'hcim',
+  41: 'gim',
+  42: 'hcgim',
+  43: 'ugim',
+};
+
+const LEADING_ICON_TAG = /^<img=(\d+)>/;
+
+export interface ParsedPlayerName {
+  /** The name with every leading `<img=N>` tag stripped off. */
+  username: string;
+  modStatus?: ModStatus;
+  ironmanStatus?: IronmanStatus;
+}
+
+/** Strips the leading `<img=N>` icon tag(s) the game embeds in a chat sender's name and resolves
+ *  each one to a mod/ironman status via IconID above. Unrecognized indices (icons OSRS's live
+ *  chat doesn't send, e.g. DMM skulls) are stripped but otherwise ignored. */
+export function parsePlayerName(rawName: string): ParsedPlayerName {
+  let username = rawName;
+  let modStatus: ModStatus | undefined;
+  let ironmanStatus: IronmanStatus | undefined;
+
+  let match = username.match(LEADING_ICON_TAG);
+  while (match) {
+    const iconId = Number(match[1]);
+    modStatus = ICON_ID_MOD_STATUS[iconId] ?? modStatus;
+    ironmanStatus = ICON_ID_IRONMAN_STATUS[iconId] ?? ironmanStatus;
+    username = username.slice(match[0].length);
+    match = username.match(LEADING_ICON_TAG);
+  }
+
+  return { username, modStatus, ironmanStatus };
 }

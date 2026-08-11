@@ -7,7 +7,6 @@ const chatInfoMessages: string[] = [
   'Right-click Channel or Clan to pick a community\'s live Friends Chat or Clan Chat to watch.',
   'Picking a chat from the right-click menu sets that tab to Filtered automatically.',
   'Community owners can set a Friends Chat display name in their community settings.',
-  'Your chat history is kept on this device only, never sent to our servers.',
   'Log in and visit Account Settings to change how many messages each feed keeps.',
   'The Public tab announces splash sessions as they start, site-wide.',
   'The Private tab keeps a local log of account actions - only you can see it, and only while logged in.',
