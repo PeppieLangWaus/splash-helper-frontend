@@ -354,3 +354,57 @@ export function getRankIcon(channelType: LiveChatChannelType, rank: number): str
 export function getClanTitleIcon(title: string): string | undefined {
   return CLAN_TITLE_ICONS[title.trim().toLowerCase()];
 }
+
+// ── Name-embedded status icons (mod/ironman) ────────────────────────────────────────────
+//
+// The game itself (not the relay) embeds a sender's mod/ironman status directly into the chat
+// name as one or more leading `<img=N>` tags — e.g. `<img=2>SomeUsername` for a regular Ironman,
+// `<img=41>AnotherUsername` for a Group Ironman. `N` is Jagex's fixed `IconID` enum value (see
+// RuneLite's runelite-api/.../IconID.java, the canonical list of every icon index the game uses
+// in chat): PLAYER_MODERATOR=0, JAGEX_MODERATOR=1, IRONMAN=2, ULTIMATE_IRONMAN=3,
+// HARDCORE_IRONMAN=10, GROUP_IRONMAN=41, HARDCORE_GROUP_IRONMAN=42, UNRANKED_GROUP_IRONMAN=43
+// (the other indices in that enum are DMM/bounty-hunter/league icons OSRS's live FC/CC chat never
+// sends, so they're not mapped here). A name carries at most one of each kind — Jagex doesn't
+// stack e.g. a mod crown and an ironman helm — but nothing stops parsing both if it ever did.
+const ICON_ID_MOD_STATUS: Record<number, ModStatus> = {
+  0: 'pmod',
+  1: 'jmod',
+};
+
+const ICON_ID_IRONMAN_STATUS: Record<number, IronmanStatus> = {
+  2: 'im',
+  3: 'uim',
+  10: 'hcim',
+  41: 'gim',
+  42: 'hcgim',
+  43: 'ugim',
+};
+
+const LEADING_ICON_TAG = /^<img=(\d+)>/;
+
+export interface ParsedPlayerName {
+  /** The name with every leading `<img=N>` tag stripped off. */
+  username: string;
+  modStatus?: ModStatus;
+  ironmanStatus?: IronmanStatus;
+}
+
+/** Strips the leading `<img=N>` icon tag(s) the game embeds in a chat sender's name and resolves
+ *  each one to a mod/ironman status via IconID above. Unrecognized indices (icons OSRS's live
+ *  chat doesn't send, e.g. DMM skulls) are stripped but otherwise ignored. */
+export function parsePlayerName(rawName: string): ParsedPlayerName {
+  let username = rawName;
+  let modStatus: ModStatus | undefined;
+  let ironmanStatus: IronmanStatus | undefined;
+
+  let match = username.match(LEADING_ICON_TAG);
+  while (match) {
+    const iconId = Number(match[1]);
+    modStatus = ICON_ID_MOD_STATUS[iconId] ?? modStatus;
+    ironmanStatus = ICON_ID_IRONMAN_STATUS[iconId] ?? ironmanStatus;
+    username = username.slice(match[0].length);
+    match = username.match(LEADING_ICON_TAG);
+  }
+
+  return { username, modStatus, ironmanStatus };
+}

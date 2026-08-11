@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatMessage, LiveChatChannelType } from '../types/chatbox';
-import { getRankIcon } from '../components/chatbox/chatIcons';
+import { getRankIcon, parsePlayerName } from '../components/chatbox/chatIcons';
 import { appendStoredMessage, ccKey, fcKey, loadStoredMessages, subscribeToStoredMessages } from '../utils/chatStorage';
 
 // Same origin as the REST API, just ws(s):// instead of http(s):// — the backend's WebSocket
@@ -33,11 +33,17 @@ function storageKey(communityId: string, channelType: LiveChatChannelType): stri
 }
 
 function toChatMessage(raw: ChatBroadcastPayload, channelType: LiveChatChannelType): ChatMessage {
+  // The game embeds the sender's mod/ironman status as leading `<img=N>` tag(s) right in the
+  // name itself (e.g. `<img=2>SomeUsername`) — see parsePlayerName's doc comment for what the
+  // indices mean.
+  const { username, modStatus, ironmanStatus } = parsePlayerName(raw.sender ?? 'Unknown');
   return {
     id: raw.id,
     timestamp: raw.timestamp,
     kind: channelType,
-    username: raw.sender ?? 'Unknown',
+    username,
+    modStatus,
+    ironmanStatus,
     message: raw.message,
     rankIcon: raw.rank !== undefined ? getRankIcon(channelType, raw.rank) : undefined,
   };
