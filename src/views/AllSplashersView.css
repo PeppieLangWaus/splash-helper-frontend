@@ -226,35 +226,48 @@
 }
 
 /* Ratio bar, pixel-matched against a per-pixel SVG reference (bar.svg, 146x13, one <rect>
-   per pixel): a sunken groove (border -> highlight -> shadow, 1px each) around a slightly
-   embossed fill. Every ring is genuinely directional in the source - top/bottom differ from
-   each other, left/right are close but not identical - so each ring is built from four
-   per-side border colors rather than one flat tone. Nested rings (not the bitmap itself) so
-   the fill stays a resizable live like/dislike split. */
+   per pixel): a sunken groove (border -> highlight -> shadow) around a slightly embossed
+   fill. Every ring is genuinely directional in the source - top/bottom differ from each
+   other, left/right are close but not identical - so each ring is built from four per-side
+   border colors rather than one flat tone. Nested rings (not the bitmap itself) so the fill
+   stays a resizable live like/dislike split.
+
+   Resize the whole thing by editing these three variables on .all-splashers-vote-ratio-outer
+   - everything else (including the outer's total width/height) derives from them via the box
+   model, no other edits needed:
+     --vote-bar-width       overall bar width (any CSS length, e.g. 100%, 300px)
+     --vote-bar-fill-height height of just the fill strip, excluding the frame
+     --vote-bar-pixel       thickness of one "source pixel" (border/highlight/shadow/fill-edge
+                             rings). Source is 1px per ring at native size; bump this to scale
+                             the whole frame up like a nearest-neighbor pixel-art zoom. */
 .all-splashers-vote-ratio-outer {
-    border: 1px solid #302920;
+    --vote-bar-width: 100%;
+    --vote-bar-fill-height: 7px;
+    --vote-bar-pixel: 1px;
+    width: var(--vote-bar-width);
+    border: var(--vote-bar-pixel) solid #302920;
     box-sizing: border-box;
 }
 
 .all-splashers-vote-ratio-highlight {
-    border-top: 1px solid #524A3E;
-    border-right: 1px solid #544C3F;
-    border-bottom: 1px solid #4B4337;
-    border-left: 1px solid #554D40;
+    border-top: var(--vote-bar-pixel) solid #524A3E;
+    border-right: var(--vote-bar-pixel) solid #544C3F;
+    border-bottom: var(--vote-bar-pixel) solid #4B4337;
+    border-left: var(--vote-bar-pixel) solid #554D40;
     box-sizing: border-box;
 }
 
 .all-splashers-vote-ratio-shadow {
-    border-top: 1px solid #13120F;
-    border-right: 1px solid #100E0C;
-    border-bottom: 1px solid #292520;
-    border-left: 1px solid #0F0D0B;
+    border-top: var(--vote-bar-pixel) solid #13120F;
+    border-right: var(--vote-bar-pixel) solid #100E0C;
+    border-bottom: var(--vote-bar-pixel) solid #292520;
+    border-left: var(--vote-bar-pixel) solid #0F0D0B;
     box-sizing: border-box;
 }
 
 .all-splashers-vote-ratio-track {
     display: flex;
-    height: 7px;
+    height: var(--vote-bar-fill-height);
     overflow: hidden;
 }
 
@@ -262,36 +275,36 @@
     height: 100%;
     background: #009400;
     box-shadow:
-        inset 0 1px 0 #006E00,
-        inset 1px 0 0 #007600,
-        inset 0 -1px 0 #004A00;
+        inset 0 var(--vote-bar-pixel) 0 #006E00,
+        inset var(--vote-bar-pixel) 0 0 #007600,
+        inset 0 calc(var(--vote-bar-pixel) * -1) 0 #004A00;
     transition: width 0.2s ease;
 }
 
 .all-splashers-vote-ratio-fill-like.is-rightmost {
     box-shadow:
-        inset 0 1px 0 #006E00,
-        inset 1px 0 0 #007600,
-        inset -1px 0 0 #007400,
-        inset 0 -1px 0 #004A00;
+        inset 0 var(--vote-bar-pixel) 0 #006E00,
+        inset var(--vote-bar-pixel) 0 0 #007600,
+        inset calc(var(--vote-bar-pixel) * -1) 0 0 #007400,
+        inset 0 calc(var(--vote-bar-pixel) * -1) 0 #004A00;
 }
 
 .all-splashers-vote-ratio-fill-dislike {
     height: 100%;
     background: #940000;
     box-shadow:
-        inset 0 1px 0 #6E0000,
-        inset -1px 0 0 #740000,
-        inset 0 -1px 0 #4A0000;
+        inset 0 var(--vote-bar-pixel) 0 #6E0000,
+        inset calc(var(--vote-bar-pixel) * -1) 0 0 #740000,
+        inset 0 calc(var(--vote-bar-pixel) * -1) 0 #4A0000;
     transition: width 0.2s ease;
 }
 
 .all-splashers-vote-ratio-fill-dislike.is-leftmost {
     box-shadow:
-        inset 0 1px 0 #6E0000,
-        inset -1px 0 0 #740000,
-        inset 1px 0 0 #760000,
-        inset 0 -1px 0 #4A0000;
+        inset 0 var(--vote-bar-pixel) 0 #6E0000,
+        inset calc(var(--vote-bar-pixel) * -1) 0 0 #740000,
+        inset var(--vote-bar-pixel) 0 0 #760000,
+        inset 0 calc(var(--vote-bar-pixel) * -1) 0 #4A0000;
 }
 
 .all-splashers-vote-btn {
