@@ -114,36 +114,53 @@ function VoteButtons({ username }: { username: string }) {
   const liked = votes?.myVote === 1;
   const disliked = votes?.myVote === -1;
 
+  // No votes yet reads as a full green bar (nothing dragging it down), same as a splasher
+  // with only likes.
+  const likes = votes?.likes ?? 0;
+  const dislikes = votes?.dislikes ?? 0;
+  const totalVotes = likes + dislikes;
+  const likePct = totalVotes === 0 ? 100 : (likes / totalVotes) * 100;
+
   return (
-    <div className="all-splashers-vote-row">
-      <button
-        type="button"
-        className="all-splashers-vote-btn like-btn"
-        aria-label="Like"
-        aria-pressed={liked}
-        disabled={pending}
-        onClick={() => handleVote(1)}
+    <div className="all-splashers-vote-section">
+      <div className="all-splashers-vote-row">
+        <button
+          type="button"
+          className="all-splashers-vote-btn like-btn"
+          aria-label="Like"
+          aria-pressed={liked}
+          disabled={pending}
+          onClick={() => handleVote(1)}
+        >
+          <Icon
+            name={liked ? 'components.buttons.like.selected' : 'components.buttons.like.unselected'}
+            size="2.5em"
+            alt="Like"
+          />
+        </button>
+        <button
+          type="button"
+          className="all-splashers-vote-btn dislike-btn"
+          aria-label="Dislike"
+          aria-pressed={disliked}
+          disabled={pending}
+          onClick={() => handleVote(-1)}
+        >
+          <Icon
+            name={disliked ? 'components.buttons.dislike.selected' : 'components.buttons.dislike.unselected'}
+            size="2.5em"
+            alt="Dislike"
+          />
+        </button>
+      </div>
+      <div
+        className="all-splashers-vote-ratio-bar"
+        role="img"
+        aria-label={totalVotes === 0 ? 'No votes yet' : `${Math.round(likePct)}% liked, ${Math.round(100 - likePct)}% disliked`}
       >
-        <Icon
-          name={liked ? 'components.buttons.like.selected' : 'components.buttons.like.unselected'}
-          size="2.5em"
-          alt="Like"
-        />
-      </button>
-      <button
-        type="button"
-        className="all-splashers-vote-btn dislike-btn"
-        aria-label="Dislike"
-        aria-pressed={disliked}
-        disabled={pending}
-        onClick={() => handleVote(-1)}
-      >
-        <Icon
-          name={disliked ? 'components.buttons.dislike.selected' : 'components.buttons.dislike.unselected'}
-          size="2.5em"
-          alt="Dislike"
-        />
-      </button>
+        <div className="all-splashers-vote-ratio-fill-like" style={{ width: `${likePct}%` }} />
+        <div className="all-splashers-vote-ratio-fill-dislike" style={{ width: `${100 - likePct}%` }} />
+      </div>
     </div>
   );
 }

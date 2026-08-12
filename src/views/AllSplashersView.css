@@ -213,10 +213,38 @@
     font-family: "RuneScape", sans-serif;
 }
 
-.all-splashers-vote-row {
+.all-splashers-vote-section {
     margin-top: .5em;
     display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.all-splashers-vote-row {
+    display: flex;
     justify-content: center;
+}
+
+.all-splashers-vote-ratio-bar {
+    display: flex;
+    width: 100%;
+    height: 0.7rem;
+    border: 2px solid #000;
+    border-radius: 4px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.all-splashers-vote-ratio-fill-like {
+    height: 100%;
+    background: #17a917;
+    transition: width 0.2s ease;
+}
+
+.all-splashers-vote-ratio-fill-dislike {
+    height: 100%;
+    background: #d61f1f;
+    transition: width 0.2s ease;
 }
 
 .all-splashers-vote-btn {
