@@ -214,23 +214,46 @@
 }
 
 .all-splashers-vote-row {
-    margin-top: auto;
+    margin-top: .5em;
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    padding-top: 0.3rem;
 }
 
 .all-splashers-vote-btn {
     background: none;
     border: none;
-    padding: 0.15rem;
+    padding: 0.15rem 0.4rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 0.3rem;
+}
+
+.all-splashers-vote-btn:disabled {
+    cursor: default;
+    opacity: 0.7;
 }
 
 .all-splashers-vote-btn img {
     display: block;
+}
+
+.all-splashers-vote-count {
+    font-size: 0.85rem;
+    font-weight: 100;
+    color: #F29130;
+    text-shadow: 1px 0px 0px black;
+    line-height: 1;
+    font-family: "RuneScape", sans-serif;
+}
+
+.like-btn img {
+    position: relative;
+    /* top: -.4em; */
+}
+
+.dislike-btn img {
+    position: relative;
+    /* top: .4em; */
 }

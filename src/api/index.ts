@@ -7,6 +7,7 @@ import type {
   CommunitySummary,
   CommunitySplasher,
   SplasherWebhooks,
+  SplasherVotes,
   Rank,
   DiscordServerConfig,
   PayoutTicket,
@@ -114,6 +115,29 @@ export async function getActiveSessions(): Promise<ActiveSession[]> {
   if (!res.ok) throw new Error('Failed to fetch active sessions');
   const data = (await res.json()) as { sessions: ActiveSession[] };
   return data.sessions;
+}
+
+/** Anonymous like/dislike tally for a splasher, plus the caller's own vote if any.
+ *  No auth required — voter identity is tracked server-side (e.g. by IP). */
+export async function getSplasherVotes(username: string): Promise<SplasherVotes> {
+  const res = await fetch(`${BASE}/splashers/${encodeURIComponent(username)}/votes`);
+  const data = (await res.json()) as Partial<SplasherVotes> & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to fetch votes');
+  return { likes: data.likes ?? 0, dislikes: data.dislikes ?? 0, myVote: data.myVote ?? null };
+}
+
+/** Casts (or retracts/switches) an anonymous like/dislike for a splasher. Voting again with
+ *  the same value retracts it; voting with the other value switches it — the server keeps at
+ *  most one vote per caller. No auth required. */
+export async function voteSplasher(username: string, value: 1 | -1): Promise<SplasherVotes> {
+  const res = await fetch(`${BASE}/splashers/${encodeURIComponent(username)}/vote`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ value }),
+  });
+  const data = (await res.json()) as Partial<SplasherVotes> & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to vote');
+  return { likes: data.likes ?? 0, dislikes: data.dislikes ?? 0, myVote: data.myVote ?? null };
 }
 
 // ─── Authenticated splasher data ─────────────────────────────────────────────

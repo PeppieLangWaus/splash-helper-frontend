@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getActiveSessions } from '../api';
-import type { ActiveSession } from '../types';
+import { getActiveSessions, getSplasherVotes, voteSplasher } from '../api';
+import type { ActiveSession, SplasherVotes } from '../types';
 import './AllSplashersView.css';
 import Icon from '../components/Icon';
 import Tile from '../components/Tile';
@@ -86,6 +86,68 @@ function StatTile({
   );
 }
 
+/** Anonymous like/dislike buttons for a splasher. Voter identity is tracked server-side (e.g.
+ *  by IP), so clicking a button always just sends that value — the backend decides whether it's
+ *  a new vote, a retraction (clicking the same value again), or a switch (clicking the other
+ *  value), and returns the up-to-date tally + the caller's resulting vote. */
+function VoteButtons({ username }: { username: string }) {
+  const [votes, setVotes] = useState<SplasherVotes | null>(null);
+  const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSplasherVotes(username)
+      .then((v) => { if (!cancelled) setVotes(v); })
+      .catch(() => { /* vote counts are non-critical; leave buttons in their default state */ });
+    return () => { cancelled = true; };
+  }, [username]);
+
+  const handleVote = useCallback((value: 1 | -1) => {
+    if (pending) return;
+    setPending(true);
+    voteSplasher(username, value)
+      .then(setVotes)
+      .catch(() => { /* leave prior tally on failure, e.g. rate-limited */ })
+      .finally(() => setPending(false));
+  }, [username, pending]);
+
+  const liked = votes?.myVote === 1;
+  const disliked = votes?.myVote === -1;
+
+  return (
+    <div className="all-splashers-vote-row">
+      <button
+        type="button"
+        className="all-splashers-vote-btn like-btn"
+        aria-label="Like"
+        aria-pressed={liked}
+        disabled={pending}
+        onClick={() => handleVote(1)}
+      >
+        <Icon
+          name={liked ? 'components.buttons.like.selected' : 'components.buttons.like.unselected'}
+          size="2.5em"
+          alt="Like"
+        />
+      </button>
+      <button
+        type="button"
+        className="all-splashers-vote-btn dislike-btn"
+        aria-label="Dislike"
+        aria-pressed={disliked}
+        disabled={pending}
+        onClick={() => handleVote(-1)}
+      >
+        <Icon
+          name={disliked ? 'components.buttons.dislike.selected' : 'components.buttons.dislike.unselected'}
+          size="2.5em"
+          alt="Dislike"
+        />
+      </button>
+    </div>
+  );
+}
+
 function SessionCard({ session, onSelectUser }: { session: ActiveSession; onSelectUser?: (username: string) => void }) {
   const d = session.sessionData;
   const location = worldsData.find((w) => w.world === d?.world)?.location;
@@ -149,6 +211,8 @@ function SessionCard({ session, onSelectUser }: { session: ActiveSession; onSele
       ) : (
         <p className="all-splashers-no-data">Session data pending…</p>
       )}
+
+      <VoteButtons username={session.username} />
     </div>
   );
 }

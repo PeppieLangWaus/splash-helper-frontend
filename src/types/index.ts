@@ -54,6 +54,15 @@ export interface ActiveSession {
   communities?: ActiveSessionCommunity[];
 }
 
+/** Anonymous like/dislike tally for a splasher, plus the caller's own vote (identified
+ *  server-side, e.g. by IP) — GET /splashers/:username/votes. `myVote` is null when the
+ *  caller hasn't voted. */
+export interface SplasherVotes {
+  likes: number;
+  dislikes: number;
+  myVote: 1 | -1 | null;
+}
+
 /** Archived session stored in MongoDB */
 export interface ArchivedSession {
   _id: string;
