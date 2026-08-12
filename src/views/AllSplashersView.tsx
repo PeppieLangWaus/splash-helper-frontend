@@ -121,8 +121,35 @@ function VoteButtons({ username }: { username: string }) {
   const totalVotes = likes + dislikes;
   const likePct = totalVotes === 0 ? 100 : (likes / totalVotes) * 100;
 
+  // Like always renders left, dislike always renders right, so each one only picks up the
+  // outward-facing edge highlight (matching the reference asset) when it's the sole visible
+  // segment on that side — the boundary between two nonzero segments has no reference pixels
+  // to match, so it's left plain rather than guessed.
+  const likeIsRightmost = dislikes === 0;
+  const dislikeIsLeftmost = likes === 0;
+
   return (
     <div className="all-splashers-vote-section">
+      <div
+        className="all-splashers-vote-ratio-outer"
+        role="img"
+        aria-label={totalVotes === 0 ? 'No votes yet' : `${Math.round(likePct)}% liked, ${Math.round(100 - likePct)}% disliked`}
+      >
+        <div className="all-splashers-vote-ratio-highlight">
+          <div className="all-splashers-vote-ratio-shadow">
+            <div className="all-splashers-vote-ratio-track">
+              <div
+                className={`all-splashers-vote-ratio-fill-like${likeIsRightmost ? ' is-rightmost' : ''}`}
+                style={{ width: `${likePct}%` }}
+              />
+              <div
+                className={`all-splashers-vote-ratio-fill-dislike${dislikeIsLeftmost ? ' is-leftmost' : ''}`}
+                style={{ width: `${100 - likePct}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="all-splashers-vote-row">
         <button
           type="button"
@@ -152,14 +179,6 @@ function VoteButtons({ username }: { username: string }) {
             alt="Dislike"
           />
         </button>
-      </div>
-      <div
-        className="all-splashers-vote-ratio-bar"
-        role="img"
-        aria-label={totalVotes === 0 ? 'No votes yet' : `${Math.round(likePct)}% liked, ${Math.round(100 - likePct)}% disliked`}
-      >
-        <div className="all-splashers-vote-ratio-fill-like" style={{ width: `${likePct}%` }} />
-        <div className="all-splashers-vote-ratio-fill-dislike" style={{ width: `${100 - likePct}%` }} />
       </div>
     </div>
   );

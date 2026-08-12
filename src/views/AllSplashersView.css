@@ -225,26 +225,65 @@
     justify-content: center;
 }
 
-.all-splashers-vote-ratio-bar {
-    display: flex;
-    width: 100%;
-    height: 0.7rem;
-    border: 2px solid #000;
-    border-radius: 4px;
-    overflow: hidden;
+/* Ratio bar, pixel-matched against a decoded reference asset: a sunken groove (border →
+   highlight → shadow, 1px each) around a slightly embossed fill (lighter top/left/right edge,
+   darker bottom edge). Built as nested rings rather than a single image so the fill stays a
+   resizable live like/dislike split instead of a static bitmap. */
+.all-splashers-vote-ratio-outer {
+    border: 1px solid #202930;
     box-sizing: border-box;
+}
+
+.all-splashers-vote-ratio-highlight {
+    padding: 1px;
+    background: #3E4A52;
+}
+
+.all-splashers-vote-ratio-shadow {
+    padding: 1px;
+    background: #0D1012;
+}
+
+.all-splashers-vote-ratio-track {
+    display: flex;
+    height: 7px;
+    overflow: hidden;
 }
 
 .all-splashers-vote-ratio-fill-like {
     height: 100%;
-    background: #17a917;
+    background: #009400;
+    box-shadow:
+        inset 0 1px 0 #007300,
+        inset 1px 0 0 #007300,
+        inset 0 -1px 0 #004A00;
     transition: width 0.2s ease;
+}
+
+.all-splashers-vote-ratio-fill-like.is-rightmost {
+    box-shadow:
+        inset 0 1px 0 #007300,
+        inset 1px 0 0 #007300,
+        inset -1px 0 0 #007300,
+        inset 0 -1px 0 #004A00;
 }
 
 .all-splashers-vote-ratio-fill-dislike {
     height: 100%;
-    background: #d61f1f;
+    background: #940000;
+    box-shadow:
+        inset 0 1px 0 #730000,
+        inset -1px 0 0 #730000,
+        inset 0 -1px 0 #4A0000;
     transition: width 0.2s ease;
+}
+
+.all-splashers-vote-ratio-fill-dislike.is-leftmost {
+    box-shadow:
+        inset 0 1px 0 #730000,
+        inset -1px 0 0 #730000,
+        inset 1px 0 0 #730000,
+        inset 0 -1px 0 #4A0000;
 }
 
 .all-splashers-vote-btn {
