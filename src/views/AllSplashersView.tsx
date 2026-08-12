@@ -123,7 +123,7 @@ function SessionCard({ session, onSelectUser }: { session: ActiveSession; onSele
             <StatTile label="World" value={String(d.world)} icon={{ name: iconName, size: '1.35em' }} />
             <StatTile
               label="Thievers"
-              value={fmt(d.pickpocketerCount)}
+              value={fmt(d.currentPlayerCount ?? 0)}
               icon={{ name: 'thieving', size: '1em' }}
               iconPosition="end"
             />

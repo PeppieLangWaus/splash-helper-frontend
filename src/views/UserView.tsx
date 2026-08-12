@@ -520,7 +520,7 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
                               </div>
                               <div style={s.detailItem}>
                                 <span style={s.detailLabel}>Pickpocketers</span>
-                                <span style={s.detailValue}>{fmt(d.pickpocketerCount)}</span>
+                                <span style={s.detailValue}>{fmt(d.currentPlayerCount ?? 0)}</span>
                               </div>
                               <div style={s.detailItem}>
                                 <span style={s.detailLabel}>Starting rune count</span>
