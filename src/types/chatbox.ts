@@ -77,9 +77,15 @@ export interface ChatMessage {
    *  Lets chatFilter.ts's Filtered state narrow down to just the viewer's selected chats within
    *  the full linked set — see the chatbox-multi-link feature notes. */
   communityId?: string;
-  /** Real items resolved for a `!log <page>`/`!pets` line — see ChatItemRef. Absent for every
-   *  other message, and for one of these commands if server-side resolution failed. */
+  /** Real items resolved for a `!log <page>`/`!pets` line — see ChatItemRef. When set, `message`
+   *  has already been replaced with a clean summary (e.g. "Cyclopes (8/8):") built from this same
+   *  resolution. Absent for every other message, and for one of these commands if server-side
+   *  resolution failed (in which case `message` stays as the original text). */
   items?: ChatItemRef[];
+  /** Whether a per-item `quantity` in `items` is meaningful to show as "xN" next to its icon —
+   *  true for a resolved collection-log page, false for resolved pets (owning a pet isn't a
+   *  "count" the way owning 5 arrows is). Meaningless/absent when `items` itself is absent. */
+  showQuantities?: boolean;
   /** Set once the relay tells us this message's text was edited after it was first sent (see
    *  useChatFeed's handling of `edited: true` broadcasts / utils/chatStorage.ts's
    *  upsertStoredMessage). Not shown in the UI — its only job is stopping a later plain resend of

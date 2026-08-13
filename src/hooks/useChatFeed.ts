@@ -20,6 +20,8 @@ interface ChatBroadcastPayload {
   /** Real items resolved server-side for a `!log <page>`/`!pets` line — see
    *  types/chatbox.ts's ChatItemRef. */
   items?: ChatItemRef[];
+  /** Whether `items`' quantities are meaningful to show — see types/chatbox.ts's ChatMessage. */
+  showQuantities?: boolean;
   /** Set when this broadcast is a re-send of a message we already relayed, with edited text —
    *  see toChatMessage/upsertStoredMessage. Absent (not just false) on the vast majority of
    *  messages, which are never edited. */
@@ -59,6 +61,7 @@ function toChatMessage(raw: ChatBroadcastPayload, channelType: LiveChatChannelTy
     message: raw.message,
     rankIcon: raw.rank !== undefined ? getRankIcon(channelType, raw.rank) : undefined,
     items: raw.items,
+    showQuantities: raw.showQuantities,
     edited: raw.edited || undefined,
   };
 }

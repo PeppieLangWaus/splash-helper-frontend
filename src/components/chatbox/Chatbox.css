@@ -257,10 +257,33 @@
   --left-offset: -.9px;
   /* -webkit-filter: drop-shadow(2px 1px 0 black)
                   drop-shadow(-1px -1px 0 black); */
-  filter: drop-shadow(0 var(--top-offset) 0 black) 
-          drop-shadow(var(--right-offset) 0 0 black) 
-          drop-shadow(0 var(--bottom-offset) 0 black) 
+  filter: drop-shadow(0 var(--top-offset) 0 black)
+          drop-shadow(var(--right-offset) 0 0 black)
+          drop-shadow(0 var(--bottom-offset) 0 black)
           drop-shadow(var(--left-offset) 0 0 black);
+}
+
+/* One <icon> x<amount> pair from a resolved !log/!pets line (ChatLog.tsx's MessageBody) — kept
+   as an inline-flex unit so the icon and its label never wrap apart from each other. */
+.chat-item {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 3px 0 1px;
+}
+
+/* Real item icons (routes/items.ts, 36x32 source) are much larger/more detailed than the 13x13
+   status icons .chat-icon is sized for — kept a bit bigger and width-driven (auto height) so
+   they don't get squished to a 13x13 square. */
+.chat-item-icon {
+  width: 18px;
+  height: auto;
+  margin: 0 1px 0 0;
+}
+
+.chat-item-quantity {
+  font-size: 13px;
+  color: #FFFF00;
 }
 
 /* ---- Scrollbar (chatbox/scroll) ------------------------------------------------------ */

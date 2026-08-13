@@ -129,15 +129,16 @@ export function upsertStoredMessage(key: string, message: ChatMessage): ChatMess
 
   const next = [...existing];
   if (matchIndex !== -1) {
-    // `items` isn't in the edited resend's own field list above by default — it's resolved
-    // once, on the original message, and left alone by a later edit for an unrelated reason (see
-    // splash-helper-backend's chatBroadcast.ts) — but falls back to whatever the resend itself
-    // carries, in case that ever changes.
+    // `items`/`showQuantities` aren't in the edited resend's own field list above by default —
+    // they're resolved once, on the original message, and left alone by a later edit for an
+    // unrelated reason (see splash-helper-backend's chatBroadcast.ts) — but fall back to
+    // whatever the resend itself carries, in case that ever changes.
     next[matchIndex] = {
       ...next[matchIndex],
       message: message.message,
       segments: message.segments,
       items: message.items ?? next[matchIndex].items,
+      showQuantities: message.showQuantities ?? next[matchIndex].showQuantities,
       edited: true,
     };
   } else {

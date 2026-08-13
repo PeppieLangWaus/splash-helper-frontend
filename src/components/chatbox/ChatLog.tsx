@@ -29,8 +29,11 @@ const MESSAGE_KIND_CLASS: Partial<Record<ChatMessage['kind'], string>> = {
 /** Renders a message body's text (with any third-party plugin's own `<img=N>` tags stripped —
  *  see itemIcons.ts for why those are never treated as item ids) plus, when present, the real
  *  items splash-helper-backend resolved for a `!log <page>`/`!pets` line, as a trailing row of
- *  actual `<img>`s after the text. */
-function MessageBody({ text, items }: { text: string; items?: ChatItemRef[] }) {
+ *  `<icon> x<amount>` pairs — one per item, in the order the backend sent them. `x<amount>` is
+ *  shown only when `showQuantities` is true *and* the item's own quantity is nonzero (an
+ *  unobtained collection-log item is always quantity 0, so it renders as a bare icon; a resolved
+ *  pets line has `showQuantities: false` and so never shows one at all, regardless of value). */
+function MessageBody({ text, items, showQuantities }: { text: string; items?: ChatItemRef[]; showQuantities?: boolean }) {
   const cleaned = useMemo(() => stripMessageIconTags(text), [text]);
 
   if (!items || items.length === 0) return <>{cleaned}</>;
@@ -39,13 +42,10 @@ function MessageBody({ text, items }: { text: string; items?: ChatItemRef[] }) {
     <>
       {cleaned}
       {items.map((item) => (
-        <img
-          key={item.id}
-          className="chat-icon chat-item-icon"
-          src={itemIconUrl(item.id)}
-          alt=""
-          title={item.quantity > 1 ? `x${item.quantity}` : undefined}
-        />
+        <span key={item.id} className="chat-item">
+          <img className="chat-icon chat-item-icon" src={itemIconUrl(item.id)} alt="" />
+          {showQuantities && item.quantity > 0 && <span className="chat-item-quantity">x{item.quantity}</span>}
+        </span>
       ))}
     </>
   );
@@ -93,7 +93,7 @@ function ChatLine({ msg, showTimestamps }: { msg: ChatMessage; showTimestamps: b
           ))
         ) : (
           <span className={`chat-line-message ${MESSAGE_KIND_CLASS[msg.kind] ?? ''}`}>
-            <MessageBody text={msg.message} items={msg.items} />
+            <MessageBody text={msg.message} items={msg.items} showQuantities={msg.showQuantities} />
           </span>
         )}
       </span>
