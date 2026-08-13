@@ -34,6 +34,15 @@ export interface MessageSegment {
   color?: string;
 }
 
+/** A real OSRS item id + quantity, resolved server-side by splash-helper-backend (see its
+ *  services/itemLogResolver.ts) for a `!log <page>`/`!pets` chat line — never derived from any
+ *  `<img=N>` tag embedded in the message text itself, which is a third-party plugin's own
+ *  local, per-viewer-session rendering artifact with no relation to the real item id. */
+export interface ChatItemRef {
+  id: number;
+  quantity: number;
+}
+
 /** A single line in the chat log. */
 export interface ChatMessage {
   id: string;
@@ -68,6 +77,15 @@ export interface ChatMessage {
    *  Lets chatFilter.ts's Filtered state narrow down to just the viewer's selected chats within
    *  the full linked set — see the chatbox-multi-link feature notes. */
   communityId?: string;
+  /** Real items resolved for a `!log <page>`/`!pets` line — see ChatItemRef. Absent for every
+   *  other message, and for one of these commands if server-side resolution failed. */
+  items?: ChatItemRef[];
+  /** Set once the relay tells us this message's text was edited after it was first sent (see
+   *  useChatFeed's handling of `edited: true` broadcasts / utils/chatStorage.ts's
+   *  upsertStoredMessage). Not shown in the UI — its only job is stopping a later plain resend of
+   *  the same message id from clobbering the edited text back to the original. Never set for the
+   *  vast majority of messages, which are never edited. */
+  edited?: boolean;
 }
 
 // ── Live relay feed (splash-helper-backend's chat.splasher.help relay) ─────────────────

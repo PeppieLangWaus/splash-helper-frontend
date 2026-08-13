@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ChatMessage } from '../../types/chatbox';
+import type { ChatItemRef, ChatMessage } from '../../types/chatbox';
 import { formatClockTime } from '../../utils/formatTime';
 import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './chatIcons';
+import { itemIconUrl, stripMessageIconTags } from './itemIcons';
 import chatEmptyTips from '../../data/chatEmptyTips';
 
 const MIN_THUMB_HEIGHT = 12;
@@ -24,6 +25,31 @@ const MESSAGE_KIND_CLASS: Partial<Record<ChatMessage['kind'], string>> = {
   cc: 'chat-line-message--cc',
   private: 'chat-line-message--private',
 };
+
+/** Renders a message body's text (with any third-party plugin's own `<img=N>` tags stripped —
+ *  see itemIcons.ts for why those are never treated as item ids) plus, when present, the real
+ *  items splash-helper-backend resolved for a `!log <page>`/`!pets` line, as a trailing row of
+ *  actual `<img>`s after the text. */
+function MessageBody({ text, items }: { text: string; items?: ChatItemRef[] }) {
+  const cleaned = useMemo(() => stripMessageIconTags(text), [text]);
+
+  if (!items || items.length === 0) return <>{cleaned}</>;
+
+  return (
+    <>
+      {cleaned}
+      {items.map((item) => (
+        <img
+          key={item.id}
+          className="chat-icon chat-item-icon"
+          src={itemIconUrl(item.id)}
+          alt=""
+          title={item.quantity > 1 ? `x${item.quantity}` : undefined}
+        />
+      ))}
+    </>
+  );
+}
 
 function ChatLine({ msg, showTimestamps }: { msg: ChatMessage; showTimestamps: boolean }) {
   return (
@@ -62,12 +88,12 @@ function ChatLine({ msg, showTimestamps }: { msg: ChatMessage; showTimestamps: b
         {msg.segments ? (
           msg.segments.map((seg, i) => (
             <span key={i} className="chat-line-message" style={seg.color ? { color: seg.color } : undefined}>
-              {seg.text}
+              <MessageBody text={seg.text} />
             </span>
           ))
         ) : (
           <span className={`chat-line-message ${MESSAGE_KIND_CLASS[msg.kind] ?? ''}`}>
-            {msg.message}
+            <MessageBody text={msg.message} items={msg.items} />
           </span>
         )}
       </span>
