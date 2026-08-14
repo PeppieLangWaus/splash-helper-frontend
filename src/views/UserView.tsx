@@ -452,7 +452,7 @@ function ChevronIcon({ open }: { open: boolean }) {
  *  fall back to `endTime` for sessions that don't have it populated. */
 function sessionDurationMs(d: ArchivedSession['session']): number {
   const start = new Date(d.startTime).getTime();
-  const end = new Date(d.logoutTime || d.endTime || d.startTime).getTime();
+  const end = new Date(d.endTime || "").getTime();
   if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return 0;
   return end - start;
 }
