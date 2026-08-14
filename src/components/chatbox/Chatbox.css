@@ -162,6 +162,14 @@
   color: #2c2c2c;
 }
 
+/* RuneLite's own chat commands (`!pb`, `!log`, etc.) mark up their reply text with
+   `<colHIGHLIGHT>`/`<colNORMAL>` tags rather than real colors — see chatColorTags.ts. HIGHLIGHT is
+   always plain black; NORMAL reuses whichever .chat-line-message--fc/--cc color the line already
+   renders in, since that's the color clan/friends chat text normally uses. */
+.chat-line-message--tag-black {
+  color: #000000;
+}
+
 .chat-line-prefix {
   font-weight: 400;
 }
@@ -251,10 +259,10 @@
 
 /* Only rank icons get the outline — mod/ironman icons stay as-is. */
 .chat-icon-rank {
-  --top-offset: -.9px;
-  --right-offset: 1px;
-  --bottom-offset: 1px;
-  --left-offset: -.9px;
+  --top-offset: -.01em;
+  --right-offset: .01em;
+  --bottom-offset: .1em;
+  --left-offset: -.01em;
   /* -webkit-filter: drop-shadow(2px 1px 0 black)
                   drop-shadow(-1px -1px 0 black); */
   filter: drop-shadow(0 var(--top-offset) 0 black)
@@ -268,7 +276,7 @@
 .chat-item {
   display: inline-flex;
   align-items: center;
-  vertical-align: middle;
+  /* vertical-align: middle; */
   margin: 0 3px 0 1px;
 }
 
@@ -281,9 +289,11 @@
   margin: 0 1px 0 0;
 }
 
+/* Matches whatever color the surrounding message text is already rendered in — this is a plain
+   continuation of that text (` x<amount>`), not its own accent color. */
 .chat-item-quantity {
   font-size: 13px;
-  color: #FFFF00;
+  color: inherit;
 }
 
 /* ---- Scrollbar (chatbox/scroll) ------------------------------------------------------ */
