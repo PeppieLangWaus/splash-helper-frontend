@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getArchivedSessions } from '../api';
 import { useAuth } from '../context/AuthContext';
 import type { ArchivedSession } from '../types';
-import { colors, fontSerif } from '../theme';
+import { colors, fontSans, fontSerif } from '../theme';
 import { formatDurationMs } from '../utils/formatTime';
 import RuneUsagePanel from '../components/RuneUsagePanel';
 
@@ -114,7 +114,7 @@ const s = {
     letterSpacing: '0.05em',
     marginBottom: '0.4rem',
   },
-  pill: (tone: 'green' | 'amber' | 'gray') => ({
+  pill: (tone: 'green' | 'amber' | 'gray' | 'accent') => ({
     display: 'inline-flex',
     alignItems: 'center',
     gap: '0.25rem',
@@ -122,10 +122,24 @@ const s = {
     borderRadius: 12,
     fontSize: '0.7rem',
     fontWeight: 600,
-    background: tone === 'green' ? colors.successSoft : tone === 'amber' ? colors.warningSoft : colors.panelAlt,
-    color: tone === 'green' ? colors.successText : tone === 'amber' ? colors.warningText : colors.textFaint,
+    background: tone === 'green' ? colors.successSoft : tone === 'amber' ? colors.warningSoft : tone === 'accent' ? colors.accentSoft : colors.panelAlt,
+    color: tone === 'green' ? colors.successText : tone === 'amber' ? colors.warningText : tone === 'accent' ? colors.accentText : colors.textFaint,
     whiteSpace: 'nowrap' as const,
   }),
+  durationBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.25rem',
+    padding: '0.15rem 0.55rem',
+    borderRadius: 12,
+    fontSize: '0.78rem',
+    fontWeight: 700,
+    fontFamily: fontSerif,
+    background: colors.accentSoft,
+    color: colors.accentText,
+    whiteSpace: 'nowrap' as const,
+    flexShrink: 0,
+  },
   errorBox: { padding: '0.75rem 1rem', background: colors.dangerSoft, border: `1px solid ${colors.danger}`, borderRadius: 6, color: colors.dangerText },
   emptyMsg: { color: colors.textFaint, textAlign: 'center' as const, padding: '2rem' },
   detailGrid: {
@@ -178,6 +192,33 @@ const s = {
     fontWeight: active ? 700 : 500,
     textAlign: 'left' as const,
   }),
+  monthChartWrap: {
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 8,
+    padding: '1rem',
+    marginTop: '0.75rem',
+  },
+  monthChartHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', gap: '0.5rem' },
+  monthChartTitle: { display: 'flex', alignItems: 'baseline', gap: '0.5rem', fontFamily: fontSerif, fontSize: '1rem', fontWeight: 700, color: colors.text },
+  monthChartTotal: { fontFamily: fontSans, fontSize: '0.75rem', fontWeight: 500, color: colors.textFaint },
+  monthNavBtn: (disabled: boolean) => ({
+    background: colors.panelAlt,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 6,
+    color: disabled ? colors.textDisabled : colors.text,
+    cursor: disabled ? 'default' : 'pointer',
+    width: 28,
+    height: 28,
+    fontSize: '1rem',
+    lineHeight: 1,
+    opacity: disabled ? 0.5 : 1,
+  }),
+  monthChartBars: { display: 'flex', alignItems: 'flex-end', gap: 2, height: 140, overflowX: 'auto' as const },
+  monthChartBarCol: { flex: '1 0 8px', display: 'flex', flexDirection: 'column-reverse' as const, height: '100%', minWidth: 6 },
+  monthChartBar: { width: '100%', borderRadius: '2px 2px 0 0', transition: 'height 0.15s' },
+  monthChartAxis: { display: 'flex', gap: 2, marginTop: '0.3rem' },
+  monthChartAxisLabel: { flex: '1 0 8px', minWidth: 6, textAlign: 'center' as const, fontSize: '0.62rem', color: colors.textFaint },
 } as const;
 
 const ACTIVITY_LEVEL_COLORS = [colors.panelAlt, '#7c3a17', '#a8460f', colors.accent, colors.accentText];
@@ -188,10 +229,10 @@ function dayKey(ts: number) {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
-function activityLevel(count: number, max: number) {
-  if (count === 0) return 0;
-  if (max <= 1) return 4;
-  const ratio = count / max;
+function activityLevel(value: number, max: number) {
+  if (value <= 0) return 0;
+  if (max <= 0) return 4;
+  const ratio = value / max;
   if (ratio > 0.75) return 4;
   if (ratio > 0.5) return 3;
   if (ratio > 0.25) return 2;
@@ -222,10 +263,12 @@ function buildWeeksInRange(rangeStart: Date, rangeEnd: Date): Date[][] {
 }
 
 function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: ArchivedSession[]; year: number; years: number[]; onYearChange: (year: number) => void }) {
-  const counts = new Map<string, number>();
+  // Keyed by day, summing play duration (ms) rather than counting sessions — hours
+  // splashed is the metric that matters, not how many separate sessions produced it.
+  const durations = new Map<string, number>();
   for (const entry of sessions) {
     const key = dayKey(entry.createdTimestamp);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    durations.set(key, (durations.get(key) ?? 0) + sessionDurationMs(entry.session));
   }
 
   const today = new Date();
@@ -239,7 +282,7 @@ function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: Archi
   for (const week of weeks) {
     for (const date of week) {
       if (date > today || !inRange(date)) continue;
-      max = Math.max(max, counts.get(dayKey(date.getTime())) ?? 0);
+      max = Math.max(max, durations.get(dayKey(date.getTime())) ?? 0);
     }
   }
 
@@ -280,13 +323,14 @@ function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: Archi
                 <div key={wi} style={s.activityCol}>
                   {week.map((date, di) => {
                     if (date > today || !inRange(date)) return <div key={di} style={{ ...s.activityCell, background: ACTIVITY_LEVEL_COLORS[0] }} />;
-                    const count = counts.get(dayKey(date.getTime())) ?? 0;
-                    const level = activityLevel(count, max);
+                    const durationMs = durations.get(dayKey(date.getTime())) ?? 0;
+                    const level = activityLevel(durationMs, max);
+                    const dateLabel = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                     return (
                       <div
                         key={di}
                         style={{ ...s.activityCell, background: ACTIVITY_LEVEL_COLORS[level] }}
-                        title={`${count} session${count === 1 ? '' : 's'} on ${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                        title={durationMs > 0 ? `${formatDurationMs(durationMs)} splashed on ${dateLabel}` : `No time splashed on ${dateLabel}`}
                       />
                     );
                   })}
@@ -308,6 +352,75 @@ function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: Archi
           <button key={y} type="button" style={s.activityYearBtn(y === year)} onClick={() => onYearChange(y)}>
             {y}
           </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Daily-resolution bar chart of hours splashed within a single month, with prev/next navigation. */
+function MonthlyHoursChart({ sessions, month, onMonthChange }: { sessions: ArchivedSession[]; month: Date; onMonthChange: (month: Date) => void }) {
+  const year = month.getFullYear();
+  const mo = month.getMonth();
+  const daysInMonth = new Date(year, mo + 1, 0).getDate();
+
+  const hoursByDay = useMemo(() => {
+    const ms = new Array(daysInMonth).fill(0);
+    for (const entry of sessions) {
+      const d = new Date(entry.createdTimestamp);
+      if (d.getFullYear() === year && d.getMonth() === mo) {
+        ms[d.getDate() - 1] += sessionDurationMs(entry.session);
+      }
+    }
+    return ms.map((v) => v / 3_600_000);
+  }, [sessions, year, mo, daysInMonth]);
+
+  const maxHours = Math.max(...hoursByDay, 0.0001);
+  const totalHours = hoursByDay.reduce((a, b) => a + b, 0);
+
+  const today = new Date();
+  const isCurrentMonth = year === today.getFullYear() && mo === today.getMonth();
+
+  return (
+    <div style={s.monthChartWrap}>
+      <div style={s.monthChartHeader}>
+        <button type="button" style={s.monthNavBtn(false)} onClick={() => onMonthChange(new Date(year, mo - 1, 1))} aria-label="Previous month">
+          ‹
+        </button>
+        <div style={s.monthChartTitle}>
+          {month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+          <span style={s.monthChartTotal}>{totalHours.toFixed(1)}h splashed</span>
+        </div>
+        <button
+          type="button"
+          style={s.monthNavBtn(isCurrentMonth)}
+          onClick={() => !isCurrentMonth && onMonthChange(new Date(year, mo + 1, 1))}
+          disabled={isCurrentMonth}
+          aria-label="Next month"
+        >
+          ›
+        </button>
+      </div>
+      <div style={s.monthChartBars}>
+        {hoursByDay.map((h, i) => {
+          const date = new Date(year, mo, i + 1);
+          const label = `${h > 0 ? formatDurationMs(h * 3_600_000) : 'No time'} splashed on ${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+          return (
+            <div key={i} style={s.monthChartBarCol} title={label}>
+              <div
+                style={{
+                  ...s.monthChartBar,
+                  height: `${Math.max(h > 0 ? 3 : 0, (h / maxHours) * 100)}%`,
+                  background: h > 0 ? colors.accent : colors.panelAlt,
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div style={s.monthChartAxis}>
+        {hoursByDay.map((_, i) => (
+          <span key={i} style={s.monthChartAxisLabel}>{i === 0 || (i + 1) % 5 === 0 ? i + 1 : ''}</span>
         ))}
       </div>
     </div>
@@ -405,6 +518,18 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionYears]);
 
+  const [selectedMonth, setSelectedMonth] = useState<Date>(() => new Date());
+
+  // Default the monthly chart to the most recent month with recorded activity, once sessions load.
+  const latestSessionTs = useMemo(() => sessions.reduce((max, e) => Math.max(max, e.createdTimestamp), 0), [sessions]);
+  useEffect(() => {
+    if (latestSessionTs > 0) {
+      const d = new Date(latestSessionTs);
+      setSelectedMonth(new Date(d.getFullYear(), d.getMonth(), 1));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [latestSessionTs]);
+
   return (
     <div style={s.container}>
       <button style={s.backBtn} onClick={onBack} type="button">
@@ -432,6 +557,7 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
                 <h3 style={{ ...s.subheading, margin: 0 }}>Activity</h3>
               </div>
               <ActivityGrid sessions={sessions} year={activityYear} years={sessionYears} onYearChange={setActivityYear} />
+              <MonthlyHoursChart sessions={sessions} month={selectedMonth} onMonthChange={setSelectedMonth} />
             </>
           )}
 
@@ -474,6 +600,9 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
                             </div>
                           </div>
                           <div style={s.rowMeta}>
+                            <span style={s.durationBadge} title="Time splashed">
+                              {formatDurationMs(sessionDurationMs(d))}
+                            </span>
                             {d.stickyKnight && <span style={s.pill('amber')}>Sticky</span>}
                             <span style={s.pill(entry.syncedToServer ? 'green' : 'gray')}>
                               {entry.syncedToServer ? 'Synced' : 'Pending'}
