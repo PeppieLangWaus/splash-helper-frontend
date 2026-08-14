@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChatMessage, LiveChatChannelType } from '../types/chatbox';
+import type { ChatItemRef, ChatMessage, LiveChatChannelType } from '../types/chatbox';
 import { getRankIcon, parsePlayerName } from '../components/chatbox/chatIcons';
-import { appendStoredMessage, ccKey, fcKey, loadStoredMessages, subscribeToStoredMessages } from '../utils/chatStorage';
+import { ccKey, fcKey, loadStoredMessages, subscribeToStoredMessages, upsertStoredMessage } from '../utils/chatStorage';
 
 // Same origin as the REST API, just ws(s):// instead of http(s):// — the backend's WebSocket
 // server (see splash-helper-backend's websocket/server.ts) accepts connections on any path.
@@ -17,6 +17,15 @@ interface ChatBroadcastPayload {
   /** Raw RuneLite rank attribute (FriendsChatRank / ClanRank numeric value) for the sender,
    *  interpreted per the channel it arrived on — see getRankIcon in chatbox/chatIcons.ts. */
   rank?: number;
+  /** Real items resolved server-side for a `!log <page>`/`!pets` line — see
+   *  types/chatbox.ts's ChatItemRef. */
+  items?: ChatItemRef[];
+  /** Whether `items`' quantities are meaningful to show — see types/chatbox.ts's ChatMessage. */
+  showQuantities?: boolean;
+  /** Set when this broadcast is a re-send of a message we already relayed, with edited text —
+   *  see toChatMessage/upsertStoredMessage. Absent (not just false) on the vast majority of
+   *  messages, which are never edited. */
+  edited?: boolean;
 }
 
 interface ChatSubscribedMessage {
@@ -27,6 +36,11 @@ interface ChatSubscribedMessage {
 }
 
 type ChatMessageEvent = { type: 'CHAT_MESSAGE' } & ChatBroadcastPayload;
+// Sent instead of a second CHAT_MESSAGE when the relay correlates an edited resend with a
+// message it already broadcast — same shape as CHAT_MESSAGE (including `edited: true`), just a
+// distinct `type` so a viewer that only cares about new lines can ignore it. See the backend's
+// websocket/chatBroadcast.ts.
+type ChatMessageEditedEvent = { type: 'CHAT_MESSAGE_EDITED' } & ChatBroadcastPayload;
 
 function storageKey(communityId: string, channelType: LiveChatChannelType): string {
   return channelType === 'fc' ? fcKey(communityId) : ccKey(communityId);
@@ -46,6 +60,9 @@ function toChatMessage(raw: ChatBroadcastPayload, channelType: LiveChatChannelTy
     ironmanStatus,
     message: raw.message,
     rankIcon: raw.rank !== undefined ? getRankIcon(channelType, raw.rank) : undefined,
+    items: raw.items,
+    showQuantities: raw.showQuantities,
+    edited: raw.edited || undefined,
   };
 }
 
@@ -122,22 +139,22 @@ export function useChatFeed(communityId: string | null, channelType: LiveChatCha
         if (msgType === 'CHAT_SUBSCRIBED') {
           const msg = parsed as ChatSubscribedMessage;
           const key = storageKey(msg.communityId, msg.channelType);
-          const local = loadStoredMessages(key);
-          const knownIds = new Set(local.map((m) => m.id));
-          const merged = [...local];
+          let latest = loadStoredMessages(key);
           for (const raw of msg.recent) {
-            if (knownIds.has(raw.id)) continue;
-            merged.push(toChatMessage(raw, msg.channelType));
+            latest = upsertStoredMessage(key, toChatMessage(raw, msg.channelType));
           }
-          merged.sort((a, b) => a.timestamp - b.timestamp);
-          setMessages(merged);
-        } else if (msgType === 'CHAT_MESSAGE') {
-          // The event itself doesn't carry a channel type, only which channel we're currently
-          // subscribed to does — fine since every message we get is for that subscription.
+          setMessages([...latest].sort((a, b) => a.timestamp - b.timestamp));
+        } else if (msgType === 'CHAT_MESSAGE' || msgType === 'CHAT_MESSAGE_EDITED') {
+          // Neither event carries a channel type, only which channel we're currently subscribed
+          // to does — fine since every message we get is for that subscription. Both go through
+          // the same upsert: a CHAT_MESSAGE_EDITED carries the same `id` as (and `edited: true`
+          // over) the CHAT_MESSAGE it's correlated with, so upsertStoredMessage updates that line
+          // in place instead of appending a duplicate.
           const target = targetRef.current;
           if (!target) return;
-          const msg = parsed as ChatMessageEvent;
-          setMessages(appendStoredMessage(storageKey(target.communityId, target.channelType), toChatMessage(msg, target.channelType)));
+          const msg = parsed as ChatMessageEvent | ChatMessageEditedEvent;
+          const key = storageKey(target.communityId, target.channelType);
+          setMessages(upsertStoredMessage(key, toChatMessage(msg, target.channelType)));
         }
       };
 

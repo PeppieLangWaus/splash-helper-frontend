@@ -103,6 +103,54 @@ export function appendStoredMessage(key: string, message: ChatMessage): ChatMess
   return trimmed;
 }
 
+/** Adds or updates one message in a feed's stored history — the single entry point for every
+ *  incoming fc/cc broadcast, live (`CHAT_MESSAGE`) or replayed (`CHAT_SUBSCRIBED`'s `recent`
+ *  buffer), edited or not. Matched against an already-stored message by id alone (unique within
+ *  one feed's own key, so kind/timestamp add nothing — and dropping timestamp from the match
+ *  means an edit is still recognized as "the same line" even if the relay bumps its timestamp
+ *  when re-sending it):
+ *
+ *  - No match → genuinely new message, appended normally.
+ *  - Match, incoming copy flagged `edited` → replaces the stored copy's text in place (same
+ *    position, every other field untouched) and marks it edited.
+ *  - Match, incoming copy NOT flagged `edited` → a plain resend of a line we already have (e.g.
+ *    the relay's `recent` buffer replaying it verbatim on reconnect). Left completely alone —
+ *    critically, this never *un*-marks an already-edited message back to its original text, which
+ *    is what previously made an unrelated new message arriving (any resend sharing an id with an
+ *    edited line) appear to "reset" every edited message until the next reload re-read storage
+ *    from scratch and got it right again.
+ *
+ *  Trims to the current limit and persists, like appendStoredMessage. */
+export function upsertStoredMessage(key: string, message: ChatMessage): ChatMessage[] {
+  const existing = loadStoredMessages(key);
+  const matchIndex = existing.findIndex((m) => m.id === message.id);
+
+  if (matchIndex !== -1 && !message.edited) return existing; // known line, not an edit — no-op.
+
+  const next = [...existing];
+  if (matchIndex !== -1) {
+    // `items`/`showQuantities` aren't in the edited resend's own field list above by default —
+    // they're resolved once, on the original message, and left alone by a later edit for an
+    // unrelated reason (see splash-helper-backend's chatBroadcast.ts) — but fall back to
+    // whatever the resend itself carries, in case that ever changes.
+    next[matchIndex] = {
+      ...next[matchIndex],
+      message: message.message,
+      segments: message.segments,
+      items: message.items ?? next[matchIndex].items,
+      showQuantities: message.showQuantities ?? next[matchIndex].showQuantities,
+      edited: true,
+    };
+  } else {
+    next.push(message);
+  }
+
+  const limit = getMessageLimit();
+  const trimmed = next.length > limit ? next.slice(next.length - limit) : next;
+  saveMessages(key, trimmed);
+  return trimmed;
+}
+
 /** Wipes one feed's stored history (used by the `::clear` chat command — see
  *  utils/chatCommands.ts) and notifies anything currently watching that key. */
 export function clearStoredMessages(key: string): void {

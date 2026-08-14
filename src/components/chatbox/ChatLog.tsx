@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ChatMessage } from '../../types/chatbox';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ChatItemRef, ChatMessage } from '../../types/chatbox';
 import { formatClockTime } from '../../utils/formatTime';
 import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './chatIcons';
+import { itemIconUrl, stripMessageIconTags } from './itemIcons';
+import { splitColorTagRuns } from './chatColorTags';
 import chatEmptyTips from '../../data/chatEmptyTips';
 
 const MIN_THUMB_HEIGHT = 12;
@@ -24,6 +26,56 @@ const MESSAGE_KIND_CLASS: Partial<Record<ChatMessage['kind'], string>> = {
   cc: 'chat-line-message--cc',
   private: 'chat-line-message--private',
 };
+
+/** fc/cc are the only kinds that ever carry raw, unprocessed RuneLite chat text — see
+ *  chatColorTags.ts — so they're the only ones worth running the (harmless but pointless
+ *  elsewhere) tag split on. */
+const COLOR_TAG_KINDS = new Set<ChatMessage['kind']>(['fc', 'cc']);
+
+/** Renders a message body's text (with any third-party plugin's own `<img=N>` tags stripped —
+ *  see itemIcons.ts for why those are never treated as item ids — and, for fc/cc lines, any
+ *  `<colHIGHLIGHT>`/`<colNORMAL>` run switched to its resolved color — see chatColorTags.ts) plus,
+ *  when present, the real items splash-helper-backend resolved for a `!log <page>`/`!pets` line,
+ *  as a trailing row of `<icon>`/`<icon> x<amount>` pairs — one per item, in the order the backend
+ *  sent them. An item with quantity 0 (an unobtained collection-log item, or an unowned pet) is
+ *  skipped entirely — no icon. A quantity of exactly 1 renders as a bare icon. Anything higher
+ *  renders `<icon> x<amount>`, but only when `showQuantities` is true — a resolved pets line has
+ *  `showQuantities: false` since pet ownership isn't a "count" worth showing even if the backend
+ *  ever sent one >1. */
+function MessageBody({
+  text,
+  items,
+  showQuantities,
+  kind,
+}: {
+  text: string;
+  items?: ChatItemRef[];
+  showQuantities?: boolean;
+  kind?: ChatMessage['kind'];
+}) {
+  const runs = useMemo(() => {
+    const cleaned = stripMessageIconTags(text);
+    return kind && COLOR_TAG_KINDS.has(kind) ? splitColorTagRuns(cleaned) : [{ text: cleaned }];
+  }, [text, kind]);
+
+  return (
+    <>
+      {runs.map((run, i) => {
+        // NORMAL reuses the channel's own message color (see MESSAGE_KIND_CLASS/
+        // .chat-line-message--fc/--cc) — that's already the color fc/cc text normally renders in.
+        if (run.tag === 'NORMAL') return <span key={i} className={kind ? MESSAGE_KIND_CLASS[kind] : undefined}>{run.text}</span>;
+        if (run.tag === 'HIGHLIGHT') return <span key={i} className="chat-line-message--tag-black">{run.text}</span>;
+        return <Fragment key={i}>{run.text}</Fragment>;
+      })}
+      {items?.filter((item) => item.quantity !== 0).map((item) => (
+        <span key={item.id} className="chat-item">
+          <img className="chat-icon chat-item-icon" src={itemIconUrl(item.id)} alt="" />
+          {showQuantities && item.quantity > 1 && <span className="chat-item-quantity">x{item.quantity}</span>}
+        </span>
+      ))}
+    </>
+  );
+}
 
 function ChatLine({ msg, showTimestamps }: { msg: ChatMessage; showTimestamps: boolean }) {
   return (
@@ -62,12 +114,12 @@ function ChatLine({ msg, showTimestamps }: { msg: ChatMessage; showTimestamps: b
         {msg.segments ? (
           msg.segments.map((seg, i) => (
             <span key={i} className="chat-line-message" style={seg.color ? { color: seg.color } : undefined}>
-              {seg.text}
+              <MessageBody text={seg.text} />
             </span>
           ))
         ) : (
           <span className={`chat-line-message ${MESSAGE_KIND_CLASS[msg.kind] ?? ''}`}>
-            {msg.message}
+            <MessageBody text={msg.message} items={msg.items} showQuantities={msg.showQuantities} kind={msg.kind} />
           </span>
         )}
       </span>
