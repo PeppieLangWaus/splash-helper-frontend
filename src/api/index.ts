@@ -582,15 +582,28 @@ export async function devGetAdminToken(): Promise<{ token: string; username: str
   };
 }
 
-export async function devAddFakeSession(username: string): Promise<ActiveSession> {
+export async function devAddFakeSession(username: string, pinned = false): Promise<ActiveSession> {
   const res = await fetch(`${BASE}/dev/sessions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username }),
+    body: JSON.stringify({ username, pinned }),
   });
   const data = (await res.json()) as ActiveSession & { error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to add fake session');
   return data;
+}
+
+/** Toggles whether the backend's inactivity sweeper is allowed to auto-clear this
+ *  dev-view fake session. See POST /dev/sessions/:username/pin. */
+export async function devSetFakeSessionPinned(username: string, pinned: boolean): Promise<{ username: string; pinned: boolean }> {
+  const res = await fetch(`${BASE}/dev/sessions/${encodeURIComponent(username)}/pin`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pinned }),
+  });
+  const data = (await res.json()) as { username?: string; pinned?: boolean; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update fake session');
+  return { username: data.username ?? username, pinned: data.pinned ?? pinned };
 }
 
 export async function devTickFakeSession(username: string): Promise<ActiveSession> {
