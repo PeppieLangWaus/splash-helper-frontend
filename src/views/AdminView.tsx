@@ -3,6 +3,7 @@ import {
   adminGetUsers, adminGetSessions, adminPromoteUser, adminDeleteUser, adminDeleteSession,
   adminSetCommunityEligibility, adminGetCommunities, adminDeleteCommunity,
   adminAssignUsersToCommunity, adminRemoveUserFromCommunity, getCommunitySplashers,
+  adminSendResetLink,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useAdminSecret } from '../hooks/useAdminSecret';
@@ -371,6 +372,16 @@ export default function AdminView({ onSelectUser }: Props) {
     }
   }
 
+  async function handleSendResetLink(username: string) {
+    if (!token) return;
+    try {
+      const result = await adminSendResetLink(username, token);
+      showFeedback('success', result.message);
+    } catch (err) {
+      showFeedback('error', err instanceof Error ? err.message : 'Failed to send reset link');
+    }
+  }
+
   function toggleTokenRevealed(username: string) {
     setRevealedTokens((prev) => {
       const next = new Set(prev);
@@ -440,6 +451,12 @@ export default function AdminView({ onSelectUser }: Props) {
       {
         label: u.communityEligible ? 'Revoke community' : 'Allow community',
         onClick: () => void handleToggleCommunityEligibility(u.username),
+      },
+      {
+        label: 'Send reset link',
+        onClick: () => void handleSendResetLink(u.username),
+        disabled: !u.emailVerifiedAt,
+        title: u.emailVerifiedAt ? undefined : 'User has no verified email',
       },
       { label: 'Delete', danger: true, onClick: () => void handleDeleteUser(u.username) },
     ];
@@ -529,6 +546,7 @@ export default function AdminView({ onSelectUser }: Props) {
                 <tr>
                   <th style={s.th}>Username</th>
                   <th style={s.th}>Token</th>
+                  <th style={s.th}>Email</th>
                   <th style={s.th}>Admin</th>
                   <th style={s.th}>Account set up</th>
                   <th style={s.th}>Community Eligible</th>
@@ -562,6 +580,15 @@ export default function AdminView({ onSelectUser }: Props) {
                           </button>
                         )}
                       </div>
+                    </td>
+                    <td style={s.td}>
+                      {u.emailVerifiedAt ? (
+                        <span style={s.badge(true)}>Verified</span>
+                      ) : u.email ? (
+                        <span style={s.badge(false)}>Unverified</span>
+                      ) : (
+                        <span style={{ color: colors.textFaint }}>—</span>
+                      )}
                     </td>
                     <td style={s.td}><span style={s.badge(u.isAdmin)}>{u.isAdmin ? 'Yes' : 'No'}</span></td>
                     <td style={s.td}><span style={s.badge(u.setupLinkUsed)}>{u.setupLinkUsed ? 'Yes' : 'Pending'}</span></td>
