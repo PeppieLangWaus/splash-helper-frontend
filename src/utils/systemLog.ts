@@ -7,8 +7,10 @@ let seq = 0;
  *  and run locally in the frontend" (point 7.5). Call this from any frontend action worth
  *  surfacing there (account settings changes, community creation, chat-config saves, ...).
  *  Callers are expected to only invoke this from code paths already behind a logged-in check —
- *  there's no separate auth gate here since the log is purely local either way. */
-export function logSystemEvent(text: string): void {
+ *  there's no separate auth gate here since the log is purely local either way.
+ *  Returns the message that was posted, for callers that need to react to it (e.g.
+ *  useEmailReminder spotlighting its own reminder — see Chatbox.tsx). Most callers ignore it. */
+export function logSystemEvent(text: string): ChatMessage {
   const message: ChatMessage = {
     id: `system-${Date.now()}-${seq++}`,
     timestamp: Date.now(),
@@ -19,4 +21,5 @@ export function logSystemEvent(text: string): void {
   };
   appendStoredMessage(PRIVATE_KEY, message);
   publishStoredMessage(PRIVATE_KEY, message);
+  return message;
 }
