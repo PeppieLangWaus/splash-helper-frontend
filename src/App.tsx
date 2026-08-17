@@ -4,6 +4,7 @@ import AllSplashersView from './views/AllSplashersView';
 import UserView from './views/UserView';
 import LoginView from './views/LoginView';
 import ForgotPasswordView from './views/ForgotPasswordView';
+import ResetPasswordView from './views/ResetPasswordView';
 import SetupAccountView from './views/SetupAccountView';
 import AdminView from './views/AdminView';
 import CommunityView from './views/CommunityView';
@@ -121,7 +122,7 @@ function AppInner() {
   // Handle Back/Forward: sync `view` from the URL without pushing another entry.
   useEffect(() => {
     function handlePopState() {
-      if (window.location.pathname === '/setup') return;
+      if (window.location.pathname === '/setup' || window.location.pathname === '/reset-password') return;
       setView(pathToView(window.location.pathname));
     }
     window.addEventListener('popstate', handlePopState);
@@ -135,6 +136,16 @@ function AppInner() {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
       if (token) setSetupToken(token);
+    }
+  }, []);
+
+  // Handle password-reset link: /reset-password?token=...
+  const [resetToken, setResetToken] = useState<string | null>(null);
+  useEffect(() => {
+    if (window.location.pathname === '/reset-password') {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (token) setResetToken(token);
     }
   }, []);
 
@@ -156,6 +167,18 @@ function AppInner() {
     );
   }
 
+  if (resetToken) {
+    return (
+      <ResetPasswordView
+        resetToken={resetToken}
+        onSuccess={() => {
+          setResetToken(null);
+          navigate({ name: 'active' });
+        }}
+      />
+    );
+  }
+
   if (view.name === 'login') {
     return (
       <LoginView
@@ -167,10 +190,7 @@ function AppInner() {
 
   if (view.name === 'forgot-password') {
     return (
-      <ForgotPasswordView
-        onSuccess={() => navigate({ name: 'active' })}
-        onBack={() => navigate({ name: 'login' })}
-      />
+      <ForgotPasswordView onBack={() => navigate({ name: 'login' })} />
     );
   }
 
