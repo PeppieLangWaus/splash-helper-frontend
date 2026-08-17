@@ -1,101 +1,35 @@
 import { useState } from 'react';
-import { resetPassword } from '../api';
-import { useAuth } from '../context/AuthContext';
+import { requestPasswordReset } from '../api';
 import { colors, fontSerif, shadow } from '../theme';
 
 const s = {
-  wrapper: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: colors.bg,
-  },
-  card: {
-    background: colors.panel,
-    border: `1px solid ${colors.border}`,
-    borderRadius: 10,
-    padding: '2rem',
-    width: '100%',
-    maxWidth: 400,
-    boxShadow: shadow,
-  },
+  wrapper: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: colors.bg },
+  card: { background: colors.panel, border: `1px solid ${colors.border}`, borderRadius: 10, padding: '2rem', width: '100%', maxWidth: 400, boxShadow: shadow },
   heading: { fontFamily: fontSerif, fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.5rem', color: colors.text },
   subheading: { fontSize: '0.875rem', color: colors.textFaint, marginBottom: '1.5rem', lineHeight: 1.5 },
   label: { display: 'block', fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.35rem', color: colors.textMuted },
   input: {
-    width: '100%',
-    padding: '0.55rem 0.75rem',
-    background: colors.inputBg,
-    border: `1px solid ${colors.inputBorder}`,
-    borderRadius: 6,
-    color: colors.text,
-    fontSize: '0.9rem',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-    marginBottom: '1rem',
+    width: '100%', padding: '0.55rem 0.75rem', background: colors.inputBg, border: `1px solid ${colors.inputBorder}`,
+    borderRadius: 6, color: colors.text, fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' as const, marginBottom: '1rem',
   },
-  submitBtn: {
-    width: '100%',
-    padding: '0.65rem',
-    background: colors.accent,
-    color: '#fff',
-    border: 'none',
-    borderRadius: 6,
-    fontWeight: 700,
-    fontSize: '0.95rem',
-    cursor: 'pointer',
-  },
+  submitBtn: { width: '100%', padding: '0.65rem', background: colors.accent, color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer' },
   submitBtnDisabled: { background: colors.borderStrong, color: colors.textDisabled, cursor: 'not-allowed' },
-  backBtn: {
-    width: '100%',
-    marginTop: '0.75rem',
-    background: 'none',
-    border: 'none',
-    color: colors.link,
-    fontWeight: 600,
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-    padding: '0.4rem',
-  },
-  errorBox: {
-    marginBottom: '1rem',
-    padding: '0.65rem 0.85rem',
-    background: colors.dangerSoft,
-    border: `1px solid ${colors.danger}`,
-    borderRadius: 6,
-    color: colors.dangerText,
-    fontSize: '0.875rem',
-  },
-  successBox: {
-    marginBottom: '1rem',
-    padding: '0.65rem 0.85rem',
-    background: colors.successSoft,
-    border: `1px solid ${colors.success}`,
-    borderRadius: 6,
-    color: colors.successText,
-    fontSize: '0.875rem',
-  },
-  hint: { fontSize: '0.78rem', color: colors.textFaint, marginTop: '-0.6rem', marginBottom: '1rem' },
+  backBtn: { width: '100%', marginTop: '0.75rem', background: 'none', border: 'none', color: colors.link, fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', padding: '0.4rem' },
+  errorBox: { marginBottom: '1rem', padding: '0.65rem 0.85rem', background: colors.dangerSoft, border: `1px solid ${colors.danger}`, borderRadius: 6, color: colors.dangerText, fontSize: '0.875rem' },
+  successBox: { marginBottom: '1rem', padding: '0.65rem 0.85rem', background: colors.successSoft, border: `1px solid ${colors.success}`, borderRadius: 6, color: colors.successText, fontSize: '0.875rem' },
 } as const;
 
 interface Props {
-  onSuccess?: () => void;
   onBack?: () => void;
 }
 
-export default function ForgotPasswordView({ onSuccess, onBack }: Props) {
-  const { setFromToken } = useAuth();
-  const [username, setUsername] = useState('');
-  const [token, setToken] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
+export default function ForgotPasswordView({ onBack }: Props) {
+  const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const passwordsMatch = password === confirm;
-  const canSubmit = username.trim().length > 0 && token.trim().length > 0 && password.length >= 8 && passwordsMatch && !loading;
+  const canSubmit = email.trim().length > 0 && !loading;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -103,12 +37,10 @@ export default function ForgotPasswordView({ onSuccess, onBack }: Props) {
     setError(null);
     setLoading(true);
     try {
-      const result = await resetPassword(username.trim(), token.trim(), password);
-      setFromToken(result.token, result.username, result.isAdmin, result.communityEligible);
+      await requestPasswordReset(email.trim());
       setDone(true);
-      setTimeout(() => onSuccess?.(), 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Password reset failed');
+      setError(err instanceof Error ? err.message : 'Request failed');
     } finally {
       setLoading(false);
     }
@@ -119,73 +51,32 @@ export default function ForgotPasswordView({ onSuccess, onBack }: Props) {
       <div style={s.card}>
         <h1 style={s.heading}>Reset your password</h1>
         <p style={s.subheading}>
-          Open the Splash Helper panel in RuneLite, find the <strong>Account</strong> section under
-          Server Sync, and click <strong>Copy Token</strong>. Paste it below along with your username
-          to set a new password.
+          Enter the email address on your account and, if it's registered and verified, we'll
+          send you a link to reset your password.
         </p>
         {error && <div style={s.errorBox}>{error}</div>}
-        {done && <div style={s.successBox}>Password reset! Redirecting…</div>}
-        {!done && (
+        {done ? (
+          <div style={s.successBox}>
+            If that address is registered, a reset link has been sent. Check your inbox.
+          </div>
+        ) : (
           <form onSubmit={handleSubmit} noValidate>
-            <label style={s.label} htmlFor="reset-username">Username</label>
+            <label style={s.label} htmlFor="forgot-email">Email</label>
             <input
-              id="reset-username"
+              id="forgot-email"
               style={s.input}
-              type="text"
-              autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <label style={s.label} htmlFor="reset-token">Token</label>
-            <input
-              id="reset-token"
-              style={s.input}
-              type="text"
-              autoComplete="off"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              required
-              placeholder="Copied from the Splash Helper plugin panel"
-            />
-            <label style={s.label} htmlFor="reset-password">New password</label>
-            <input
-              id="reset-password"
-              style={s.input}
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-            />
-            <p style={s.hint}>Minimum 8 characters</p>
-            <label style={s.label} htmlFor="reset-confirm">Confirm new password</label>
-            <input
-              id="reset-confirm"
-              style={{
-                ...s.input,
-                borderColor: confirm && !passwordsMatch ? colors.danger : colors.inputBorder,
-              }}
-              type="password"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-            />
-            {confirm && !passwordsMatch && (
-              <p style={{ ...s.hint, color: colors.dangerText, marginTop: '-0.6rem' }}>Passwords do not match</p>
-            )}
-            <button
-              type="submit"
-              style={{ ...s.submitBtn, ...(!canSubmit ? s.submitBtnDisabled : {}) }}
-              disabled={!canSubmit}
-            >
-              {loading ? 'Resetting…' : 'Reset password'}
+            <button type="submit" style={{ ...s.submitBtn, ...(!canSubmit ? s.submitBtnDisabled : {}) }} disabled={!canSubmit}>
+              {loading ? 'Sending…' : 'Send reset link'}
             </button>
           </form>
         )}
-        {!done && onBack && (
+        {onBack && (
           <button type="button" style={s.backBtn} onClick={onBack}>
             ← Back to sign in
           </button>

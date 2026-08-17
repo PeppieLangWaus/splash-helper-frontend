@@ -138,34 +138,6 @@ export async function resendVerificationEmail(token: string): Promise<{ message:
   return { message: data.message ?? '' };
 }
 
-export async function resetPassword(
-  username: string,
-  token: string,
-  newPassword: string,
-): Promise<{ token: string; username: string; message: string; isAdmin: boolean; communityEligible: boolean }> {
-  const res = await fetch(`${BASE}/auth/reset-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, token, newPassword }),
-  });
-  const data = (await res.json()) as {
-    token?: string;
-    username?: string;
-    message?: string;
-    isAdmin?: boolean;
-    communityEligible?: boolean;
-    error?: string;
-  };
-  if (!res.ok) throw new Error(data.error ?? 'Password reset failed');
-  return {
-    token: data.token!,
-    username: data.username!,
-    message: data.message!,
-    isAdmin: data.isAdmin ?? false,
-    communityEligible: data.communityEligible ?? false,
-  };
-}
-
 // ─── Public live chat relay ───────────────────────────────────────────────────
 
 /** Every community with at least one registered Friends/Clan Chat name, for the chatbox's
