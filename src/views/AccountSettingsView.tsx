@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { getArchivedSessions, setSplasherWebhook, uploadJson } from '../api';
+import { getArchivedSessions, setSplasherWebhook, uploadJson, updateAccountEmail, resendVerificationEmail } from '../api';
 import { useAuth } from '../context/AuthContext';
 import WebhookFieldsEditor from '../components/WebhookFieldsEditor';
 import CopyableField from '../components/CopyableField';
+import EmailField from '../components/EmailField';
 import type { SplasherWebhooks, SplashEntry } from '../types';
 import { colors, fontSerif } from '../theme';
 import { applyMessageLimitToAllStores, getMessageLimit } from '../utils/chatStorage';
@@ -39,6 +40,8 @@ export default function AccountSettingsView() {
   const { token, user } = useAuth();
   const [pluginToken, setPluginToken] = useState<string | null>(null);
   const [webhooks, setWebhooks] = useState<SplasherWebhooks>({});
+  const [email, setEmail] = useState<string | undefined>(undefined);
+  const [emailVerifiedAt, setEmailVerifiedAt] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
@@ -64,6 +67,8 @@ export default function AccountSettingsView() {
           discordActiveWebhookUrl: data.discordActiveWebhookUrl,
           discordHistoryWebhookUrl: data.discordHistoryWebhookUrl,
         });
+        setEmail(data.email);
+        setEmailVerifiedAt(data.emailVerifiedAt);
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load account data.'))
       .finally(() => setLoading(false));
@@ -79,6 +84,19 @@ export default function AccountSettingsView() {
     if (!token || !user) return;
     setWebhooks(await setSplasherWebhook(user.username, { historyWebhookUrl: value }, token));
     logSystemEvent('Updated session-history webhook');
+  }
+
+  async function handleSaveEmail(newEmail: string, currentPassword: string) {
+    if (!token) return;
+    const result = await updateAccountEmail(newEmail, currentPassword, token);
+    setEmail(result.email);
+    setEmailVerifiedAt(result.emailVerifiedAt ?? undefined);
+    logSystemEvent('Updated account email');
+  }
+
+  async function handleResendVerification() {
+    if (!token) return;
+    await resendVerificationEmail(token);
   }
 
   async function handleExport() {
@@ -169,6 +187,20 @@ export default function AccountSettingsView() {
             ) : (
               <p style={s.emptyMsg}>No plugin token found — sync a session from the plugin first.</p>
             )}
+          </div>
+
+          <div style={s.card}>
+            <div style={s.cardTitle}>Account recovery</div>
+            <EmailField
+              email={email}
+              emailVerifiedAt={emailVerifiedAt}
+              onSave={handleSaveEmail}
+              onResendVerification={handleResendVerification}
+            />
+            <p style={s.fieldHint}>
+              Used to reset your password if you're ever locked out. Requires your current
+              password to add or change.
+            </p>
           </div>
 
           <div style={s.card}>
