@@ -7,6 +7,18 @@
   user-select: none;
 }
 
+/* Briefly pulses the whole chatbox yellow/orange to draw attention to a just-posted reminder
+   (e.g. the missing/unverified-email nudge — see useEmailReminder + Chatbox.tsx). Purely
+   decorative, cleared automatically ~1.5s after it starts. */
+@keyframes chatbox-alert-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
+  25%, 75% { box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.55); }
+}
+
+.chatbox--alert {
+  animation: chatbox-alert-pulse 1.5s ease-in-out;
+}
+
 .chat-live-status {
   font-family: var(--font-sans);
   font-size: 12px;

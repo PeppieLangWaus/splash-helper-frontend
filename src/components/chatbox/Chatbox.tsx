@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChatChannel, ChatMessage, ChatTabStates, LiveChatChannelType } from '../../types/chatbox';
 import { useAuth } from '../../context/AuthContext';
 import { useChatChannels } from '../../hooks/useChatChannels';
@@ -10,6 +10,7 @@ import { usePrivateLog } from '../../hooks/usePrivateLog';
 import { useTradeLog } from '../../hooks/useTradeLog';
 import { useAccountActivityEvents } from '../../hooks/useAccountActivityEvents';
 import { useChatSettings } from '../../hooks/useChatSettings';
+import { useEmailReminder } from '../../hooks/useEmailReminder';
 import ChatLog from './ChatLog';
 import ChatControls from './ChatControls';
 import ReportModal from './ReportModal';
@@ -123,6 +124,23 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
   useAccountActivityEvents();
   const { timestamps: showTimestamps } = useChatSettings();
 
+  const emailReminder = useEmailReminder();
+  const [spotlightMessageId, setSpotlightMessageId] = useState<string | null>(null);
+  const [alertFlash, setAlertFlash] = useState(false);
+
+  // A missing/unverified email fires this once per visit — jump to Private, show only the
+  // reminder (not the whole log), and briefly flash the window to draw the eye. Picking any tab
+  // manually (handleSelect) clears the spotlight, so All -> Private afterward shows everything.
+  useEffect(() => {
+    if (!emailReminder) return;
+    setChannel('private');
+    setWindowOpen(true);
+    setSpotlightMessageId(emailReminder.id);
+    setAlertFlash(true);
+    const timeout = setTimeout(() => setAlertFlash(false), 1500);
+    return () => clearTimeout(timeout);
+  }, [emailReminder]);
+
   const mergedMessages = useMemo(
     () =>
       [
@@ -148,11 +166,15 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
   );
 
   const messages =
-    messagesOverride ?? visibleMessages(mergedMessages, channel, tabStates, { channel: fcSelected, clan: ccSelected });
+    messagesOverride ??
+    (spotlightMessageId && channel === 'private'
+      ? mergedMessages.filter((m) => m.id === spotlightMessageId)
+      : visibleMessages(mergedMessages, channel, tabStates, { channel: fcSelected, clan: ccSelected }));
 
   // Picking a new tab switches channel and (re)opens the window; clicking the tab that's
   // already selected toggles the window closed/open instead, matching OSRS's own chatbox.
   function handleSelect(tab: ChatChannel) {
+    setSpotlightMessageId(null);
     if (tab === channel) {
       setWindowOpen((open) => !open);
     } else {
@@ -186,7 +208,7 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
   const hasCcLinks = live && Object.keys(ccConnected).length > 0;
 
   return (
-    <div className={`chatbox ${className ?? ''}`}>
+    <div className={`chatbox ${alertFlash ? 'chatbox--alert' : ''} ${className ?? ''}`}>
       {(hasFcLinks || hasCcLinks) && (
         <div className="chat-live-status">
           {hasFcLinks && <LiveStatusLine label="Channel" connected={fcConnected} />}
