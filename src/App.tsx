@@ -5,6 +5,7 @@ import UserView from './views/UserView';
 import LoginView from './views/LoginView';
 import ForgotPasswordView from './views/ForgotPasswordView';
 import ResetPasswordView from './views/ResetPasswordView';
+import VerifyEmailView from './views/VerifyEmailView';
 import SetupAccountView from './views/SetupAccountView';
 import AdminView from './views/AdminView';
 import CommunityView from './views/CommunityView';
@@ -122,7 +123,7 @@ function AppInner() {
   // Handle Back/Forward: sync `view` from the URL without pushing another entry.
   useEffect(() => {
     function handlePopState() {
-      if (window.location.pathname === '/setup' || window.location.pathname === '/reset-password') return;
+      if (window.location.pathname === '/setup' || window.location.pathname === '/reset-password' || window.location.pathname === '/verify-email') return;
       setView(pathToView(window.location.pathname));
     }
     window.addEventListener('popstate', handlePopState);
@@ -146,6 +147,16 @@ function AppInner() {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
       if (token) setResetToken(token);
+    }
+  }, []);
+
+  // Handle email-verification link: /verify-email?token=...
+  const [verifyEmailTokenValue, setVerifyEmailTokenValue] = useState<string | null>(null);
+  useEffect(() => {
+    if (window.location.pathname === '/verify-email') {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (token) setVerifyEmailTokenValue(token);
     }
   }, []);
 
@@ -174,6 +185,18 @@ function AppInner() {
         onSuccess={() => {
           setResetToken(null);
           navigate({ name: 'active' });
+        }}
+      />
+    );
+  }
+
+  if (verifyEmailTokenValue) {
+    return (
+      <VerifyEmailView
+        verifyToken={verifyEmailTokenValue}
+        onDone={() => {
+          setVerifyEmailTokenValue(null);
+          navigate({ name: user ? 'settings' : 'login' });
         }}
       />
     );
