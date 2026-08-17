@@ -99,6 +99,8 @@ export interface AdminUser {
   setupLinkUsed: boolean;
   communityEligible: boolean;
   createdAt: string;
+  email?: string;
+  emailVerifiedAt?: string;
 }
 
 /** Community record returned from the communities endpoints */

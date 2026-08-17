@@ -68,6 +68,76 @@ export async function setupAccount(
   };
 }
 
+export async function requestPasswordReset(email: string): Promise<{ message: string }> {
+  const res = await fetch(`${BASE}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  const data = (await res.json()) as { message?: string; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Request failed');
+  return { message: data.message ?? '' };
+}
+
+export async function confirmPasswordReset(
+  resetToken: string,
+  newPassword: string,
+): Promise<{ token: string; username: string; message: string; isAdmin: boolean; communityEligible: boolean }> {
+  const res = await fetch(`${BASE}/auth/reset-password/${encodeURIComponent(resetToken)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ newPassword }),
+  });
+  const data = (await res.json()) as {
+    token?: string;
+    username?: string;
+    message?: string;
+    isAdmin?: boolean;
+    communityEligible?: boolean;
+    error?: string;
+  };
+  if (!res.ok) throw new Error(data.error ?? 'Password reset failed');
+  return {
+    token: data.token!,
+    username: data.username!,
+    message: data.message!,
+    isAdmin: data.isAdmin ?? false,
+    communityEligible: data.communityEligible ?? false,
+  };
+}
+
+export async function verifyEmailToken(verifyToken: string): Promise<{ message: string }> {
+  const res = await fetch(`${BASE}/auth/verify-email/${encodeURIComponent(verifyToken)}`);
+  const data = (await res.json()) as { message?: string; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Verification failed');
+  return { message: data.message ?? '' };
+}
+
+export async function updateAccountEmail(
+  email: string,
+  currentPassword: string,
+  token: string,
+): Promise<{ email: string; emailVerifiedAt: string | null; message: string }> {
+  const res = await fetch(`${BASE}/auth/email`, {
+    method: 'POST',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, currentPassword }),
+  });
+  const data = (await res.json()) as { email?: string; emailVerifiedAt?: string | null; message?: string; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update email');
+  return { email: data.email!, emailVerifiedAt: data.emailVerifiedAt ?? null, message: data.message ?? '' };
+}
+
+export async function resendVerificationEmail(token: string): Promise<{ message: string }> {
+  const res = await fetch(`${BASE}/auth/resend-verification`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  const data = (await res.json()) as { message?: string; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to resend verification email');
+  return { message: data.message ?? '' };
+}
+
 export async function resetPassword(
   username: string,
   token: string,
@@ -121,7 +191,7 @@ export async function getActiveSessions(): Promise<ActiveSession[]> {
 export async function getArchivedSessions(
   username: string,
   token: string,
-): Promise<{ username: string; sessions: ArchivedSession[]; token?: string } & SplasherWebhooks> {
+): Promise<{ username: string; sessions: ArchivedSession[]; token?: string; email?: string; emailVerifiedAt?: string } & SplasherWebhooks> {
   const res = await fetch(`${BASE}/splashers/${encodeURIComponent(username)}`, {
     headers: authHeaders(token),
   });
@@ -131,10 +201,12 @@ export async function getArchivedSessions(
     discordActiveWebhookUrl?: string;
     discordHistoryWebhookUrl?: string;
     token?: string;
+    email?: string;
+    emailVerifiedAt?: string;
     error?: string;
   };
   if (!res.ok) throw new Error(data.error ?? `Failed to fetch sessions for "${username}"`);
-  return data as { username: string; sessions: ArchivedSession[]; token?: string } & SplasherWebhooks;
+  return data as { username: string; sessions: ArchivedSession[]; token?: string; email?: string; emailVerifiedAt?: string } & SplasherWebhooks;
 }
 
 export async function setSplasherWebhook(
@@ -215,6 +287,16 @@ export async function adminSetCommunityEligibility(
   const data = (await res.json()) as { message?: string; communityEligible?: boolean; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to update community eligibility');
   return data as { message: string; communityEligible: boolean };
+}
+
+export async function adminSendResetLink(username: string, token: string): Promise<{ message: string }> {
+  const res = await fetch(`${BASE}/admin/users/${encodeURIComponent(username)}/send-reset-link`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  const data = (await res.json()) as { message?: string; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to send reset link');
+  return { message: data.message ?? '' };
 }
 
 // ─── Communities ──────────────────────────────────────────────────────────────
