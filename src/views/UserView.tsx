@@ -268,7 +268,7 @@ function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: Archi
   const durations = new Map<string, number>();
   for (const entry of sessions) {
     const key = dayKey(entry.createdTimestamp);
-    durations.set(key, (durations.get(key) ?? 0) + sessionDurationMs(entry.session));
+    durations.set(key, (durations.get(key) ?? 0) + sessionDurationMs(entry));
   }
 
   const today = new Date();
@@ -369,7 +369,7 @@ function MonthlyHoursChart({ sessions, month, onMonthChange }: { sessions: Archi
     for (const entry of sessions) {
       const d = new Date(entry.createdTimestamp);
       if (d.getFullYear() === year && d.getMonth() === mo) {
-        ms[d.getDate() - 1] += sessionDurationMs(entry.session);
+        ms[d.getDate() - 1] += sessionDurationMs(entry);
       }
     }
     return ms.map((v) => v / 3_600_000);
@@ -450,9 +450,9 @@ function ChevronIcon({ open }: { open: boolean }) {
 
 /** A session's play duration in ms — `logoutTime` is when the session ended normally;
  *  fall back to `endTime` for sessions that don't have it populated. */
-function sessionDurationMs(d: ArchivedSession['session']): number {
-  const start = new Date(d.startTime).getTime();
-  const end = new Date(d.endTime || "").getTime();
+function sessionDurationMs(d: ArchivedSession): number {
+  const start = new Date(d.session.startTime).getTime();
+  const end = new Date(d.session.endTime || d.finalizedTimestamp || "").getTime();
   if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return 0;
   return end - start;
 }
@@ -463,7 +463,7 @@ function calcStats(sessions: ArchivedSession[]) {
     spells += entry.session.spellsCast;
     xp += entry.session.currentMagicXp - entry.session.startMagicXp;
     runeCost += entry.session.runeCostGp;
-    totalPlayedMs += sessionDurationMs(entry.session);
+    totalPlayedMs += sessionDurationMs(entry);
   }
   return { spells, xp, runeCost, totalPlayedMs };
 }
@@ -601,7 +601,7 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
                           </div>
                           <div style={s.rowMeta}>
                             <span style={s.durationBadge} title="Time splashed">
-                              {formatDurationMs(sessionDurationMs(d))}
+                              {formatDurationMs(sessionDurationMs(entry))}
                             </span>
                             {d.stickyKnight && <span style={s.pill('amber')}>Sticky</span>}
                             <span style={s.pill(entry.syncedToServer ? 'green' : 'gray')}>
@@ -641,7 +641,7 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
                               )}
                               <div style={s.detailItem}>
                                 <span style={s.detailLabel}>Duration</span>
-                                <span style={s.detailValue}>{formatDurationMs(sessionDurationMs(d))}</span>
+                                <span style={s.detailValue}>{formatDurationMs(sessionDurationMs(entry))}</span>
                               </div>
                               <div style={s.detailItem}>
                                 <span style={s.detailLabel}>Highest players</span>
