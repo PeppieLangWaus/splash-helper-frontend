@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-08-19
+### Added
+- Support multi-line labels in PixelText (split on `\n`), with every line sharing a consistent row height based on the font's full ink bounds rather than each line's own glyphs.
+
 ## [0.23.2] - 2026-08-19
 ### Changed
 - Wrap Tile's decorative corner/edge/background layers in their own container, so content can layer above them predictably.
