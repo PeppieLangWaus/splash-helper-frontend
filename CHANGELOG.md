@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.26.3] - 2026-08-19
+### Fixed
+- Normalize spell names before looking up their icon, so real session data's "Fire Strike" (space-separated, as sent by the RuneLite plugin) resolves the same icon as dev/fake data's "FIRE_STRIKE" — previously only the latter shape matched, which is why the icon only ever appeared to be missing in production.
+
 ## [0.26.2] - 2026-08-19
 ### Fixed
 - Surface the "Missing icon" console warning in production builds too, not just dev — a name/spell that fails to resolve renders nothing with no failed network request to spot, so the warning was the only trace and it was being stripped exactly where nobody has devtools open.
