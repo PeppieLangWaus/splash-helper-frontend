@@ -7,6 +7,7 @@ import type {
   CommunitySummary,
   CommunitySplasher,
   SplasherWebhooks,
+  SplasherVotes,
   Rank,
   DiscordServerConfig,
   PayoutTicket,
@@ -156,6 +157,29 @@ export async function getActiveSessions(): Promise<ActiveSession[]> {
   if (!res.ok) throw new Error('Failed to fetch active sessions');
   const data = (await res.json()) as { sessions: ActiveSession[] };
   return data.sessions;
+}
+
+/** Anonymous like/dislike tally for a splasher, plus the caller's own vote if any.
+ *  No auth required — voter identity is tracked server-side (e.g. by IP). */
+export async function getSplasherVotes(username: string): Promise<SplasherVotes> {
+  const res = await fetch(`${BASE}/splashers/${encodeURIComponent(username)}/votes`);
+  const data = (await res.json()) as Partial<SplasherVotes> & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to fetch votes');
+  return { likes: data.likes ?? 0, dislikes: data.dislikes ?? 0, myVote: data.myVote ?? null };
+}
+
+/** Casts (or retracts/switches) an anonymous like/dislike for a splasher. Voting again with
+ *  the same value retracts it; voting with the other value switches it — the server keeps at
+ *  most one vote per caller. No auth required. */
+export async function voteSplasher(username: string, value: 1 | -1): Promise<SplasherVotes> {
+  const res = await fetch(`${BASE}/splashers/${encodeURIComponent(username)}/vote`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ value }),
+  });
+  const data = (await res.json()) as Partial<SplasherVotes> & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to vote');
+  return { likes: data.likes ?? 0, dislikes: data.dislikes ?? 0, myVote: data.myVote ?? null };
 }
 
 // ─── Authenticated splasher data ─────────────────────────────────────────────
@@ -612,15 +636,28 @@ export async function devGetAdminToken(): Promise<{ token: string; username: str
   };
 }
 
-export async function devAddFakeSession(username: string): Promise<ActiveSession> {
+export async function devAddFakeSession(username: string, pinned = false): Promise<ActiveSession> {
   const res = await fetch(`${BASE}/dev/sessions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username }),
+    body: JSON.stringify({ username, pinned }),
   });
   const data = (await res.json()) as ActiveSession & { error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to add fake session');
   return data;
+}
+
+/** Toggles whether the backend's inactivity sweeper is allowed to auto-clear this
+ *  dev-view fake session. See POST /dev/sessions/:username/pin. */
+export async function devSetFakeSessionPinned(username: string, pinned: boolean): Promise<{ username: string; pinned: boolean }> {
+  const res = await fetch(`${BASE}/dev/sessions/${encodeURIComponent(username)}/pin`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pinned }),
+  });
+  const data = (await res.json()) as { username?: string; pinned?: boolean; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update fake session');
+  return { username: data.username ?? username, pinned: data.pinned ?? pinned };
 }
 
 export async function devTickFakeSession(username: string): Promise<ActiveSession> {

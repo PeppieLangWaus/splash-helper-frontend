@@ -13,6 +13,9 @@ interface ChatFont {
   descent: number;
   /** Advance width for glyphs that don't set their own horiz-adv-x. */
   fallbackAdvance: number;
+  /** Ink bounds spanning every glyph the font defines (every character it can draw, not just the
+   *  ones in some particular string) — see getFontInkBounds. */
+  fullInk: { minY: number; maxY: number } | null;
 }
 
 let cached: ChatFont | null = null;
@@ -49,8 +52,29 @@ function getChatFont(): ChatFont {
     });
   });
 
-  cached = { glyphs, unitsPerEm, ascent, descent, fallbackAdvance };
+  let fullMinY = Infinity;
+  let fullMaxY = -Infinity;
+  glyphs.forEach((glyph) => {
+    if (!glyph.d) return;
+    const bounds = traceGlyphBoundsY(glyph.d);
+    if (!bounds) return;
+    if (bounds.minY < fullMinY) fullMinY = bounds.minY;
+    if (bounds.maxY > fullMaxY) fullMaxY = bounds.maxY;
+  });
+  const fullInk = fullMinY === Infinity ? null : { minY: fullMinY, maxY: fullMaxY };
+
+  cached = { glyphs, unitsPerEm, ascent, descent, fallbackAdvance, fullInk };
   return cached;
+}
+
+/** Ink bounds spanning every glyph this font defines — the tallest ascender and deepest
+ *  descender it can ever draw, in font units. Unlike `layoutChatText(text).ink`, which is tight
+ *  to whatever glyphs happen to be in `text`, this is the same value no matter what text is
+ *  passed. Use it to give independently-worded strings (e.g. the separate lines of a wrapped
+ *  label) a shared, predictable line height instead of one that shifts depending on whether a
+ *  particular line happens to contain a descender like "g" or "y". */
+export function getFontInkBounds(): { minY: number; maxY: number } | null {
+  return getChatFont().fullInk;
 }
 
 /** Traces a glyph's path data to find its ink bounds, in the glyph's own local coordinates

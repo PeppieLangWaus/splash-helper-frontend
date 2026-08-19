@@ -40,6 +40,10 @@ const ICON_FILE_PATHS = [
   '/assets/icons/worldType/f2p.png',
   '/assets/icons/worldType/members.png',
   '/assets/icons/worldType/pvp.png',
+  '/assets/icons/components/buttons/like/selected.png',
+  '/assets/icons/components/buttons/like/unselected.png',
+  '/assets/icons/components/buttons/dislike/selected.png',
+  '/assets/icons/components/buttons/dislike/unselected.png',
 ] as const;
 
 function stripAssetPrefixAndExtension(assetPath: string): string[] {

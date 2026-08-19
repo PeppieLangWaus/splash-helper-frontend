@@ -1,13 +1,33 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getActiveSessions, devAddFakeSession, devTickFakeSession, devRemoveFakeSession, devReset } from '../api';
+import {
+  getActiveSessions,
+  devAddFakeSession,
+  devTickFakeSession,
+  devRemoveFakeSession,
+  devSetFakeSessionPinned,
+  devReset,
+} from '../api';
 import type { ActiveSession } from '../types';
 import { colors, fontSerif } from '../theme';
+
+// Remembered across reloads so the checkbox doesn't reset itself every time the dev view is
+// re-opened while poking at fake sessions.
+const PIN_NEW_SESSIONS_KEY = 'dev.pinNewFakeSessions';
 
 const s = {
   container: { maxWidth: 900, margin: '0 auto', padding: '2rem 1rem' },
   heading: { fontFamily: fontSerif, fontSize: '1.6rem', fontWeight: 700, color: colors.text, margin: '0 0 0.25rem' },
   note: { fontSize: '0.8rem', color: colors.textFaint, marginBottom: '1.25rem' },
-  form: { display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' },
+  form: { display: 'flex', gap: '0.5rem', marginBottom: '0.6rem' },
+  pinOption: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+    fontSize: '0.8rem',
+    color: colors.textMuted,
+    marginBottom: '1.5rem',
+    cursor: 'pointer',
+  },
   input: {
     flex: 1,
     padding: '0.5rem 0.75rem',
@@ -74,6 +94,25 @@ const s = {
     fontSize: '0.8rem',
     color: colors.dangerText,
   },
+  pinBtn: {
+    padding: '0.35rem 0.7rem',
+    border: `1px solid ${colors.borderStrong}`,
+    borderRadius: 6,
+    background: '#3e2816',
+    cursor: 'pointer',
+    fontSize: '0.8rem',
+    color: colors.textMuted,
+  },
+  pinBtnActive: {
+    padding: '0.35rem 0.7rem',
+    border: `1px solid ${colors.accent}`,
+    borderRadius: 6,
+    background: colors.accent,
+    cursor: 'pointer',
+    fontSize: '0.8rem',
+    color: '#fff',
+    fontWeight: 700,
+  },
   emptyMsg: { color: colors.textFaint, textAlign: 'center' as const, padding: '2rem' },
 } as const;
 
@@ -83,6 +122,13 @@ export default function DevSessionsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
   const [resetStatus, setResetStatus] = useState<string | null>(null);
+  const [pinNewSessions, setPinNewSessions] = useState(
+    () => localStorage.getItem(PIN_NEW_SESSIONS_KEY) === 'true',
+  );
+
+  useEffect(() => {
+    localStorage.setItem(PIN_NEW_SESSIONS_KEY, String(pinNewSessions));
+  }, [pinNewSessions]);
 
   const load = useCallback(async () => {
     try {
@@ -103,11 +149,21 @@ export default function DevSessionsPanel() {
     if (!name) return;
     setError(null);
     try {
-      await devAddFakeSession(name);
+      await devAddFakeSession(name, pinNewSessions);
       setUsername('');
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add fake session.');
+    }
+  }
+
+  async function handleTogglePin(name: string, currentlyPinned: boolean) {
+    setError(null);
+    try {
+      await devSetFakeSessionPinned(name, !currentlyPinned);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update fake session.');
     }
   }
 
@@ -181,6 +237,15 @@ export default function DevSessionsPanel() {
         </button>
       </div>
 
+      <label style={s.pinOption}>
+        <input
+          type="checkbox"
+          checked={pinNewSessions}
+          onChange={(e) => setPinNewSessions(e.target.checked)}
+        />
+        Prevent auto-clear for new fake sessions (skips the inactivity sweep entirely)
+      </label>
+
       {sessions.length === 0 && <p style={s.emptyMsg}>No active sessions. Add one above.</p>}
 
       {sessions.map((session) => (
@@ -191,9 +256,17 @@ export default function DevSessionsPanel() {
               {session.sessionData
                 ? `${session.sessionData.spell} · World ${session.sessionData.world} · ${session.sessionData.spellsCast} casts`
                 : 'Session data pending…'}
+              {session.pinned ? ' · 📌 auto-clear disabled' : ''}
             </span>
           </div>
           <div style={s.actions}>
+            <button
+              style={session.pinned ? s.pinBtnActive : s.pinBtn}
+              type="button"
+              onClick={() => void handleTogglePin(session.username, !!session.pinned)}
+            >
+              {session.pinned ? 'Unpin' : 'Pin (no auto-clear)'}
+            </button>
             <button style={s.actionBtn} type="button" onClick={() => void handleTick(session.username)}>
               Tick (+casts)
             </button>

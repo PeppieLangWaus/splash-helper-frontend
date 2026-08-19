@@ -52,6 +52,18 @@ export interface ActiveSession {
   sessionData: SessionData | null;
   lastUpdate: number;
   communities?: ActiveSessionCommunity[];
+  /** True when the inactivity sweeper is not allowed to auto-clear this session.
+   *  Only ever set on fake sessions injected via the dev view. */
+  pinned?: boolean;
+}
+
+/** Anonymous like/dislike tally for a splasher, plus the caller's own vote (identified
+ *  server-side, e.g. by IP) — GET /splashers/:username/votes. `myVote` is null when the
+ *  caller hasn't voted. */
+export interface SplasherVotes {
+  likes: number;
+  dislikes: number;
+  myVote: 1 | -1 | null;
 }
 
 /** Archived session stored in MongoDB */

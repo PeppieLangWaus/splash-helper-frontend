@@ -1,0 +1,326 @@
+.session-panel {
+    flex: 0 0 auto;
+    aspect-ratio: 407 / 549;
+    height: 375px;
+    border: 7px solid transparent;
+    border-image-source: url(/assets/icons/panelBackground.png);
+    border-image-slice: 30 fill;
+    border-image-width: 18px;
+    border-image-repeat: stretch;
+    box-sizing: border-box;
+    padding: 1.2rem 0.25rem 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.session-panel-username {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0 0 0.215rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #FF981F;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+    font-family: "RuneScape", sans-serif;
+}
+
+.session-panel-community-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem;
+    margin: -0.05rem 0 0.15rem;
+}
+
+.session-panel-community-link {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--accent-text);
+    text-decoration: none;
+    background: var(--accent-soft);
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+}
+
+.session-panel-pair-row {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.session-panel-tile {
+    flex: 1;
+    max-height: 89px;
+}
+
+.session-panel-tile-content {
+    padding: 0.4rem 0.4rem 0.3rem 0.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.session-panel-tile-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.session-panel-tile-icon {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.session-panel-tile-value-inline {
+    display: flex;
+    justify-content: end;
+    line-height: 1;
+    gap: 0.35rem;
+}
+
+.session-panel-tile-wide {
+    aspect-ratio: 302 / 60;
+    max-height: 2rem;
+}
+
+.session-panel-tile-wide .session-panel-tile-content {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+
+.session-panel-tile-wide
+> .session-panel-tile-content {
+    display: flex;
+    flex-direction: row;
+    gap: .2em;
+    justify-content: center;
+}
+
+.session-panel-tile-content
+> .session-panel-tile-label {
+    gap: .3em
+}
+
+.session-panel-tile-wide
+> .session-panel-tile-content
+> .session-panel-tile-value {
+    /* padding-top: .2em; */
+    margin-bottom: .15em;
+}
+
+.session-panel-tile-wide > .session-panel-tile-label {
+    margin-bottom: 0;
+    padding-top: 0;
+    line-height: 1;
+}
+
+.session-panel-tile-label {
+    display: flex;
+    font-size: .9rem;
+    margin-bottom: 0.15rem;
+    justify-self: start;
+}
+
+.session-panel-tile-value {
+    display: flex;
+    justify-content: end;
+    line-height: 1;
+    gap: 0.35rem;
+}
+
+.session-panel-tile-label-value svg {
+    align-self: end;
+}
+
+.session-panel-tile-label-text {
+    align-self: center;
+    display: flex;
+    align-content: center;
+}
+
+.session-panel-tile-label-text svg {
+    align-self: end;
+}
+
+.session-panel-tile-label-icon {
+    align-self: center;
+}
+
+.session-panel-tile-label {
+    font-size: .9rem;
+    justify-self: start;
+}
+
+.session-panel-tile-value {
+    font-size: .9rem;
+    justify-self: end;
+}
+
+.session-panel-no-data {
+    color: #c9bd9f;
+    font-style: italic;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 0.5rem 0;
+    font-family: "RuneScape", sans-serif;
+}
+
+.session-panel-vote-section {
+    padding-top: .7em;
+    margin-top: .5em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 75%;
+    margin: auto;
+}
+
+.session-panel-vote-row {
+    position: relative;
+    top: -.5em;
+    display: flex;
+    justify-content: center;
+}
+
+/* Ratio bar, pixel-matched against a per-pixel SVG reference (bar.svg, 146x13, one <rect>
+   per pixel): a sunken groove (border -> highlight -> shadow) around a slightly embossed
+   fill. Every ring is genuinely directional in the source - top/bottom differ from each
+   other, left/right are close but not identical - so each ring is built from four per-side
+   border colors rather than one flat tone. Nested rings (not the bitmap itself) so the fill
+   stays a resizable live like/dislike split.
+
+   Resize the whole thing by editing these three variables on .session-panel-vote-ratio-outer
+   - everything else (including the outer's total width/height) derives from them via the box
+   model, no other edits needed:
+     --vote-bar-width       overall bar width (any CSS length, e.g. 100%, 300px)
+     --vote-bar-fill-height height of just the fill strip, excluding the frame
+     --vote-bar-pixel       thickness of one "source pixel" (border/highlight/shadow/fill-edge
+                             rings). Source is 1px per ring at native size; bump this to scale
+                             the whole frame up like a nearest-neighbor pixel-art zoom. */
+.session-panel-vote-ratio-outer {
+    --vote-bar-width: 100%;
+    --vote-bar-fill-height: .5em;
+    --vote-bar-pixel: .12em;
+    width: var(--vote-bar-width);
+    border: var(--vote-bar-pixel) solid #302920;
+    box-sizing: border-box;
+}
+
+.session-panel-vote-ratio-highlight {
+    border-top: var(--vote-bar-pixel) solid #524A3E;
+    border-right: var(--vote-bar-pixel) solid #544C3F;
+    border-bottom: var(--vote-bar-pixel) solid #4B4337;
+    border-left: var(--vote-bar-pixel) solid #554D40;
+    box-sizing: border-box;
+}
+
+.session-panel-vote-ratio-shadow {
+    border-top: var(--vote-bar-pixel) solid #13120F;
+    border-right: var(--vote-bar-pixel) solid #100E0C;
+    border-bottom: var(--vote-bar-pixel) solid #292520;
+    border-left: var(--vote-bar-pixel) solid #0F0D0B;
+    box-sizing: border-box;
+}
+
+.session-panel-vote-ratio-track {
+    display: flex;
+    height: var(--vote-bar-fill-height);
+    overflow: hidden;
+}
+
+.session-panel-vote-ratio-fill-like {
+    height: 100%;
+    background: #009400;
+    box-shadow:
+        inset 0 var(--vote-bar-pixel) 0 #006E00,
+        inset var(--vote-bar-pixel) 0 0 #007600,
+        inset 0 calc(var(--vote-bar-pixel) * -1) 0 #004A00;
+    transition: width 0.2s ease;
+}
+
+.session-panel-vote-ratio-fill-like.is-rightmost {
+    box-shadow:
+        inset 0 var(--vote-bar-pixel) 0 #006E00,
+        inset var(--vote-bar-pixel) 0 0 #007600,
+        inset calc(var(--vote-bar-pixel) * -1) 0 0 #007400,
+        inset 0 calc(var(--vote-bar-pixel) * -1) 0 #004A00;
+}
+
+.session-panel-vote-ratio-fill-dislike {
+    height: 100%;
+    background: #940000;
+    box-shadow:
+        inset 0 var(--vote-bar-pixel) 0 #6E0000,
+        inset calc(var(--vote-bar-pixel) * -1) 0 0 #740000,
+        inset 0 calc(var(--vote-bar-pixel) * -1) 0 #4A0000;
+    transition: width 0.2s ease;
+}
+
+.session-panel-vote-ratio-fill-dislike.is-leftmost {
+    box-shadow:
+        inset 0 var(--vote-bar-pixel) 0 #6E0000,
+        inset calc(var(--vote-bar-pixel) * -1) 0 0 #740000,
+        inset var(--vote-bar-pixel) 0 0 #760000,
+        inset 0 calc(var(--vote-bar-pixel) * -1) 0 #4A0000;
+}
+
+.session-panel-vote-btn {
+    background: none;
+    border: none;
+    padding: 0.15rem 0.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.session-panel-vote-btn:hover:not(:disabled) {
+    transform: scale(1.15);
+    filter: brightness(1.2);
+}
+
+.session-panel-vote-btn:active:not(:disabled) {
+    transform: scale(1.0);
+}
+
+.session-panel-vote-btn:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.session-panel-vote-btn img {
+    display: block;
+}
+
+.session-panel-vote-count {
+    font-size: 0.85rem;
+    font-weight: 100;
+    color: #F29130;
+    text-shadow: 1px 0px 0px black;
+    line-height: 1;
+    font-family: "RuneScape", sans-serif;
+}
+
+.like-btn img {
+    position: relative;
+    /* top: -.4em; */
+}
+
+.dislike-btn img {
+    position: relative;
+    /* top: .4em; */
+}

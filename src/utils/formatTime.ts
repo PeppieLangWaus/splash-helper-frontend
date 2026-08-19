@@ -21,7 +21,8 @@ export function formatRelativeTime(date: Date): string {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
-  });
+
+  }).replace(/\s([^\s]*)$/, '$1');
 
   return `${dayLabel} ${time}`;
 }
