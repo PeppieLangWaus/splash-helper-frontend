@@ -15,6 +15,8 @@ const ICON_FILE_PATHS = [
   '/assets/icons/xp.png',
   '/assets/icons/knight/normal.png',
   '/assets/icons/knight/sticky.png',
+  '/assets/icons/knight/skull/normal.png',
+  '/assets/icons/knight/skull/sticky.png',
   '/assets/icons/location/aus.png',
   '/assets/icons/location/bra.png',
   '/assets/icons/location/ger.png',
