@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-08-19
+### Added
+- Redraw the knight-type, session-start, and last-update icons at a larger, sharper 18x18, and add skulled knight icon variants (normal + sticky).
+
 ## [0.24.1] - 2026-08-19
 ### Fixed
 - Drop the stray space before the AM/PM suffix in relative time labels (e.g. "2:30PM" instead of "2:30 PM").
