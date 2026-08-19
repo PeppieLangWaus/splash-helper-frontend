@@ -16,10 +16,11 @@ export default function Icon({ src, spell, name, size, alt = '', width, height, 
     ?? (name ? getIcon(name) : undefined);
 
   if (!resolvedSrc) {
-    if (import.meta.env.DEV) {
-      const id = src ?? spell ?? name ?? '(empty)';
-      console.warn(`Missing icon for "${id}"`);
-    }
+    // Not gated to DEV: a name/spell that doesn't resolve renders nothing with no failed
+    // network request to spot in the Network tab, so this warning is the only trace of it —
+    // production is exactly where that's needed most.
+    const id = src ?? spell ?? name ?? '(empty)';
+    console.warn(`Missing icon for "${id}"`);
 
     return null;
   }

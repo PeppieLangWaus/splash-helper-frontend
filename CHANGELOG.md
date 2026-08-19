@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.26.2] - 2026-08-19
+### Fixed
+- Surface the "Missing icon" console warning in production builds too, not just dev — a name/spell that fails to resolve renders nothing with no failed network request to spot, so the warning was the only trace and it was being stripped exactly where nobody has devtools open.
+
 ## [0.26.1] - 2026-08-19
 ### Fixed
 - Register the skulled knight icon paths in `icons.ts` so `knight.skull.normal`/`knight.skull.sticky` actually resolve instead of silently rendering nothing.
