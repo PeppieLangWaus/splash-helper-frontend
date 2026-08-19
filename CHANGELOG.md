@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-08-19
+### Added
+- Extract the splasher card into its own SessionPanel component, and redesign its stat tiles with pixel-font labels/values, per-tile icon placement (start/end/label), and wrapped two-line labels (e.g. "Session / Start time").
+
 ## [0.25.0] - 2026-08-19
 ### Added
 - Redraw the knight-type, session-start, and last-update icons at a larger, sharper 18x18, and add skulled knight icon variants (normal + sticky).
