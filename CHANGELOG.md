@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.23.2] - 2026-08-19
+### Changed
+- Wrap Tile's decorative corner/edge/background layers in their own container, so content can layer above them predictably.
+
 ## [0.23.1] - 2026-08-15
 ### Added
 - Add this retroactive CHANGELOG.md documenting the full project history.

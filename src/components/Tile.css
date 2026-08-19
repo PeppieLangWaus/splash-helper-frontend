@@ -5,9 +5,14 @@
   height: 100%;
 }
 
+.tile-bg {
+  position: absolute;
+  inset: 0;
+}
+
 .tile-corner,
 .tile-edge,
-.tile-bg {
+.tile-bg-fill {
   position: absolute;
   image-rendering: pixelated;
 }
@@ -68,7 +73,7 @@
   background-image: url(/assets/icons/components/tile/edges/right.png);
 }
 
-.tile-bg {
+.tile-bg-fill {
   background-repeat: repeat;
   background-image: url(/assets/icons/components/tile/bg.png);
   inset: 4px;

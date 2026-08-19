@@ -29,32 +29,34 @@ export default function Tile({
 
   return (
     <div className={`tile ${className ?? ''}`} style={{ width, height, ...style }}>
-      <div className="tile-corner tile-corner-top-left" style={{ width: corner, height: corner }} />
-      <div className="tile-corner tile-corner-top-right" style={{ width: corner, height: corner }} />
-      <div className="tile-corner tile-corner-bottom-left" style={{ width: corner, height: corner }} />
-      <div className="tile-corner tile-corner-bottom-right" style={{ width: corner, height: corner }} />
+      <div className="tile-bg">
+        <div className="tile-corner tile-corner-top-left" style={{ width: corner, height: corner }} />
+        <div className="tile-corner tile-corner-top-right" style={{ width: corner, height: corner }} />
+        <div className="tile-corner tile-corner-bottom-left" style={{ width: corner, height: corner }} />
+        <div className="tile-corner tile-corner-bottom-right" style={{ width: corner, height: corner }} />
 
-      <div
-        className="tile-edge tile-edge-top"
-        style={{ left: corner, right: corner, height: edge, backgroundSize: `${edge}px ${edge}px` }}
-      />
-      <div
-        className="tile-edge tile-edge-bottom"
-        style={{ left: corner, right: corner, height: edge, backgroundSize: `${edge}px ${edge}px` }}
-      />
-      <div
-        className="tile-edge tile-edge-left"
-        style={{ top: corner, bottom: corner, width: edge, backgroundSize: `${edge}px ${edge}px` }}
-      />
-      <div
-        className="tile-edge tile-edge-right"
-        style={{ top: corner, bottom: corner, width: edge, backgroundSize: `${edge}px ${edge}px` }}
-      />
+        <div
+          className="tile-edge tile-edge-top"
+          style={{ left: corner, right: corner, height: edge, backgroundSize: `${edge}px ${edge}px` }}
+        />
+        <div
+          className="tile-edge tile-edge-bottom"
+          style={{ left: corner, right: corner, height: edge, backgroundSize: `${edge}px ${edge}px` }}
+        />
+        <div
+          className="tile-edge tile-edge-left"
+          style={{ top: corner, bottom: corner, width: edge, backgroundSize: `${edge}px ${edge}px` }}
+        />
+        <div
+          className="tile-edge tile-edge-right"
+          style={{ top: corner, bottom: corner, width: edge, backgroundSize: `${edge}px ${edge}px` }}
+        />
 
-      <div
-        className="tile-bg"
-        style={{ backgroundSize: `${edge}px ${edge}px` }}
-      />
+        <div
+          className="tile-bg-fill"
+          style={{ backgroundSize: `${edge}px ${edge}px` }}
+        />
+      </div>
 
       {children != null && <div className={`tile-content ${contentClassName ?? ''}`}>{children}</div>}
     </div>
