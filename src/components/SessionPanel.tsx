@@ -279,7 +279,7 @@ export default function SessionPanel({ session, onSelectUser }: Props) {
             <StatTile
               label="Spells Cast"
               value={fmt(d.spellsCast)}
-              icon={{ name: d.spell, size: '1.55em' }}
+              icon={{ spell: d.spell, size: '1.55em' }}
               iconMargin='0 -.4em 0 -.5em'
             />
           </div>
