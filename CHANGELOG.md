@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.24.1] - 2026-08-19
+### Fixed
+- Drop the stray space before the AM/PM suffix in relative time labels (e.g. "2:30PM" instead of "2:30 PM").
+
 ## [0.24.0] - 2026-08-19
 ### Added
 - Support multi-line labels in PixelText (split on `\n`), with every line sharing a consistent row height based on the font's full ink bounds rather than each line's own glyphs.
