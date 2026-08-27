@@ -17,16 +17,12 @@ const faqs = [
     a: 'The normal knight is able to freely walk in and out of the bank, since it has pathing there. The Sticky knight, on the other hand, has to be pushed outside of its wander range to get inside the bank. This causes them to never path outside the bank, making it move a lot less and more AFK for the people pickpocketing.',
   },
   {
-    q: 'Can paladins be splashed too?',
-    a: "It's a Thieving training method where you pickpocket the Knight of Ardougne NPCs in East Ardougne.",
+    q: "Why aren't Paladins splashed too?",
+    a: "This is mostly because Paladins have a lower pickpocket success chance. So much so that it's always better to just keep pickpocketing Knights of Ardougne.",
   },
   {
     q: 'What level and gear do I need for ardy knight thieving?',
-    a: 'A thieving level of 55 is needed to start pickpocketing a Knight of Ardougne, but it\'s recommended to do wealthy citizens to around level 70, as you get hit a lot at level 55. No special gear is required, though there are a few things you can do to improve your XP/GP per hour.',
-  },
-  {
-    q: "I'm getting hit a lot, what do I do?",
-    a: ''
+    a: 'A thieving level of 55 is needed to start pickpocketing a Knight of Ardougne, but it\'s recommended to do wealthy citizens to around level 70-75, as you get hit a lot at level 55. No special gear is required, though there are a few things you can do to improve your XP/GP per hour (See: recommended setup)',
   },
 ];
 
@@ -68,7 +64,12 @@ const tooltip = {
       <LinkPreview href='https://oldschool.runescape.wiki/w/Ardougne_Diary#Medium' style={gs.a}>
         Achievement Diary
       </LinkPreview>
-    )
+    ),
+    friendsChat: (
+      <LinkPreview href='https://oldschool.runescape.wiki/w/Chat-channel' style={gs.a}>
+        friends chats
+      </LinkPreview>
+    ),
   },
   rockyDrop: (
     <>
@@ -203,35 +204,53 @@ export default function PickpocketGuide() {
           That's where a splasher comes in, they keep the knight aggroed on them by
           having a low enough {tooltip.atkBonus} that they never hit the knight. 
           This method is used to trap the knight in the corner of the south-east Ardougne bank.
+          Once a knight is splashed, it won't despawn. Normally, when an NPC has been stuck on the same tile for more
+          than 15 minutes, it despawns, but since the splasher keeps it in combat, it doesn't. Aside from this, it also makes the knight move much, much less, 
+          allowing you to pickpocket the knight to your hearts content.
         </p>
 
         <h3 style={gs.h3}>How to find a world</h3>
         <p style={gs.p}>
-          Splash worlds change constantly — a splasher logs off, gets bumped, or moves spots, and the
-          knight goes back to patrolling (unless it's a "sticky" knight — see below). Ardy Host's home
-          page lists who's currently splashing, on which world, and roughly where, refreshed live, so
-          you're not world-hopping blind looking for one.
+          Splash worlds change constantly — a splasher logs off, maybe they disconnect, or move worlds.
+          <br />
+          This makes finding new worlds is a somewhat regular occurence. Ardy Host's home page lists who's currently splashing, 
+          on which world, and roughly where, refreshed live, so you're not world-hopping blind looking for one.
         </p>
+        
         <a href="/" style={gs.cta}>See live splash worlds</a>
+
+        <p style={gs.p}>
+          There also are {tooltip.wiki.friendsChat}, which have many users in them. There's two ways of finding worlds
+          in these. You can either sort the chat by world by clicking the 2nd to last little caret at the top of the chat interface (see the highlighted "friends chat").
+          or you can just send a message asking what the world is. You can send messages by starting it with "/". 
+        </p>
 
         <h3 style={gs.h3}>Start splashing for others</h3>
         <p style={gs.p}>
-          Splashers get the Magic XP either way — letting thieves pickpocket the knight you're
-          splashing doesn't cost you anything, and it's the norm in this community (that's the
-          "letting people train thieving" part). If you want your world listed here so thieves can
-          find you, use the{' '}
-          <a style={gs.a} href="/guides/splash-helper-plugin">Splash Helper RuneLite plugin's</a> Server
-          Sync option to show up on the live list automatically.
+          Check out one of our guides on how to start splashing, or setting up a solo world.
+          <br />
+          WIP
         </p>
 
         <h2 style={gs.h2}>Tips & Tricks</h2>
         <p style={gs.p}>Here are some thing that are good to know, but didn't fit in the guide's structure</p>
 
-        <p style={gs.faqQ}>mouse keys</p>
-        <p style={gs.p}></p>
+        <div>
+          <p style={gs.faqQ}>Mouse Keys</p>
+          <p style={gs.p}>
+            This is a built-in feature in most operating systems. It enables you to click with numpad 5. Which a lot of people
+          </p>
+        </div>
 
-        <p style={gs.faqQ}>pickpocket helper</p>
-        <p style={gs.p}></p>
+        <div>
+          <p style={gs.faqQ}>Pickpocket Helper plugin</p>
+          <p style={gs.p}>WIP</p>
+        </div>
+
+        <div>
+          <p style={gs.faqQ}>The splasher is still setting up</p>
+          <p style={gs.p}>WIP</p>
+        </div>
 
         <h2 style={gs.h2}>FAQ</h2>
         {faqs.map((f) => (
