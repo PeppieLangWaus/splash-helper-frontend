@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-08-27
+### Added
+- Add SEO metadata: page title/description, canonical URL, Open Graph and Twitter card tags, and a WebApplication JSON-LD block in `index.html`, plus `robots.txt` and a `sitemap.xml` covering the home page, guides, bot page, and legal pages.
+
 ## [0.29.0] - 2026-08-27
 ### Added
 - Add a guides hub (`/guides`) and four guide pages — pickpocketing, normal-knight setup, sticky-knight setup, and the RuneLite plugin — reachable from a new "Guides" nav link, using the new `LinkPreview` and `ExplvMap` components. The old `/guide` URL now redirects to `/guides/pickpocketing`.

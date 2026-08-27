@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /setup
+Disallow: /account
+Disallow: /admin
+Disallow: /dev
+
+Sitemap: https://ardy.host/sitemap.xml
