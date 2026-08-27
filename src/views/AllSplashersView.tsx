@@ -37,6 +37,15 @@ export default function AllSplashersView({ onSelectUser }: Props) {
 
   return (
     <div className="all-splashers-view">
+      <p className="all-splashers-intro">
+        Ardy Host tracks OSRS worlds in real time where mages are <strong>splashing the Knights of Ardougne</strong> —
+        AFK-attacking them with a guaranteed-to-miss combat spell so the knights stay stuck in combat and never
+        retaliate. That makes them safe to <strong>pickpocket for Thieving training</strong>: free, low-effort
+        Thieving XP for anyone who shows up. Pick a live <strong>splash world</strong> below and start pickpocketing,
+        or read the <a href="/guides/pickpocketing">full guide</a> if you're new to this, or browse{' '}
+        <a href="/guides">all guides</a> for setting up your own splash spot.
+      </p>
+
       <div className="all-splashers-header">
         <div>
           <h2 className="all-splashers-heading">Active Splashers</h2>

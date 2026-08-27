@@ -4,6 +4,18 @@
     padding: 2rem 1rem;
 }
 
+.all-splashers-intro {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    max-width: 68ch;
+    margin: 0 0 1.5rem;
+}
+
+.all-splashers-intro strong {
+    color: var(--text);
+}
+
 .all-splashers-header {
     display: flex;
     align-items: center;

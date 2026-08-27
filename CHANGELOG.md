@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.30.1] - 2026-08-27
+### Added
+- Add an intro paragraph to the Active Splashers view explaining what splash worlds are and linking to the pickpocketing guide and the new guides hub.
+
 ## [0.30.0] - 2026-08-27
 ### Added
 - Add SEO metadata: page title/description, canonical URL, Open Graph and Twitter card tags, and a WebApplication JSON-LD block in `index.html`, plus `robots.txt` and a `sitemap.xml` covering the home page, guides, bot page, and legal pages.
