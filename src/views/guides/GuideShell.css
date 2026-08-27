@@ -1,0 +1,14 @@
+.guide-toc {
+  width: 200px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 2rem;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+@media (max-width: 880px) {
+  .guide-toc {
+    display: none;
+  }
+}

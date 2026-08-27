@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-08-27
+### Added
+- Add a guides hub (`/guides`) and four guide pages — pickpocketing, normal-knight setup, sticky-knight setup, and the RuneLite plugin — reachable from a new "Guides" nav link, using the new `LinkPreview` and `ExplvMap` components. The old `/guide` URL now redirects to `/guides/pickpocketing`.
+
 ## [0.28.0] - 2026-08-27
 ### Added
 - Add an `ExplvMap` component embedding Explv's Map (a separately-hosted static site) via `postMessage`, plus a `findDaxPath` API client for an itsdax-compatible pathfinder, so guides can show live, annotated in-game maps and walk paths instead of static screenshots.

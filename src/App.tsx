@@ -14,6 +14,11 @@ import DevSessionsPanel from './views/DevSessionsPanel';
 import DiscordBotView from './views/DiscordBotView';
 import TermsOfServiceView from './views/TermsOfServiceView';
 import PrivacyPolicyView from './views/PrivacyPolicyView';
+import GuidesView from './views/guides/GuidesView';
+import NormalKnightGuide from './views/guides/NormalKnightGuide';
+import StickyKnightGuide from './views/guides/StickyKnightGuide';
+import PluginGuide from './views/guides/PluginGuide';
+import PickpocketGuide from './views/guides/PickpocketGuide';
 import { colors, fontSerif } from './theme';
 
 type View =
@@ -164,6 +169,17 @@ function AppInner() {
   // always reachable at their own URL, outside the nav/login-gated shell.
   if (window.location.pathname === '/terms') return <TermsOfServiceView />;
   if (window.location.pathname === '/privacy') return <PrivacyPolicyView />;
+  if (window.location.pathname === '/guides') return <GuidesView />;
+  if (window.location.pathname === '/guides/normal-knight-setup') return <NormalKnightGuide />;
+  if (window.location.pathname === '/guides/sticky-knight-setup') return <StickyKnightGuide />;
+  if (window.location.pathname === '/guides/splash-helper-plugin') return <PluginGuide />;
+  if (window.location.pathname === '/guides/pickpocketing') return <PickpocketGuide />;
+  // Legacy URL from before the guides hub existed — keep it working and consolidate to the
+  // new canonical path so it doesn't linger as a second indexed URL for the same content.
+  if (window.location.pathname === '/guide') {
+    history.replaceState(null, '', '/guides/pickpocketing');
+    return <PickpocketGuide />;
+  }
 
   // If a setup token is present, show the setup view
   if (setupToken) {
@@ -271,6 +287,9 @@ function AppInner() {
         >
           Discord Bot
         </button>
+        <a href="/guides" style={{ ...nav.btn(false), textDecoration: 'none', display: 'inline-block' }}>
+          Guides
+        </a>
         {import.meta.env.DEV && (
           <button
             style={nav.btn(view.name === 'dev')}
