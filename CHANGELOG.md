@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-08-27
+### Added
+- Add a Discord-style hover link preview component (`LinkPreview`) that fetches OSRS Wiki and Discord invite previews from the backend's `/link-preview` endpoint, replacing hand-written tooltip boilerplate.
+
 ## [0.26.3] - 2026-08-19
 ### Fixed
 - Normalize spell names before looking up their icon, so real session data's "Fire Strike" (space-separated, as sent by the RuneLite plugin) resolves the same icon as dev/fake data's "FIRE_STRIKE" — previously only the latter shape matched, which is why the icon only ever appeared to be missing in production.
