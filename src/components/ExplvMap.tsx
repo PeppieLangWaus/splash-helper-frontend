@@ -5,7 +5,7 @@ import type { MapPath, MapRectangle } from '../types/explvMap';
 /** Base URL of Explv's Map (../Explv-s-map — see repo README). Configurable via
  *  VITE_EXPLV_MAP_URL since it's a separately-hosted static site, not part of this app;
  *  defaults to the local dev instance (`npm run dev` in that repo runs on :3003). */
-const MAP_BASE_URL = (import.meta.env.VITE_EXPLV_MAP_URL as string | undefined) || 'http://localhost:3003';
+const MAP_BASE_URL = (import.meta.env.VITE_EXPLV_MAP_URL as string)
 const MAP_ORIGIN = new URL(MAP_BASE_URL).origin;
 
 /** Matches Explv-s-map's `js/embed_overlays.js` — must stay in sync with it. */
