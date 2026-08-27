@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-08-27
+### Added
+- Add an `ExplvMap` component embedding Explv's Map (a separately-hosted static site) via `postMessage`, plus a `findDaxPath` API client for an itsdax-compatible pathfinder, so guides can show live, annotated in-game maps and walk paths instead of static screenshots.
+
 ## [0.27.0] - 2026-08-27
 ### Added
 - Add a Discord-style hover link preview component (`LinkPreview`) that fetches OSRS Wiki and Discord invite previews from the backend's `/link-preview` endpoint, replacing hand-written tooltip boilerplate.
