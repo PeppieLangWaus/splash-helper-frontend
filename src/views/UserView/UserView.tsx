@@ -286,18 +286,25 @@ function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: Archi
     }
   }
 
+  // Plain for-loop (not .map()) so `lastMonth` is mutated directly in sequential render code,
+  // not captured and reassigned from inside a callback — matches the durations/max loops above.
   let lastMonth = -1;
-  const monthLabels = weeks.map((week) => {
+  const monthLabels: string[] = [];
+  for (const week of weeks) {
     // Skip the leading padding week(s) that belong to the previous year — labeling them
     // would put "Dec" right next to "Jan" with barely a column between them.
-    if (week[0].getFullYear() !== year) return '';
+    if (week[0].getFullYear() !== year) {
+      monthLabels.push('');
+      continue;
+    }
     const m = week[0].getMonth();
     if (m !== lastMonth) {
       lastMonth = m;
-      return MONTH_LABELS[m];
+      monthLabels.push(MONTH_LABELS[m]);
+    } else {
+      monthLabels.push('');
     }
-    return '';
-  });
+  }
 
   return (
     <div style={s.activityWrap}>
@@ -527,7 +534,6 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
       const d = new Date(latestSessionTs);
       setSelectedMonth(new Date(d.getFullYear(), d.getMonth(), 1));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latestSessionTs]);
 
   return (

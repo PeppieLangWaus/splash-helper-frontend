@@ -40,11 +40,12 @@ function ChatInputRow({ tabStates, onToggleTabState, inputRef }: ChatInputRowPro
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     switch (e.key) {
-      case 'Enter':
+      case 'Enter': {
         const text = value
         setValue('');
-        runChatCommand(text, { tabStates, toggleTabState: onToggleTabState });        
+        runChatCommand(text, { tabStates, toggleTabState: onToggleTabState });
         break;
+      }
       case 'Backspace':
         setValue(value.slice(0, value.length - 1));
         break;
@@ -131,15 +132,23 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
   // A missing/unverified email fires this once per visit — jump to Private, show only the
   // reminder (not the whole log), and briefly flash the window to draw the eye. Picking any tab
   // manually (handleSelect) clears the spotlight, so All -> Private afterward shows everything.
-  useEffect(() => {
-    if (!emailReminder) return;
+  // Reacting to a new reminder is a plain "adjust state when a value changes" case, so it happens
+  // directly during render rather than in an effect; only the flash's timed reset is a genuine
+  // side effect (needs setTimeout), so that's the only part left in one.
+  const [spotlightedReminderId, setSpotlightedReminderId] = useState<string | null>(null);
+  if (emailReminder && emailReminder.id !== spotlightedReminderId) {
+    setSpotlightedReminderId(emailReminder.id);
     setChannel('private');
     setWindowOpen(true);
     setSpotlightMessageId(emailReminder.id);
     setAlertFlash(true);
+  }
+
+  useEffect(() => {
+    if (!alertFlash) return;
     const timeout = setTimeout(() => setAlertFlash(false), 1500);
     return () => clearTimeout(timeout);
-  }, [emailReminder]);
+  }, [alertFlash]);
 
   const mergedMessages = useMemo(
     () =>

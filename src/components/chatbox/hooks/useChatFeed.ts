@@ -81,9 +81,16 @@ function toChatMessage(raw: ChatBroadcastPayload, channelType: LiveChatChannelTy
  * (ephemeral, resets on restart) is merged in behind local history rather than replacing it.
  */
 export function useChatFeed(communityId: string | null, channelType: LiveChatChannelType | null) {
-  const [messages, setMessages] = useState<ChatMessage[]>(() =>
-    communityId && channelType ? loadStoredMessages(storageKey(communityId, channelType)) : [],
-  );
+  const feedKey = communityId && channelType ? storageKey(communityId, channelType) : null;
+  const [messages, setMessages] = useState<ChatMessage[]>(() => (feedKey ? loadStoredMessages(feedKey) : []));
+  // Reload stored history when the selected community/channel actually changes — a plain "adjust
+  // state when a prop changes" case, so it's handled directly during render (comparing against
+  // the last-seen key) rather than in an effect.
+  const [trackedFeedKey, setTrackedFeedKey] = useState(feedKey);
+  if (feedKey !== trackedFeedKey) {
+    setTrackedFeedKey(feedKey);
+    setMessages(feedKey ? loadStoredMessages(feedKey) : []);
+  }
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const targetRef = useRef<{ communityId: string; channelType: LiveChatChannelType } | null>(null);
@@ -178,11 +185,11 @@ export function useChatFeed(communityId: string | null, channelType: LiveChatCha
     };
   }, [sendSubscribe]);
 
-  // Re-subscribe (and load that channel's stored history) whenever the selected community/
-  // channel changes. No-ops quietly if the socket isn't open yet; onopen above will pick up the
-  // now-current targetRef once it connects.
+  // Re-subscribe over the existing socket whenever the selected community/channel changes —
+  // reloading that channel's stored history is handled above, during render. No-ops quietly if
+  // the socket isn't open yet; onopen above will pick up the now-current targetRef once it
+  // connects.
   useEffect(() => {
-    setMessages(communityId && channelType ? loadStoredMessages(storageKey(communityId, channelType)) : []);
     const ws = wsRef.current;
     if (ws) sendSubscribe(ws);
   }, [communityId, channelType, sendSubscribe]);
