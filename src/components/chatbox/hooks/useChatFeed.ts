@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChatItemRef, ChatMessage, LiveChatChannelType } from '../../types/chatbox';
-import { getRankIcon, parsePlayerName } from './chatIcons';
-import { ccKey, fcKey, loadStoredMessages, subscribeToStoredMessages, upsertStoredMessage } from '../../utils/chatStorage';
+import type { ChatItemRef, ChatMessage, LiveChatChannelType } from '../../../types/chatbox';
+import { getRankIcon, parsePlayerName } from '../utils/chatIcons';
+import { ccKey, fcKey, loadStoredMessages, subscribeToStoredMessages, upsertStoredMessage } from '../../../utils/chatStorage';
 
 // Same origin as the REST API, just ws(s):// instead of http(s):// — the backend's WebSocket
 // server (see splash-helper-backend's websocket/server.ts) accepts connections on any path.

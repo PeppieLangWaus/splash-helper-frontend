@@ -10,6 +10,11 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.32.3] - 2026-08-28
+### Changed
+- Split `components/chatbox/` into `hooks/`, `utils/`, and `data/` subfolders (it had grown to ~30 flat files); the actual chatbox components stay at its root.
+- Move `worldsData.ts` out of `src/` root into `views/AllSplashersView/`, its only consumer.
+
 ## [0.32.2] - 2026-08-28
 ### Changed
 - Reorganize the frontend's file structure: colocate views (`AllSplashersView`, `UserView`, `AdminView`, `AccountSettingsView`) with the panels and hooks only they use, move guide-only helpers (`ExplvMap`, `LinkPreview`) into `views/guides/`, and move chat-only hooks/utils/data into `components/chatbox/`. No behavior change.

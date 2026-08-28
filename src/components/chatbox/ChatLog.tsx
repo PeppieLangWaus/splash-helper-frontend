@@ -1,10 +1,10 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChatItemRef, ChatMessage } from '../../types/chatbox';
 import { formatClockTime } from '../../utils/formatTime';
-import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './chatIcons';
-import { itemIconUrl, stripMessageIconTags } from './itemIcons';
-import { splitColorTagRuns } from './chatColorTags';
-import chatEmptyTips from './chatEmptyTips';
+import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './utils/chatIcons';
+import { itemIconUrl, stripMessageIconTags } from './utils/itemIcons';
+import { splitColorTagRuns } from './utils/chatColorTags';
+import chatEmptyTips from './data/chatEmptyTips';
 
 const MIN_THUMB_HEIGHT = 12;
 const STEP_PX = 24;

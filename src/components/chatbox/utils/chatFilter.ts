@@ -1,4 +1,4 @@
-import type { ChatChannel, ChatMessage, ChatMessageKind, ChatTabStates, TabState } from '../../types/chatbox';
+import type { ChatChannel, ChatMessage, ChatMessageKind, ChatTabStates, TabState } from '../../../types/chatbox';
 
 /** Which bottom-bar tab each message kind belongs to. */
 export const KIND_TO_TAB: Record<ChatMessageKind, ChatChannel> = {

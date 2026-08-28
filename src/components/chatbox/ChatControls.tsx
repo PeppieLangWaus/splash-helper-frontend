@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChatChannel, ChatChannelListing, ChatTabStates, LiveChatChannelType } from '../../types/chatbox';
 import PixelText from './PixelText';
 import ChatChannelMenu from './ChatChannelMenu';
-import { TAB_STATE_COLORS } from './chatColors';
-import { TAB_STATE_LABEL } from './chatFilter';
+import { TAB_STATE_COLORS } from './utils/chatColors';
+import { TAB_STATE_LABEL } from './utils/chatFilter';
 
 const TABS: { id: ChatChannel; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -40,7 +40,7 @@ interface Props {
 /** The chatbox's bottom bar: 7 channel-filter tabs (only one selected at a time) plus a
  *  report button, on the `controls.png` background. Each tab (besides All) also has its own
  *  status line — Game/Public/Private/Trade cycle On/Off, Channel/Clan cycle On/Filtered/Off —
- *  toggled independently of which tab is selected; see chatbox/chatFilter.ts for what each state
+ *  toggled independently of which tab is selected; see chatbox/utils/chatFilter.ts for what each state
  *  actually does to the message list. Right-clicking "Channel" or "Clan" additionally opens a
  *  menu of live Friends/Clan Chats to watch. */
 export default function ChatControls({

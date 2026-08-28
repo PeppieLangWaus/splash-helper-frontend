@@ -1,4 +1,4 @@
-import type { ChatChannel, ChatMessage, ChatTabStates } from '../../types/chatbox';
+import type { ChatChannel, ChatMessage, ChatTabStates } from '../../../types/chatbox';
 import { TAB_STATE_LABEL, nextTabState } from './chatFilter';
 import { navigateToPath } from './appNavigation';
 import { loadChatSettings, setTimestampsEnabled } from './chatSettings';
@@ -14,7 +14,7 @@ import {
   clearStoredMessages,
   clearStoredMessagesByPrefix,
   publishStoredMessage,
-} from '../../utils/chatStorage';
+} from '../../../utils/chatStorage';
 
 /** The chatbox's input row (see Chatbox.tsx) is a command console, not a real chat — nothing
  *  typed there is ever broadcast anywhere. Every line is parsed as a `::command` and answered

@@ -1,4 +1,4 @@
-import type { ChatRank, IronmanStatus, LiveChatChannelType, ModStatus } from '../../types/chatbox';
+import type { ChatRank, IronmanStatus, LiveChatChannelType, ModStatus } from '../../../types/chatbox';
 
 export const MOD_STATUS_ICONS: Record<ModStatus, string> = {
   pmod: '/assets/chatbox/icons/mod/pmod.png',

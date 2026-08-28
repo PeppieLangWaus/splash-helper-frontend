@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import type { ChatMessage } from '../../types/chatbox';
-import { useAuth } from '../../context/AuthContext';
-import { TRADE_KEY, loadStoredMessages, subscribeToStoredMessages } from '../../utils/chatStorage';
+import type { ChatMessage } from '../../../types/chatbox';
+import { useAuth } from '../../../context/AuthContext';
+import { TRADE_KEY, loadStoredMessages, subscribeToStoredMessages } from '../../../utils/chatStorage';
 
 /** Owns the Trade tab's local income/payout/balance log (point 7.7). Entries are appended
  *  elsewhere via utils/tradeLog.ts's logTradeEvent — this hook only reads/subscribes. Returns an

@@ -5,7 +5,7 @@ import './SessionPanel.css';
 import Icon from '../../components/Icon';
 import Tile from './Tile';
 import PixelText from '../../components/chatbox/PixelText';
-import worldsData from '../../worldsData';
+import worldsData from './worldsData';
 import { formatRelativeTime, formatDurationMs } from '../../utils/formatTime';
 import type * as CSS from 'csstype';
 

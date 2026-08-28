@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ChatMessage } from '../../types/chatbox';
-import { getActiveSessions } from '../../api';
-import { CHAT_GREEN, CHAT_ORANGE } from './chatColors';
+import type { ChatMessage } from '../../../types/chatbox';
+import { getActiveSessions } from '../../../api';
+import { CHAT_GREEN, CHAT_ORANGE } from '../utils/chatColors';
 import {
   PUBLIC_KEY,
   appendStoredMessage,
   loadStoredMessages,
   subscribeToStoredMessages,
-} from '../../utils/chatStorage';
+} from '../../../utils/chatStorage';
 
 const POLL_INTERVAL_MS = 15_000;
 

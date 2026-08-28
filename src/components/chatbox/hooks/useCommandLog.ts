@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { ChatMessage } from '../../types/chatbox';
-import { SYSTEM_KEY, loadStoredMessages, subscribeToStoredMessages } from '../../utils/chatStorage';
+import type { ChatMessage } from '../../../types/chatbox';
+import { SYSTEM_KEY, loadStoredMessages, subscribeToStoredMessages } from '../../../utils/chatStorage';
 
 /** Owns the Game tab's `::command` replies (see chatbox/chatCommands.ts) — loads whatever's
  *  already stored, then picks up new ones the moment runChatCommand appends them. No login
