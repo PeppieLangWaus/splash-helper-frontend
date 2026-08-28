@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.31.3] - 2026-08-28
+### Fixed
+- Shrink link-preview thumbnails by 2px (300px → 298px max-height) so they no longer poke past the tooltip's rounded corner into its 1px border.
+
 ## [0.31.2] - 2026-08-28
 ### Fixed
 - Fix link-preview tooltips landing in the wrong position on their first hover (subsequent hovers were fine) — the tooltip now renders its content through react-tooltip's `render` prop instead of children, so it repositions correctly once the preview finishes loading and grows past the "Loading preview…" placeholder's size.
