@@ -1,6 +1,7 @@
 import ExplvMap from '../../components/ExplvMap';
 import { LinkPreview } from '../../components/LinkPreview';
 import { colors } from '../../theme';
+import { Faq } from './Faq';
 import { GuideButtons } from './GuideButton';
 import { guides } from './guidesCatalog';
 import GuideShell from './GuideShell';
@@ -73,6 +74,18 @@ const tooltip = {
       </LinkPreview>
     ),
   },
+  discord: {
+    splashworlds: (
+      <LinkPreview href="https://discord.gg/splashworlds" style={gs.a}>
+        Splashworlds
+      </LinkPreview>
+    ),
+    thievinghost: (
+      <LinkPreview href="https://discord.gg/thievinghost" style={gs.a}>
+        Thievinghost
+      </LinkPreview>
+    )
+  },
   rockyDrop: (
     <>
       <Tooltip
@@ -142,6 +155,7 @@ export default function PickpocketGuide() {
         </p>
 
         <h2 style={gs.h2}>Getting started with pickpocketing Ardy knights</h2>
+        <hr style={gs.hr}/>
 
         <p style={gs.p}>
           So you're looking to get that level you need? Are you an iron looking to get that cash stack going? Or maybe even looking to get {tooltip.rockyDrop}?
@@ -196,6 +210,7 @@ export default function PickpocketGuide() {
         />
 
         <h2 style={gs.h2}>What "Ardougne Knight splashing" is, and why</h2>
+        <hr style={gs.hr}/>
         <p style={gs.p}>
           Having the knights walk about, makes pickpocketing them a more tedious training method than it's worth.
           <br />
@@ -208,11 +223,12 @@ export default function PickpocketGuide() {
         </p>
 
         <h3 style={gs.h3}>How to find a world</h3>
+        
         <p style={gs.p}>
-          Splash worlds change constantly — a splasher logs off, maybe they disconnect, or move worlds.
+          Splash worlds change regularly — a splasher logs off, maybe they disconnect, or move worlds.
           <br />
-          This makes finding new worlds is a somewhat regular occurence. Ardy Host's home page lists who's currently splashing, 
-          on which world, and roughly where, refreshed live, so you're not world-hopping blind looking for one.
+          This makes having to find new worlds a somewhat regular occurence. Ardy Host's home page lists who's currently splashing, 
+          on which world, refreshed live, so you're not world-hopping blind looking for one.
         </p>
         
         <a href="/" style={gs.cta}>See live splash worlds</a>
@@ -220,7 +236,11 @@ export default function PickpocketGuide() {
         <p style={gs.p}>
           There also are {tooltip.wiki.friendsChat}, which have many users in them. There's two ways of finding worlds
           in these. You can either sort the chat by world by clicking the 2nd to last little caret at the top of the chat interface (see the highlighted "friends chat").
-          or you can just send a message asking what the world is. You can send messages by starting it with "/". 
+          or you can just send a message asking what the world is. You can send messages by starting it with "/".
+        </p>
+
+        <p style={gs.p}>
+          To join a friends chat click the join button and enter one of the two following highlighted names. These are the two biggest splashing friends chats: {tooltip.discord.splashworlds} and {tooltip.discord.thievinghost}
         </p>
 
         <h3 style={gs.h3}>Start splashing for others</h3>
@@ -231,53 +251,46 @@ export default function PickpocketGuide() {
         <GuideButtons guides={[guides.knightSetup[0], guides.knightSetup[1] ]} />
 
         <h2 style={gs.h2}>Tips & Tricks</h2>
-        <p style={gs.p}>Here are some thing that are good to know, but didn't fit in the guide's structure</p>
+        <hr style={gs.hr}/>
 
+        <p style={gs.p}>Here are some thing that are good to know, but didn't fit in the guide's structure</p>
         <div>
-          <p style={gs.faqQ}>Mouse Keys</p>
+          <p style={gs.faqQ}>The splasher is still setting up</p>
           <p style={gs.p}>
-            This is a built-in feature in most operating systems. It enables you to click with numpad 5. Which a lot of people
+            When a splasher is setting up a world, please stay inside of the bank and tell others to do so too.
+            Only start pickpocketing when the knight is in its corner.
           </p>
         </div>
 
         <div>
-          <p style={gs.faqQ}>Pickpocket Helper plugin</p>
-          <p style={gs.p}>WIP</p>
+          <p style={gs.faqQ}>Mouse Keys</p>
+          <p style={gs.p}>
+            This is a built-in feature in most operating systems. It lets you control the mouse pointer using the numpad on your keyboard.
+            You can use <span style={gs.code}>8/2/6/4</span> to move the mouse <span style={gs.code}>up/down/left/right</span>. The feature
+            that is most useful for pickpocketing however, is that you can left click using <span style={gs.code}>5</span> on your numpad.
+          </p>
+            <ul style={gs.ul}>
+              <li style={gs.li}><strong>Windows</strong>: <span style={gs.code}>Left Alt + Left Shift + Num Lock</span></li>
+              <li style={gs.li}><strong>MacOS</strong>: <span style={gs.code}>Option + Command + F5</span></li>
+              <li style={gs.li}><strong>Linux (gnome)</strong>: No shortcut, enable it with <span style={gs.code}>Settings {">"} Accessibility {">"} Pointing and Clicking {">"} Mouse Keys</span></li>
+            </ul>
         </div>
 
         <div>
-          <p style={gs.faqQ}>The splasher is still setting up</p>
-          <p style={gs.p}>WIP</p>
+          <p style={gs.faqQ}>Pickpocket Helper plugin</p>
+          <p style={gs.p}>
+            If you're on runelite, there is a plugin called "Pickpocket Helper" on the plugin hub. It helps with keeping
+            track of lots of things and sends notification when an action is needed (for example; when to empty coin pouches).
+            <br />
+            Check it out over at: <a style={gs.a} href="https://runelite.net/plugin-hub/show/pickpocket-helper" target="_blank" rel="noopener noreferrer">Runelite plugin hub</a>
+          </p>
         </div>
 
-        <h2 style={gs.h2}>FAQ</h2>
-        {faqs.map((f) => (
-          <div key={f.q}>
-            <p style={gs.faqQ}>{f.q}</p>
-            <p style={gs.p}>{f.a}</p>
-          </div>
-        ))}
 
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'FAQPage',
-              mainEntity: faqs.map((f) => ({
-                '@type': 'Question',
-                name: f.q,
-                acceptedAnswer: { '@type': 'Answer', text: f.a },
-              })),
-            }),
-          }}
-        />
+        <h2 style={gs.h2}>Frequently Asked Questions</h2>
+        <hr style={gs.hr}/>
 
-        <p style={{ ...gs.p, marginTop: '2rem' }}>
-          See also the <a style={gs.a} href="/">live splash world list</a>, the{' '}
-          <a style={gs.a} href="/guides">full guides list</a>, and the{' '}
-          <a style={gs.a} href="/bot">Discord bot</a> for community setup.
-        </p>
+        <Faq faqs={faqs} />
       </div>
     </GuideShell>
   );

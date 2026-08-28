@@ -12,3 +12,25 @@
     display: none;
   }
 }
+
+.guide-faq summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.guide-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-faq summary::marker {
+  content: '';
+}
+
+.guide-faq-chevron {
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.guide-faq details[open] .guide-faq-chevron {
+  transform: rotate(90deg);
+}

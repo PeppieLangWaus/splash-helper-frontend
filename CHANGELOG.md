@@ -10,6 +10,12 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-08-28
+### Added
+- Make the pickpocketing guide's FAQ entries collapsible (native, keyboard-accessible expand/collapse), via a new reusable `Faq` component.
+### Changed
+- Fill in the pickpocketing guide's "Tips & Tricks" placeholders (Mouse Keys, Pickpocket Helper plugin) with real content, add section divider rules, and link the Splashworlds/Thievinghost Discord friends chats inline.
+
 ## [0.30.2] - 2026-08-28
 ### Changed
 - Move the Discord guild icon to render after the description in link-preview cards instead of before.

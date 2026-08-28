@@ -29,10 +29,11 @@ export const gs = {
   cta: {
     display: 'inline-block',
     marginTop: '0.5rem',
-    padding: '0.65rem 1.25rem',
-    background: colors.accent,
-    color: '#fff',
-    borderRadius: 6,
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 8,
+    padding: '0.6rem 0.95rem',
+    color: colors.text,
     fontWeight: 700,
     fontSize: '0.9rem',
     textDecoration: 'none',
@@ -51,6 +52,26 @@ export const gs = {
     textDecoration: 'none',
   },
   faqQ: { fontFamily: fontSerif, fontSize: '0.95rem', fontWeight: 700, color: colors.text, marginTop: '1.1rem', marginBottom: '0.3rem' },
+
+  // Collapsible FAQ entries (native <details>/<summary>, see Faq.tsx).
+  faqItem: {
+    border: `1px solid ${colors.border}`,
+    borderRadius: 8,
+    marginBottom: '0.6rem',
+    background: colors.panel,
+    overflow: 'hidden',
+  },
+  faqSummary: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.6rem',
+    padding: '0.75rem 1rem',
+    fontFamily: fontSerif,
+    fontSize: '0.95rem',
+    fontWeight: 700,
+    color: colors.text,
+  },
+  faqAnswer: { color: colors.textMuted, fontSize: '0.9rem', lineHeight: 1.7, padding: '0 1rem 0.85rem' },
 
   // Callout boxes used by the setup/plugin guides.
   note: {
@@ -115,6 +136,11 @@ export const gs = {
     opacity: 1,
     padding: '8px 16px',
     fontSize: '0.85rem',
+  },
+  hr: {
+    border: 0,
+    height: "2px",
+    backgroundImage: `linear-gradient(to right, ${colors.borderStrong}, ${colors.borderStrong}, ${colors.bg})`,
   },
 
   table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: '0.85rem', marginBottom: '1.25rem' },
