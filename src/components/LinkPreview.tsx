@@ -112,7 +112,6 @@ function LinkPreviewContent({
     const { guildName, guildIconUrl, description, memberCount, onlineCount } = result.data;
     return (
       <div className="link-preview">
-        {guildIconUrl && <img className="link-preview-thumb link-preview-thumb-round" src={guildIconUrl} alt="" />}
         <div className="link-preview-body">
           <div className="link-preview-title">{guildName}</div>
           {description && <div className="link-preview-extract">{description}</div>}
@@ -128,6 +127,7 @@ function LinkPreviewContent({
             </div>
           )}
         </div>
+        {guildIconUrl && <img className="link-preview-thumb link-preview-thumb-round" src={guildIconUrl} alt="" />}
       </div>
     );
   }

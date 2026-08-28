@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.30.2] - 2026-08-28
+### Changed
+- Move the Discord guild icon to render after the description in link-preview cards instead of before.
+
 ## [0.30.1] - 2026-08-27
 ### Added
 - Add an intro paragraph to the Active Splashers view explaining what splash worlds are and linking to the pickpocketing guide and the new guides hub.
