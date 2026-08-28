@@ -19,6 +19,10 @@ import NormalKnightGuide from './views/guides/NormalKnightGuide';
 import StickyKnightGuide from './views/guides/StickyKnightGuide';
 import PluginGuide from './views/guides/PluginGuide';
 import PickpocketGuide from './views/guides/PickpocketGuide';
+import OptimalSetupGuide from './views/guides/OptimalSetupGuide';
+import MobileSetupGuide from './views/guides/MobileSetupGuide';
+import SoloSetupGuide from './views/guides/SoloSetupGuide';
+import ChatCommandsGuide from './views/guides/ChatCommandsGuide';
 import { colors, fontSerif } from './theme';
 
 type View =
@@ -174,6 +178,10 @@ function AppInner() {
   if (window.location.pathname === '/guides/sticky-knight-setup') return <StickyKnightGuide />;
   if (window.location.pathname === '/guides/splash-helper-plugin') return <PluginGuide />;
   if (window.location.pathname === '/guides/pickpocketing') return <PickpocketGuide />;
+  if (window.location.pathname === '/guides/optimal-setup') return <OptimalSetupGuide />;
+  if (window.location.pathname === '/guides/mobile-setup') return <MobileSetupGuide />;
+  if (window.location.pathname === '/guides/solo-setup') return <SoloSetupGuide />;
+  if (window.location.pathname === '/guides/chat-commands') return <ChatCommandsGuide />;
   // Legacy URL from before the guides hub existed — keep it working and consolidate to the
   // new canonical path so it doesn't linger as a second indexed URL for the same content.
   if (window.location.pathname === '/guide') {
