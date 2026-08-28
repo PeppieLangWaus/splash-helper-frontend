@@ -64,9 +64,18 @@ export function LinkPreview({ href, children, className, style, onClick }: LinkP
         clickable
         className={wideThumb ? 'link-preview-tooltip link-preview-tooltip-wide' : 'link-preview-tooltip'}
         border="1px solid var(--border-strong)"
-      >
-        <LinkPreviewContent href={href} status={status} result={result} wideThumb={wideThumb} onThumbLoad={handleThumbLoad} />
-      </Tooltip>
+        // `render` (rather than children) is what wires up react-tooltip's internal
+        // ResizeObserver-based reposition — see contentWrapperRef in react-tooltip's source: it's
+        // only ever attached to a DOM node along the `render`/`content` prop path, never for plain
+        // children. Without it, the tooltip's position is computed once against whatever content
+        // is in it at that instant (typically the "Loading preview…" placeholder) and never
+        // recomputed as the real preview loads in and grows the box — which is why the first
+        // hover on a link lands the tooltip in the wrong place while a second (cached, so already
+        // full-size by the time it's positioned) hover lands correctly.
+        render={() => (
+          <LinkPreviewContent href={href} status={status} result={result} wideThumb={wideThumb} onThumbLoad={handleThumbLoad} />
+        )}
+      />
     </>
   );
 }

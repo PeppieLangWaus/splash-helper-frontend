@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.31.2] - 2026-08-28
+### Fixed
+- Fix link-preview tooltips landing in the wrong position on their first hover (subsequent hovers were fine) — the tooltip now renders its content through react-tooltip's `render` prop instead of children, so it repositions correctly once the preview finishes loading and grows past the "Loading preview…" placeholder's size.
+
 ## [0.31.1] - 2026-08-28
 ### Fixed
 - Add hover styling to guide link-buttons and the "See live splash worlds" CTA, which previously had none because their inline background/border/color styles silently overrode the hover CSS.
