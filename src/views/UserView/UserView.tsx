@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getArchivedSessions } from '../api';
-import { useAuth } from '../context/AuthContext';
-import type { ArchivedSession } from '../types';
-import { colors, fontSans, fontSerif } from '../theme';
-import { formatDurationMs } from '../utils/formatTime';
-import RuneUsagePanel from '../components/RuneUsagePanel';
+import { getArchivedSessions } from '../../api';
+import { useAuth } from '../../context/AuthContext';
+import type { ArchivedSession } from '../../types';
+import { colors, fontSans, fontSerif } from '../../theme';
+import { formatDurationMs } from '../../utils/formatTime';
+import RuneUsagePanel from './RuneUsagePanel';
 
 const s = {
   container: { maxWidth: 900, margin: '0 auto', padding: '2rem 1rem' },

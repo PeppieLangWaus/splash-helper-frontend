@@ -1,7 +1,7 @@
 import type { ChatChannel, ChatMessage, ChatTabStates } from '../../types/chatbox';
 import { TAB_STATE_LABEL, nextTabState } from './chatFilter';
-import { navigateToPath } from '../../utils/appNavigation';
-import { loadChatSettings, setTimestampsEnabled } from '../../utils/chatSettings';
+import { navigateToPath } from './appNavigation';
+import { loadChatSettings, setTimestampsEnabled } from './chatSettings';
 import {
   CC_KEY_PREFIX,
   FC_KEY_PREFIX,

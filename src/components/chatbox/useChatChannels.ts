@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getPublicChatChannels } from '../api';
-import type { ChatChannelListing } from '../types/chatbox';
+import { getPublicChatChannels } from '../../api';
+import type { ChatChannelListing } from '../../types/chatbox';
 
 /** Fetches the public list of communities with a registered live chat feed (GET /chat-channels)
  *  once on mount, for the chatbox's community picker. Requires no login. */

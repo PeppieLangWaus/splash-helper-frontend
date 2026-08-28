@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { ChatChannelListing, ChatMessage, LiveChatChannelType } from '../types/chatbox';
+import type { ChatChannelListing, ChatMessage, LiveChatChannelType } from '../../types/chatbox';
 import { useChatFeed } from './useChatFeed';
 
 /** How many communities' live feeds one viewer subscribes to at once, per channel type. Only two

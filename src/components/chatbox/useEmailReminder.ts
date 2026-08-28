@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ChatMessage } from '../types/chatbox';
-import { useAuth } from '../context/AuthContext';
-import { getArchivedSessions } from '../api';
-import { logSystemEvent } from '../utils/systemLog';
+import type { ChatMessage } from '../../types/chatbox';
+import { useAuth } from '../../context/AuthContext';
+import { getArchivedSessions } from '../../api';
+import { logSystemEvent } from '../../utils/systemLog';
 
 /** Checks once per mount whether the logged-in user has a verified email on file, and if not,
  *  posts a one-shot reminder into the Private tab (see logSystemEvent) — either "add an email"

@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { getArchivedSessions, setSplasherWebhook, uploadJson, updateAccountEmail, resendVerificationEmail } from '../api';
-import { useAuth } from '../context/AuthContext';
-import WebhookFieldsEditor from '../components/WebhookFieldsEditor';
-import CopyableField from '../components/CopyableField';
-import EmailField from '../components/EmailField';
-import type { SplasherWebhooks, SplashEntry } from '../types';
-import { colors, fontSerif } from '../theme';
-import { applyMessageLimitToAllStores, getMessageLimit } from '../utils/chatStorage';
-import { logSystemEvent } from '../utils/systemLog';
+import { getArchivedSessions, setSplasherWebhook, uploadJson, updateAccountEmail, resendVerificationEmail } from '../../api';
+import { useAuth } from '../../context/AuthContext';
+import WebhookFieldsEditor from '../../components/WebhookFieldsEditor';
+import CopyableField from '../../components/CopyableField';
+import EmailField from './EmailField';
+import type { SplasherWebhooks, SplashEntry } from '../../types';
+import { colors, fontSerif } from '../../theme';
+import { applyMessageLimitToAllStores, getMessageLimit } from '../../utils/chatStorage';
+import { logSystemEvent } from '../../utils/systemLog';
 
 const MIN_CHAT_LOG_SIZE = 10;
 const MAX_CHAT_LOG_SIZE = 500;

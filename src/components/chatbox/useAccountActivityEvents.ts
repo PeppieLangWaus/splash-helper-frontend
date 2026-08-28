@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { getArchivedSessions, getMyPayouts } from '../api';
-import { logSystemEvent } from '../utils/systemLog';
-import { logTradeEvent } from '../utils/tradeLog';
+import { useAuth } from '../../context/AuthContext';
+import { getArchivedSessions, getMyPayouts } from '../../api';
+import { logSystemEvent } from '../../utils/systemLog';
+import { logTradeEvent } from '../../utils/tradeLog';
 
 const POLL_INTERVAL_MS = 20_000;
 // "-v2": these replace an older id-set format (capped at a fixed count, evicting oldest ids on

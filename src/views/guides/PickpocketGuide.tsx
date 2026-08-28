@@ -1,5 +1,5 @@
-import ExplvMap from '../../components/ExplvMap';
-import { LinkPreview } from '../../components/LinkPreview';
+import ExplvMap from './ExplvMap';
+import { LinkPreview } from './LinkPreview';
 import { colors } from '../../theme';
 import { Faq } from './Faq';
 import { GuideButtons } from './GuideButton';

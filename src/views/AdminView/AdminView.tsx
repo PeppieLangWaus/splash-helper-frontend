@@ -4,14 +4,14 @@ import {
   adminSetCommunityEligibility, adminGetCommunities, adminDeleteCommunity,
   adminAssignUsersToCommunity, adminRemoveUserFromCommunity, getCommunitySplashers,
   adminSendResetLink,
-} from '../api';
-import { useAuth } from '../context/AuthContext';
-import { useAdminSecret } from '../hooks/useAdminSecret';
-import Menu, { type MenuItem } from '../components/Menu';
-import { useContextMenu } from '../components/ContextMenu';
-import Modal from '../components/Modal';
-import type { AdminUser, ArchivedSession, Community, CommunitySplasher } from '../types';
-import { colors, fontSerif } from '../theme';
+} from '../../api';
+import { useAuth } from '../../context/AuthContext';
+import { useAdminSecret } from './useAdminSecret';
+import Menu, { type MenuItem } from '../../components/Menu';
+import { useContextMenu } from './ContextMenu';
+import Modal from '../../components/Modal';
+import type { AdminUser, ArchivedSession, Community, CommunitySplasher } from '../../types';
+import { colors, fontSerif } from '../../theme';
 
 const s = {
   container: { maxWidth: 960, margin: '0 auto', padding: '2rem 1rem' },

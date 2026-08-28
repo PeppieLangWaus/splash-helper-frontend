@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getLinkPreview } from '../api';
-import type { LinkPreviewResult } from '../types/linkPreview';
+import { getLinkPreview } from '../../api';
+import type { LinkPreviewResult } from '../../types/linkPreview';
 
 export type LinkPreviewStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -45,7 +45,7 @@ async function resolve(url: string): Promise<LinkPreviewResult> {
 }
 
 /** Lazily resolves a URL to Discord-style preview data. Nothing is fetched until `request()`
- *  fires — see components/LinkPreview.tsx for the anchor + tooltip this backs. */
+ *  fires — see LinkPreview.tsx for the anchor + tooltip this backs. */
 export function useLinkPreview(url: string): LinkPreviewState {
   const [status, setStatus] = useState<LinkPreviewStatus>(() => (cache.has(url) ? 'ready' : 'idle'));
   const [result, setResult] = useState<LinkPreviewResult | undefined>(() => cache.get(url));

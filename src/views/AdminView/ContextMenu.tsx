@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type MouseEvent as ReactMouseEvent } from 'react';
-import { MenuList, type MenuItem } from './Menu';
+import { MenuList, type MenuItem } from '../../components/Menu';
 
 interface ContextMenuState {
   x: number;

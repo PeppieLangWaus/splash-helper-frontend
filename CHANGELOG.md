@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.32.2] - 2026-08-28
+### Changed
+- Reorganize the frontend's file structure: colocate views (`AllSplashersView`, `UserView`, `AdminView`, `AccountSettingsView`) with the panels and hooks only they use, move guide-only helpers (`ExplvMap`, `LinkPreview`) into `views/guides/`, and move chat-only hooks/utils/data into `components/chatbox/`. No behavior change.
+
 ## [0.32.1] - 2026-08-28
 ### Fixed
 - Scope the main nav's border/shadow/margin styling to a `.main-nav` class instead of the bare `nav` element selector — it was leaking onto every guide page's table-of-contents `<nav>`, shoving it 160px to the right and giving it an unwanted border and shadow.

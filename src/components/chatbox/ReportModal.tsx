@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Modal from '../Modal';
-import reportReasons, { type ReportSeverity } from '../../data/reportReasons';
+import reportReasons, { type ReportSeverity } from './reportReasons';
 import { colors, fontSerif } from '../../theme';
 
 const SEVERITY_COLOR: Record<ReportSeverity, { bg: string; text: string }> = {

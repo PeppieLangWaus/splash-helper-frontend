@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { colors } from '../theme';
+import { colors } from '../../theme';
 
 const s = {
   wrap: { display: 'flex', flexDirection: 'column' as const, gap: '0.6rem' },

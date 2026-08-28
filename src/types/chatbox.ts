@@ -21,8 +21,8 @@ export type ChatChannel = 'all' | 'game' | 'public' | 'private' | 'channel' | 'c
 /** What kind of source a message came from — drives which tab it belongs to (see
  *  chatbox/chatFilter.ts) and how it's rendered (chatbox/ChatLog.tsx). `fc`/`cc` are real live
  *  chat lines (Channel/Clan tabs); the rest are locally-synthesized lines (Game/Public/Private/
- *  Trade tabs) — see the individual `use*` hooks in `hooks/`. `system` is the chat command
- *  console's own replies (utils/chatCommands.ts) — it shares the Game tab with `info`, but is
+ *  Trade tabs) — see the individual `use*` hooks in `chatbox/`. `system` is the chat command
+ *  console's own replies (chatbox/chatCommands.ts) — it shares the Game tab with `info`, but is
  *  kept as its own kind/localStorage feed so `::clear info` and `::clear system` can target
  *  either independently. */
 export type ChatMessageKind = 'fc' | 'cc' | 'info' | 'public' | 'private' | 'trade' | 'system';

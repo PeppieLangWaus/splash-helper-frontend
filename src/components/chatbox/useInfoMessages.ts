@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ChatMessage } from '../types/chatbox';
-import { CHAT_INFO } from '../components/chatbox/chatColors';
-import chatInfoMessages from '../data/chatInfoMessages';
+import type { ChatMessage } from '../../types/chatbox';
+import { CHAT_INFO } from './chatColors';
+import chatInfoMessages from './chatInfoMessages';
 import {
   INFO_KEY,
   appendStoredMessage,
   loadStoredMessages,
   subscribeToStoredMessages,
-} from '../utils/chatStorage';
+} from '../../utils/chatStorage';
 
 /** How often the Game tab gets a new info tip — "by default every 10 minutes" (point 1). */
 export const INFO_MESSAGE_INTERVAL_MS = 10 * 60 * 1000;

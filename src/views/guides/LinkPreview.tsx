@@ -1,8 +1,8 @@
 import { useId, useState } from 'react';
 import type { CSSProperties, MouseEventHandler, ReactNode, SyntheticEvent } from 'react';
 import { Tooltip } from 'react-tooltip';
-import { useLinkPreview } from '../hooks/useLinkPreview';
-import type { LinkPreviewResult } from '../types/linkPreview';
+import { useLinkPreview } from './useLinkPreview';
+import type { LinkPreviewResult } from '../../types/linkPreview';
 import './LinkPreview.css';
 
 interface LinkPreviewProps {
@@ -15,7 +15,7 @@ interface LinkPreviewProps {
 
 /**
  * A link that grows a Discord-style hover preview once the backend resolves it — see
- * hooks/useLinkPreview.ts and splash-helper-backend's routes/linkPreview.ts. Only OSRS Wiki
+ * useLinkPreview.ts and splash-helper-backend's routes/linkPreview.ts. Only OSRS Wiki
  * articles and Discord invite links actually resolve to anything (the backend's own domain
  * allowlist decides that, not this component); any other href still renders as a plain working
  * link, just with a minimal "Open link" tooltip instead of a real preview.

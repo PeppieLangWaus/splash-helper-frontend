@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getSplasherVotes, voteSplasher } from '../api';
-import type { ActiveSession, SplasherVotes } from '../types';
+import { getSplasherVotes, voteSplasher } from '../../api';
+import type { ActiveSession, SplasherVotes } from '../../types';
 import './SessionPanel.css';
-import Icon from './Icon';
+import Icon from '../../components/Icon';
 import Tile from './Tile';
-import PixelText from './chatbox/PixelText';
-import worldsData from '../worldsData';
-import { formatRelativeTime, formatDurationMs } from '../utils/formatTime';
+import PixelText from '../../components/chatbox/PixelText';
+import worldsData from '../../worldsData';
+import { formatRelativeTime, formatDurationMs } from '../../utils/formatTime';
 import type * as CSS from 'csstype';
 
 function fmt(n: number) { return n.toLocaleString(); }

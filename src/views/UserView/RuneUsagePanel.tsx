@@ -1,6 +1,6 @@
-import Icon from './Icon';
-import { colors } from '../theme';
-import type { RuneUsageMap } from '../types';
+import Icon from '../../components/Icon';
+import { colors } from '../../theme';
+import type { RuneUsageMap } from '../../types';
 
 const s = {
   wrap: { display: 'flex', flexDirection: 'column' as const, gap: '0.3rem' },

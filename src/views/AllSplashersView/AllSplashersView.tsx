@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getActiveSessions } from '../api';
-import type { ActiveSession } from '../types';
+import { getActiveSessions } from '../../api';
+import type { ActiveSession } from '../../types';
 import './AllSplashersView.css';
-import Chatbox from '../components/chatbox/Chatbox';
-import SessionPanel from '../components/SessionPanel';
+import Chatbox from '../../components/chatbox/Chatbox';
+import SessionPanel from './SessionPanel';
 
 interface Props {
   onSelectUser?: (username: string) => void;
