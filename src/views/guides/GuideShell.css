@@ -1,0 +1,61 @@
+.guide-toc {
+  width: 200px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 2rem;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+@media (max-width: 880px) {
+  .guide-toc {
+    display: none;
+  }
+}
+
+.guide-faq summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.guide-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-faq summary::marker {
+  content: '';
+}
+
+.guide-faq-chevron {
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.guide-faq details[open] .guide-faq-chevron {
+  transform: rotate(90deg);
+}
+
+/* GuideButton (compact inline link-button used to point at another guide). Both the button
+   and its hover target set background/border/color as inline styles (`s.button` in
+   GuideButton.tsx, `gs.cta` in guideTheme.ts) — inline styles always beat an external
+   stylesheet's selectors, hover or not, so the hover overrides below need `!important` to
+   actually take effect. */
+.guide-link-btn {
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.guide-link-btn:hover {
+  background: var(--panel-hover) !important;
+  border-color: var(--border-strong) !important;
+}
+
+/* Primary CTA link (e.g. "See live splash worlds"), gs.cta in guideTheme.ts. */
+.guide-cta {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.guide-cta:hover {
+  background: var(--panel-hover) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent-text) !important;
+}

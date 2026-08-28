@@ -13,6 +13,7 @@ import type {
   PayoutTicket,
 } from '../types';
 import type { ChatChannelListing, CommunityChatConfig } from '../types/chatbox';
+import type { LinkPreviewResult } from '../types/linkPreview';
 
 /** Body shape for every webhook PUT endpoint: either field may be omitted to leave it
  *  unchanged, or set to '' to clear it. */
@@ -148,6 +149,18 @@ export async function getPublicChatChannels(): Promise<ChatChannelListing[]> {
   if (!res.ok) throw new Error('Failed to fetch chat channels');
   const data = (await res.json()) as { channels?: ChatChannelListing[] };
   return data.channels ?? [];
+}
+
+// ─── Link previews ────────────────────────────────────────────────────────────
+
+/** Discord-style hover preview for an OSRS Wiki article or Discord invite link — see
+ *  components/LinkPreview.tsx. No auth required; the backend itself allowlists which domains it
+ *  will resolve (routes/linkPreview.ts), so any other URL just comes back `{ type: 'unsupported' }`
+ *  rather than erroring. */
+export async function getLinkPreview(url: string): Promise<LinkPreviewResult> {
+  const res = await fetch(`${BASE}/link-preview?url=${encodeURIComponent(url)}`);
+  if (!res.ok) throw new Error('Failed to fetch link preview');
+  return (await res.json()) as LinkPreviewResult;
 }
 
 // ─── Public splashers ─────────────────────────────────────────────────────────

@@ -10,6 +10,58 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.32.1] - 2026-08-28
+### Fixed
+- Scope the main nav's border/shadow/margin styling to a `.main-nav` class instead of the bare `nav` element selector — it was leaking onto every guide page's table-of-contents `<nav>`, shoving it 160px to the right and giving it an unwanted border and shadow.
+
+## [0.32.0] - 2026-08-28
+### Added
+- Add a collapsible "What is this?" info corner, pinned under the nav bar, shown on every logged-in view with page-specific text (Active Splashers, Sessions, Admin, Communities, Account, Discord Bot) via a new reusable `InfoCorner` component.
+### Changed
+- Move the Active Splashers view's intro paragraph into the new shared info corner, animating both its width and height when expanded/collapsed instead of snapping.
+
+## [0.31.3] - 2026-08-28
+### Fixed
+- Shrink link-preview thumbnails by 2px (300px → 298px max-height) so they no longer poke past the tooltip's rounded corner into its 1px border.
+
+## [0.31.2] - 2026-08-28
+### Fixed
+- Fix link-preview tooltips landing in the wrong position on their first hover (subsequent hovers were fine) — the tooltip now renders its content through react-tooltip's `render` prop instead of children, so it repositions correctly once the preview finishes loading and grows past the "Loading preview…" placeholder's size.
+
+## [0.31.1] - 2026-08-28
+### Fixed
+- Add hover styling to guide link-buttons and the "See live splash worlds" CTA, which previously had none because their inline background/border/color styles silently overrode the hover CSS.
+
+## [0.31.0] - 2026-08-28
+### Added
+- Make the pickpocketing guide's FAQ entries collapsible (native, keyboard-accessible expand/collapse), via a new reusable `Faq` component.
+### Changed
+- Fill in the pickpocketing guide's "Tips & Tricks" placeholders (Mouse Keys, Pickpocket Helper plugin) with real content, add section divider rules, and link the Splashworlds/Thievinghost Discord friends chats inline.
+
+## [0.30.2] - 2026-08-28
+### Changed
+- Move the Discord guild icon to render after the description in link-preview cards instead of before.
+
+## [0.30.1] - 2026-08-27
+### Added
+- Add an intro paragraph to the Active Splashers view explaining what splash worlds are and linking to the pickpocketing guide and the new guides hub.
+
+## [0.30.0] - 2026-08-27
+### Added
+- Add SEO metadata: page title/description, canonical URL, Open Graph and Twitter card tags, and a WebApplication JSON-LD block in `index.html`, plus `robots.txt` and a `sitemap.xml` covering the home page, guides, bot page, and legal pages.
+
+## [0.29.0] - 2026-08-27
+### Added
+- Add a guides hub (`/guides`) and four guide pages — pickpocketing, normal-knight setup, sticky-knight setup, and the RuneLite plugin — reachable from a new "Guides" nav link, using the new `LinkPreview` and `ExplvMap` components. The old `/guide` URL now redirects to `/guides/pickpocketing`.
+
+## [0.28.0] - 2026-08-27
+### Added
+- Add an `ExplvMap` component embedding Explv's Map (a separately-hosted static site) via `postMessage`, plus a `findDaxPath` API client for an itsdax-compatible pathfinder, so guides can show live, annotated in-game maps and walk paths instead of static screenshots.
+
+## [0.27.0] - 2026-08-27
+### Added
+- Add a Discord-style hover link preview component (`LinkPreview`) that fetches OSRS Wiki and Discord invite previews from the backend's `/link-preview` endpoint, replacing hand-written tooltip boilerplate.
+
 ## [0.26.3] - 2026-08-19
 ### Fixed
 - Normalize spell names before looking up their icon, so real session data's "Fire Strike" (space-separated, as sent by the RuneLite plugin) resolves the same icon as dev/fake data's "FIRE_STRIKE" — previously only the latter shape matched, which is why the icon only ever appeared to be missing in production.
