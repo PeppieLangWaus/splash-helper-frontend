@@ -1,6 +1,8 @@
 import ExplvMap from '../../components/ExplvMap';
 import { LinkPreview } from '../../components/LinkPreview';
 import { colors } from '../../theme';
+import { GuideButtons } from './GuideButton';
+import { guides } from './guidesCatalog';
 import GuideShell from './GuideShell';
 import { gs } from './guideTheme';
 import { useGuideMeta } from './useGuideMeta';
@@ -171,14 +173,10 @@ export default function PickpocketGuide() {
         <p style={gs.p}>
           Are you in it for the long haul? Rocky hasn't given you that funny feeling yet? Or maybe you are looking to
           secure a leaderboard spot with the fabled 200m XP? Then head on over to our optimal setup guide.
-          {/* TODO: Add step-by-step optimal setup guide */}
+          Or are you on mobile, just chilling and watching some TV? In that case follow our step-by-step mobile guide.
         </p>
 
-        
-        <p style={gs.p}>
-          Or are you on mobile, just chilling and watching some TV? In that case follow our simple to follow step-by-step mobile guide.
-          {/* TODO: Add step-by-step mobile setup guide */}
-        </p>
+        <GuideButtons guides={[guides.pickpocketSetup[0], guides.pickpocketSetup[1]]} />
 
         <h3 style={gs.h3}>Getting there</h3>
         <p style={gs.subtext}>Once teleported to Ardougne, follow the map below</p>
@@ -227,10 +225,10 @@ export default function PickpocketGuide() {
 
         <h3 style={gs.h3}>Start splashing for others</h3>
         <p style={gs.p}>
-          Check out one of our guides on how to start splashing, or setting up a solo world.
-          <br />
-          WIP
+          Check out one of our guides on how to start splashing, or set up a solo world.
         </p>
+
+        <GuideButtons guides={[guides.knightSetup[0], guides.knightSetup[1] ]} />
 
         <h2 style={gs.h2}>Tips & Tricks</h2>
         <p style={gs.p}>Here are some thing that are good to know, but didn't fit in the guide's structure</p>

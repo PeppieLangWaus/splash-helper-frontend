@@ -1,6 +1,7 @@
 import { colors, fontSerif } from '../../theme';
 import { gs } from './guideTheme';
 import { useGuideMeta } from './useGuideMeta';
+import { guides, type Guide} from './guidesCatalog';
 
 const s = {
   ...gs,
@@ -18,43 +19,6 @@ const s = {
   cardDesc: { color: colors.textMuted, fontSize: '0.85rem', lineHeight: 1.55 },
   cardMeta: { color: colors.textFaint, fontSize: '0.75rem', marginTop: '0.5rem', fontWeight: 600 },
 };
-
-type Guide = {
-  href: string;
-  title: string;
-  desc: string;
-  meta: string;
-};
-
-const setupGuides: Guide[] = [
-  {
-    href: '/guides/normal-knight-setup',
-    title: 'Setting up a normal knight at South Ardougne bank',
-    desc: 'How to find a Knight of Ardougne patrol point near the bank, aggro it against an obstacle, and keep it splashing for as long as you’re actively casting.',
-    meta: 'Setup guide · Needs an alt account',
-  },
-  {
-    href: '/guides/sticky-knight-setup',
-    title: 'Setting up a sticky knight at South Ardougne bank',
-    desc: 'The advanced Entangle + dragon spear method for trapping a knight in a corner permanently, so it stays splashable even with nobody actively casting on it.',
-    meta: 'Setup guide · needs an alt account',
-  },
-];
-
-const otherGuides: Guide[] = [
-  {
-    href: '/guides/splash-helper-plugin',
-    title: 'Installing and configuring the Splash Helper plugin',
-    desc: 'Install the RuneLite plugin, set up the combat idle timer and notifications, and use its built-in interactive sticky-knight setup guide.',
-    meta: 'Plugin guide',
-  },
-  {
-    href: '/guides/pickpocketing',
-    title: 'How to pickpocket a splashed Knight of Ardougne',
-    desc: 'Just want to train Thieving? What you need, why it’s safe, and how to find a live splash world right now.',
-    meta: 'Player guide · no setup required',
-  },
-];
 
 function GuideCard({ guide }: { guide: Guide }) {
   return (
@@ -85,17 +49,23 @@ export default function GuidesView() {
 
       <p style={s.sectionLabel}>Just here to thieve?</p>
       <div style={s.grid}>
-        <GuideCard guide={otherGuides[1]} />
+        <GuideCard guide={guides.pickpocket[0]} />
       </div>
 
-      <p style={s.sectionLabel}>Setup guides</p>
+      <p style={s.sectionLabel}>Pickpocketing setups</p>
       <div style={s.grid}>
-        {setupGuides.map((g) => <GuideCard key={g.href} guide={g} />)}
+        {guides.pickpocketSetup.map((g) => <GuideCard key={g.href} guide={g} />)}
       </div>
 
-      <p style={s.sectionLabel}>Tools</p>
+      <p style={s.sectionLabel}>Splash spot setup guides</p>
       <div style={s.grid}>
-        <GuideCard guide={otherGuides[0]} />
+        {guides.knightSetup.map((g) => <GuideCard key={g.href} guide={g} />)}
+      </div>
+
+      <p style={s.sectionLabel}>Tools &amp; reference</p>
+      <div style={s.grid}>
+        <GuideCard guide={guides.other[0]} />
+        <GuideCard guide={guides.other[1]} />
       </div>
 
       <p style={{ ...s.p, marginTop: '2rem' }}>
