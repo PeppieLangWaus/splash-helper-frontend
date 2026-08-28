@@ -231,7 +231,7 @@ export default function PickpocketGuide() {
           on which world, refreshed live, so you're not world-hopping blind looking for one.
         </p>
         
-        <a href="/" style={gs.cta}>See live splash worlds</a>
+        <a href="/" className="guide-cta" style={gs.cta}>See live splash worlds</a>
 
         <p style={gs.p}>
           There also are {tooltip.wiki.friendsChat}, which have many users in them. There's two ways of finding worlds

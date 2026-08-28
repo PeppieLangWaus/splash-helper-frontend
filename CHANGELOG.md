@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.31.1] - 2026-08-28
+### Fixed
+- Add hover styling to guide link-buttons and the "See live splash worlds" CTA, which previously had none because their inline background/border/color styles silently overrode the hover CSS.
+
 ## [0.31.0] - 2026-08-28
 ### Added
 - Make the pickpocketing guide's FAQ entries collapsible (native, keyboard-accessible expand/collapse), via a new reusable `Faq` component.
