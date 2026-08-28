@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { colors, fontSerif } from '../../../theme';
-import '../styling/GuideShell.css';
+import '../style/GuideShell.css';
 
 type Heading = { id: string; text: string; level: 2 | 3; branch: boolean };
 

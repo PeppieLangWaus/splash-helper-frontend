@@ -1,5 +1,5 @@
 import { colors, fontSerif } from '../../../theme';
-import { gs } from '../styling/guideTheme';
+import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
 import { guides, type Guide} from '../data/guidesCatalog';
 

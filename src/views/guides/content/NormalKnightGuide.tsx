@@ -6,7 +6,7 @@
 // the generic "find a fence/wall the knight patrols along" framing with an actual named
 // spot/tile before this goes live.
 import GuideShell from '../components/GuideShell';
-import { gs } from '../styling/guideTheme';
+import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
 
 const steps = [

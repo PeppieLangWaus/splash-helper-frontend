@@ -1,7 +1,7 @@
 // NOTE FOR REVIEW: boilerplate/example content only, drafted from general OSRS mobile client
 // knowledge, not from anything verified in this workspace. Treat the steps below as placeholders.
 import GuideShell from '../components/GuideShell';
-import { gs } from '../styling/guideTheme';
+import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
 
 const steps = [

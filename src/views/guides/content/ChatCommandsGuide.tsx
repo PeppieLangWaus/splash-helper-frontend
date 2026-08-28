@@ -1,5 +1,5 @@
 import GuideShell from '../components/GuideShell';
-import { gs } from '../styling/guideTheme';
+import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
 
 const consoleCommands = [

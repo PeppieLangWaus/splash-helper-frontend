@@ -5,7 +5,7 @@ import { Faq } from '../components/Faq';
 import { GuideButtons } from '../components/GuideButton';
 import { guides } from '../data/guidesCatalog';
 import GuideShell from '../components/GuideShell';
-import { gs } from '../styling/guideTheme';
+import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
 import { Tooltip } from 'react-tooltip';
 

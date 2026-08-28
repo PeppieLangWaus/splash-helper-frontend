@@ -3,7 +3,7 @@
 // XP/GP-rate source. Treat the steps, ordering, and numbers below as placeholders to replace,
 // not as fact-checked advice.
 import GuideShell from '../components/GuideShell';
-import { gs } from '../styling/guideTheme';
+import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
 
 const steps = [

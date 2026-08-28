@@ -10,6 +10,11 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.32.5] - 2026-08-29
+### Changed
+- Rename `views/guides/styling/` to `views/guides/style/`, fixing three component imports (`GuideShell.tsx`, `GuideButton.tsx`, `LinkPreview.tsx`) that were left pointing at the old path.
+- Add `views/guides/components/GuideFigure.tsx`, the standard image-block component for guide pages (bordered frame, optional caption, optional click-to-enlarge) — not yet wired into any guide.
+
 ## [0.32.4] - 2026-08-29
 ### Changed
 - Split `views/guides/` into `content/` (the routed guide pages, plus the guides hub), `components/` (`GuideShell`, `GuideButton`, `Faq`, `ExplvMap`, `LinkPreview`), `styling/` (`guideTheme.ts`, `GuideShell.css`, `LinkPreview.css`), `hooks/` (`useGuideMeta`, `useLinkPreview`), and `data/` (`guidesCatalog.ts`).

@@ -3,7 +3,7 @@ import type { CSSProperties, MouseEventHandler, ReactNode, SyntheticEvent } from
 import { Tooltip } from 'react-tooltip';
 import { useLinkPreview } from '../hooks/useLinkPreview';
 import type { LinkPreviewResult } from '../../../types/linkPreview';
-import '../styling/LinkPreview.css';
+import '../style/LinkPreview.css';
 
 interface LinkPreviewProps {
   href: string;
