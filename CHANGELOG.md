@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.32.4] - 2026-08-29
+### Changed
+- Split `views/guides/` into `content/` (the routed guide pages, plus the guides hub), `components/` (`GuideShell`, `GuideButton`, `Faq`, `ExplvMap`, `LinkPreview`), `styling/` (`guideTheme.ts`, `GuideShell.css`, `LinkPreview.css`), `hooks/` (`useGuideMeta`, `useLinkPreview`), and `data/` (`guidesCatalog.ts`).
+
 ## [0.32.3] - 2026-08-28
 ### Changed
 - Split `components/chatbox/` into `hooks/`, `utils/`, and `data/` subfolders (it had grown to ~30 flat files); the actual chatbox components stay at its root.

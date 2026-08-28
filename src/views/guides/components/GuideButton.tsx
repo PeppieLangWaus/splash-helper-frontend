@@ -1,6 +1,6 @@
-import { colors, fontSerif } from '../../theme';
-import { type Guide } from './guidesCatalog';
-import './GuideShell.css';
+import { colors, fontSerif } from '../../../theme';
+import { type Guide } from '../data/guidesCatalog';
+import '../styling/GuideShell.css';
 
 /** Compact link-button for pointing at another guide inline — title + meta only, no
  *  description. For the fuller card treatment (with description) see the guides hub,

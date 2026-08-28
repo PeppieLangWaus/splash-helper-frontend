@@ -1,7 +1,7 @@
-import { colors, fontSerif } from '../../theme';
-import { gs } from './guideTheme';
-import { useGuideMeta } from './useGuideMeta';
-import { guides, type Guide} from './guidesCatalog';
+import { colors, fontSerif } from '../../../theme';
+import { gs } from '../styling/guideTheme';
+import { useGuideMeta } from '../hooks/useGuideMeta';
+import { guides, type Guide} from '../data/guidesCatalog';
 
 const s = {
   ...gs,

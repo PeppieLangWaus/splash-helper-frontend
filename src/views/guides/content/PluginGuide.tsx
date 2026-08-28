@@ -1,6 +1,6 @@
-import GuideShell from './GuideShell';
-import { gs } from './guideTheme';
-import { useGuideMeta } from './useGuideMeta';
+import GuideShell from '../components/GuideShell';
+import { gs } from '../styling/guideTheme';
+import { useGuideMeta } from '../hooks/useGuideMeta';
 
 export default function PluginGuide() {
   useGuideMeta({

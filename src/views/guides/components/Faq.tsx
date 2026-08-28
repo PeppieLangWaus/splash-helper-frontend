@@ -1,5 +1,5 @@
-import { colors } from '../../theme';
-import { gs } from './guideTheme';
+import { colors } from '../../../theme';
+import { gs } from '../styling/guideTheme';
 
 export type FaqEntry = { q: string; a: string };
 

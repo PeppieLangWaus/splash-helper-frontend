@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getLinkPreview } from '../../api';
-import type { LinkPreviewResult } from '../../types/linkPreview';
+import { getLinkPreview } from '../../../api';
+import type { LinkPreviewResult } from '../../../types/linkPreview';
 
 export type LinkPreviewStatus = 'idle' | 'loading' | 'ready' | 'error';
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { colors } from '../../theme';
-import type { MapPath, MapRectangle } from '../../types/explvMap';
+import { colors } from '../../../theme';
+import type { MapPath, MapRectangle } from '../../../types/explvMap';
 
 /** Base URL of Explv's Map (../Explv-s-map — see repo README). Configurable via
  *  VITE_EXPLV_MAP_URL since it's a separately-hosted static site, not part of this app;

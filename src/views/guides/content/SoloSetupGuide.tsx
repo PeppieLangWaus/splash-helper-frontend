@@ -1,8 +1,8 @@
 // NOTE FOR REVIEW: boilerplate/example content only, drafted from general knowledge, not from
 // anything verified in this workspace. Treat the steps below as placeholders to replace.
-import GuideShell from './GuideShell';
-import { gs } from './guideTheme';
-import { useGuideMeta } from './useGuideMeta';
+import GuideShell from '../components/GuideShell';
+import { gs } from '../styling/guideTheme';
+import { useGuideMeta } from '../hooks/useGuideMeta';
 
 const steps = [
   {

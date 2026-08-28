@@ -2,9 +2,9 @@
 // already listed in PickpocketGuide.tsx's "Recommended setup" section, not from any verified
 // XP/GP-rate source. Treat the steps, ordering, and numbers below as placeholders to replace,
 // not as fact-checked advice.
-import GuideShell from './GuideShell';
-import { gs } from './guideTheme';
-import { useGuideMeta } from './useGuideMeta';
+import GuideShell from '../components/GuideShell';
+import { gs } from '../styling/guideTheme';
+import { useGuideMeta } from '../hooks/useGuideMeta';
 
 const steps = [
   {

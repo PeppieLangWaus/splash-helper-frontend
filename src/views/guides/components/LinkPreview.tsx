@@ -1,9 +1,9 @@
 import { useId, useState } from 'react';
 import type { CSSProperties, MouseEventHandler, ReactNode, SyntheticEvent } from 'react';
 import { Tooltip } from 'react-tooltip';
-import { useLinkPreview } from './useLinkPreview';
-import type { LinkPreviewResult } from '../../types/linkPreview';
-import './LinkPreview.css';
+import { useLinkPreview } from '../hooks/useLinkPreview';
+import type { LinkPreviewResult } from '../../../types/linkPreview';
+import '../styling/LinkPreview.css';
 
 interface LinkPreviewProps {
   href: string;

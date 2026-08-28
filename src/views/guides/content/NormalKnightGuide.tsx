@@ -5,9 +5,9 @@
 // invent an equivalent of). Please fact-check the mechanics description and, ideally, replace
 // the generic "find a fence/wall the knight patrols along" framing with an actual named
 // spot/tile before this goes live.
-import GuideShell from './GuideShell';
-import { gs } from './guideTheme';
-import { useGuideMeta } from './useGuideMeta';
+import GuideShell from '../components/GuideShell';
+import { gs } from '../styling/guideTheme';
+import { useGuideMeta } from '../hooks/useGuideMeta';
 
 const steps = [
   {

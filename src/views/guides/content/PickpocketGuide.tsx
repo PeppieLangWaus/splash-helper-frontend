@@ -1,12 +1,12 @@
-import ExplvMap from './ExplvMap';
-import { LinkPreview } from './LinkPreview';
-import { colors } from '../../theme';
-import { Faq } from './Faq';
-import { GuideButtons } from './GuideButton';
-import { guides } from './guidesCatalog';
-import GuideShell from './GuideShell';
-import { gs } from './guideTheme';
-import { useGuideMeta } from './useGuideMeta';
+import ExplvMap from '../components/ExplvMap';
+import { LinkPreview } from '../components/LinkPreview';
+import { colors } from '../../../theme';
+import { Faq } from '../components/Faq';
+import { GuideButtons } from '../components/GuideButton';
+import { guides } from '../data/guidesCatalog';
+import GuideShell from '../components/GuideShell';
+import { gs } from '../styling/guideTheme';
+import { useGuideMeta } from '../hooks/useGuideMeta';
 import { Tooltip } from 'react-tooltip';
 
 

@@ -154,7 +154,7 @@ export async function getPublicChatChannels(): Promise<ChatChannelListing[]> {
 // ─── Link previews ────────────────────────────────────────────────────────────
 
 /** Discord-style hover preview for an OSRS Wiki article or Discord invite link — see
- *  views/guides/LinkPreview.tsx. No auth required; the backend itself allowlists which domains it
+ *  views/guides/components/LinkPreview.tsx. No auth required; the backend itself allowlists which domains it
  *  will resolve (routes/linkPreview.ts), so any other URL just comes back `{ type: 'unsupported' }`
  *  rather than erroring. */
 export async function getLinkPreview(url: string): Promise<LinkPreviewResult> {

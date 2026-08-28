@@ -1,4 +1,4 @@
-import { colors, fontSerif } from '../../theme';
+import { colors, fontSerif } from '../../../theme';
 
 /** Shared inline-style tokens for the standalone `/guides/*` content pages. Kept as one
  *  module so every guide reads/scans the same way instead of re-deriving these per file. */
