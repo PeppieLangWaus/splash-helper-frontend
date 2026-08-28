@@ -228,6 +228,11 @@ function CommunityCard({
     }
   }
 
+  // loadMembers only calls setSplashers after an `await`, so it's a genuine async fetch-on-
+  // dependency-change effect (React's own recommended pattern for this without a data-fetching
+  // library), not the synchronous "derive state from props" case set-state-in-effect actually
+  // targets — the rule can't see across the await to tell the difference.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void loadMembers(); }, [community._id, token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleAssign() {

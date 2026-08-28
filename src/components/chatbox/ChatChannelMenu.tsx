@@ -46,6 +46,12 @@ export default function ChatChannelMenu({ channelType, channels, selected, onTog
     const el = menuRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
+    // Genuinely can't be computed during render — it depends on the actual rendered DOM node's
+    // measured position, which doesn't exist yet on the first pass. This is exactly the
+    // "synchronizing with an external system" case React's own effect docs carve out as needing
+    // an effect, despite the setState-in-effect lint rule not distinguishing it from the
+    // avoidable "derive state from props" case.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPlacement({
       vertical: rect.bottom > window.innerHeight ? 'up' : 'down',
       horizontal: rect.right > window.innerWidth ? 'right' : 'left',
