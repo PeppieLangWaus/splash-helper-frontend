@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.32.1] - 2026-08-28
+### Fixed
+- Scope the main nav's border/shadow/margin styling to a `.main-nav` class instead of the bare `nav` element selector — it was leaking onto every guide page's table-of-contents `<nav>`, shoving it 160px to the right and giving it an unwanted border and shadow.
+
 ## [0.32.0] - 2026-08-28
 ### Added
 - Add a collapsible "What is this?" info corner, pinned under the nav bar, shown on every logged-in view with page-specific text (Active Splashers, Sessions, Admin, Communities, Account, Discord Bot) via a new reusable `InfoCorner` component.

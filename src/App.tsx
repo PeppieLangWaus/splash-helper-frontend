@@ -300,7 +300,7 @@ function AppInner() {
 
   return (
     <div style={{ minHeight: '100vh', background: colors.bg }}>
-      <nav style={nav.wrapper}>
+      <nav className="main-nav" style={nav.wrapper}>
         <div className='logo-container'>
           <span style={nav.brand}>Splash Helper</span>
         </div>
