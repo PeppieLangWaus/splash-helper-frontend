@@ -1,10 +1,10 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChatItemRef, ChatMessage } from '../../types/chatbox';
 import { formatClockTime } from '../../utils/formatTime';
-import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './chatIcons';
-import { itemIconUrl, stripMessageIconTags } from './itemIcons';
-import { splitColorTagRuns } from './chatColorTags';
-import chatEmptyTips from '../../data/chatEmptyTips';
+import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './utils/chatIcons';
+import { itemIconUrl, stripMessageIconTags } from './utils/itemIcons';
+import { splitColorTagRuns } from './utils/chatColorTags';
+import chatEmptyTips from './data/chatEmptyTips';
 
 const MIN_THUMB_HEIGHT = 12;
 const STEP_PX = 24;
@@ -151,7 +151,7 @@ function ChatEmptyState() {
 /** The chat log's message list plus a custom scrollbar built from the `chatbox/scroll` sprites
  *  (native `overflow` scrollbars are hidden — see `.chat-log-viewport` in Chatbox.css).
  *  `showTimestamps` is the `::settings timestamp on|off` chat command's own setting (see
- *  hooks/useChatSettings.ts) — defaults on, matching the chatbox's original behavior. */
+ *  useChatSettings.ts) — defaults on, matching the chatbox's original behavior. */
 export default function ChatLog({ messages, showTimestamps = true }: { messages: ChatMessage[]; showTimestamps?: boolean }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);

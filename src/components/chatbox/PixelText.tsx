@@ -1,4 +1,4 @@
-import { layoutChatText, getFontInkBounds } from './svgChatFont';
+import { layoutChatText, getFontInkBounds } from './utils/svgChatFont';
 
 interface Props {
   text: string;

@@ -1,0 +1,154 @@
+import { colors, fontSerif } from '../../../theme';
+
+/** Shared inline-style tokens for the standalone `/guides/*` content pages. Kept as one
+ *  module so every guide reads/scans the same way instead of re-deriving these per file. */
+export const gs = {
+  container: { maxWidth: 760, margin: '0 auto', padding: '2.5rem 1.25rem 4rem' },
+  back: { color: colors.link, fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 },
+  breadcrumb: { color: colors.textFaint, fontSize: '0.8rem', margin: '0.9rem 0 0.25rem' },
+  heading: { fontFamily: fontSerif, fontSize: '1.75rem', fontWeight: 700, color: colors.text, margin: '0.5rem 0 0.25rem' },
+  updated: { color: colors.textFaint, fontSize: '0.8rem', marginBottom: '1.75rem' },
+  subtext: { color: colors.textFaint, fontSize: '0.7rem', margin: '0.2rem 0 0.25rem' },
+  intro: { color: colors.textMuted, fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '1.5rem' },
+  h2: { fontFamily: fontSerif, fontSize: '1.2rem', fontWeight: 700, color: colors.text, marginTop: '2rem', marginBottom: '0.6rem' },
+  h3: { fontFamily: fontSerif, fontSize: '1.1rem', fontWeight: 700, color: colors.text, marginTop: '1.25rem', marginBottom: '0.4rem' },
+  p: { color: colors.textMuted, fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '0.75rem' },
+  ul: { color: colors.textMuted, fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '0.75rem', paddingLeft: '1.25rem' },
+  ol: { color: colors.textMuted, fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '0.75rem', paddingLeft: '1.25rem' },
+  li: { marginBottom: '0.4rem' },
+  a: { color: colors.link, fontWeight: 600 },
+  code: {
+    background: colors.panelAlt,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 4,
+    padding: '0.1rem 0.35rem',
+    fontSize: '0.85em',
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+    color: colors.accentText,
+  },
+  cta: {
+    display: 'inline-block',
+    marginTop: '0.5rem',
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 8,
+    padding: '0.6rem 0.95rem',
+    color: colors.text,
+    fontWeight: 700,
+    fontSize: '0.9rem',
+    textDecoration: 'none',
+  },
+  ctaSecondary: {
+    display: 'inline-block',
+    marginTop: '0.5rem',
+    marginLeft: '0.6rem',
+    padding: '0.6rem 1.15rem',
+    background: 'transparent',
+    border: `1px solid ${colors.borderStrong}`,
+    color: colors.text,
+    borderRadius: 6,
+    fontWeight: 700,
+    fontSize: '0.9rem',
+    textDecoration: 'none',
+  },
+  faqQ: { fontFamily: fontSerif, fontSize: '0.95rem', fontWeight: 700, color: colors.text, marginTop: '1.1rem', marginBottom: '0.3rem' },
+
+  // Collapsible FAQ entries (native <details>/<summary>, see Faq.tsx).
+  faqItem: {
+    border: `1px solid ${colors.border}`,
+    borderRadius: 8,
+    marginBottom: '0.6rem',
+    background: colors.panel,
+    overflow: 'hidden',
+  },
+  faqSummary: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.6rem',
+    padding: '0.75rem 1rem',
+    fontFamily: fontSerif,
+    fontSize: '0.95rem',
+    fontWeight: 700,
+    color: colors.text,
+  },
+  faqAnswer: { color: colors.textMuted, fontSize: '0.9rem', lineHeight: 1.7, padding: '0 1rem 0.85rem' },
+
+  // Callout boxes used by the setup/plugin guides.
+  note: {
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
+    borderLeft: `3px solid ${colors.link}`,
+    borderRadius: 6,
+    padding: '0.85rem 1rem',
+    fontSize: '0.85rem',
+    lineHeight: 1.6,
+    color: colors.textMuted,
+    marginBottom: '1.1rem',
+  },
+  warn: {
+    background: colors.warningSoft,
+    border: `1px solid ${colors.border}`,
+    borderLeft: '3px solid #d97706',
+    borderRadius: 6,
+    padding: '0.85rem 1rem',
+    fontSize: '0.85rem',
+    lineHeight: 1.6,
+    color: colors.warningText,
+    marginBottom: '1.1rem',
+  },
+  requirementsBox: {
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 8,
+    padding: '1rem 1.1rem',
+    marginBottom: '1.25rem',
+  },
+
+  // Numbered "phase" steps (setup guides walk through a sequence).
+  stepList: { display: 'flex', flexDirection: 'column' as const, gap: '0.9rem', marginBottom: '1.25rem' },
+  step: {
+    display: 'flex',
+    gap: '0.85rem',
+    background: colors.panel,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 8,
+    padding: '0.9rem 1rem',
+  },
+  stepNum: {
+    flexShrink: 0,
+    width: 26,
+    height: 26,
+    borderRadius: '50%',
+    background: colors.accentSoft,
+    color: colors.accentText,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 700,
+    fontSize: '0.85rem',
+    fontFamily: fontSerif,
+  },
+  stepTitle: { fontWeight: 700, color: colors.text, fontSize: '0.9rem', marginBottom: '0.25rem' },
+  stepBody: { color: colors.textMuted, fontSize: '0.85rem', lineHeight: 1.6 },
+  tooltip: {
+    backgroundColor: colors.panelAlt,
+    color: colors.text,
+    opacity: 1,
+    padding: '8px 16px',
+    fontSize: '0.85rem',
+  },
+  hr: {
+    border: 0,
+    height: "2px",
+    backgroundImage: `linear-gradient(to right, ${colors.borderStrong}, ${colors.borderStrong}, ${colors.bg})`,
+  },
+
+  table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: '0.85rem', marginBottom: '1.25rem' },
+  th: { textAlign: 'left' as const, color: colors.text, borderBottom: `1px solid ${colors.borderStrong}`, padding: '0.5rem 0.6rem', fontFamily: fontSerif },
+  td: { color: colors.textMuted, borderBottom: `1px solid ${colors.border}`, padding: '0.5rem 0.6rem', verticalAlign: 'top' as const },
+} as const;
+
+/** Renders a `HowTo`/`Article`-style JSON-LD `<script>` tag. Pass any schema.org object. */
+export function guideJsonLd(schema: object): string {
+  return JSON.stringify(schema);
+}

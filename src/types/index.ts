@@ -79,7 +79,7 @@ export interface ArchivedSession {
   /** The splasher's rank/rate in each community they belonged to, frozen at finalization —
    *  keyed by communityId. Only present on sessions fetched via GET /splashers/:username; used
    *  client-side to compute per-session earnings for the chatbox's Trade tab (see
-   *  hooks/useAccountActivityEvents.ts) the same way GET /communities/:id/sessions does
+   *  chatbox/useAccountActivityEvents.ts) the same way GET /communities/:id/sessions does
    *  server-side. */
   earningsSnapshot?: Record<string, { rankId: string; rankName: string; hourlyRate: number }>;
 }

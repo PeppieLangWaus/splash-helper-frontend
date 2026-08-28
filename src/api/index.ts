@@ -154,7 +154,7 @@ export async function getPublicChatChannels(): Promise<ChatChannelListing[]> {
 // ─── Link previews ────────────────────────────────────────────────────────────
 
 /** Discord-style hover preview for an OSRS Wiki article or Discord invite link — see
- *  components/LinkPreview.tsx. No auth required; the backend itself allowlists which domains it
+ *  views/guides/components/LinkPreview.tsx. No auth required; the backend itself allowlists which domains it
  *  will resolve (routes/linkPreview.ts), so any other URL just comes back `{ type: 'unsupported' }`
  *  rather than erroring. */
 export async function getLinkPreview(url: string): Promise<LinkPreviewResult> {
@@ -353,7 +353,7 @@ export async function getCommunitySplashers(communityId: string, token: string):
 }
 
 /** The caller's own payout ticket history in a community — powers the chatbox's Trade tab (see
- *  hooks/useAccountActivityEvents.ts). Self-scoped server-side, so this works for any community
+ *  chatbox/useAccountActivityEvents.ts). Self-scoped server-side, so this works for any community
  *  the user has ever requested a payout in, not just ones they own. */
 export async function getMyPayouts(
   communityId: string,

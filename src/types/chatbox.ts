@@ -19,12 +19,12 @@ export type ChatRank =
 export type ChatChannel = 'all' | 'game' | 'public' | 'private' | 'channel' | 'clan' | 'trade';
 
 /** What kind of source a message came from — drives which tab it belongs to (see
- *  chatbox/chatFilter.ts) and how it's rendered (chatbox/ChatLog.tsx). `fc`/`cc` are real live
- *  chat lines (Channel/Clan tabs); the rest are locally-synthesized lines (Game/Public/Private/
- *  Trade tabs) — see the individual `use*` hooks in `hooks/`. `system` is the chat command
- *  console's own replies (utils/chatCommands.ts) — it shares the Game tab with `info`, but is
- *  kept as its own kind/localStorage feed so `::clear info` and `::clear system` can target
- *  either independently. */
+ *  chatbox/utils/chatFilter.ts) and how it's rendered (chatbox/ChatLog.tsx). `fc`/`cc` are real
+ *  live chat lines (Channel/Clan tabs); the rest are locally-synthesized lines (Game/Public/
+ *  Private/Trade tabs) — see the individual `use*` hooks in `chatbox/hooks/`. `system` is the
+ *  chat command console's own replies (chatbox/utils/chatCommands.ts) — it shares the Game tab
+ *  with `info`, but is kept as its own kind/localStorage feed so `::clear info` and
+ *  `::clear system` can target either independently. */
 export type ChatMessageKind = 'fc' | 'cc' | 'info' | 'public' | 'private' | 'trade' | 'system';
 
 /** One colored run of text within a message body — see ChatMessage.segments. */
@@ -58,7 +58,7 @@ export interface ChatMessage {
    *  public/private/trade kinds; fc/cc chat lines never set this. */
   segments?: MessageSegment[];
   /** Prefix image shown before everything else on the line (e.g. the info/System/world icons —
-   *  see chatbox/chatColors.ts and the `use*` hooks). fc/cc chat lines don't use this — they use
+   *  see chatbox/utils/chatColors.ts and the `use*` hooks). fc/cc chat lines don't use this — they use
    *  modStatus/ironmanStatus/rankIcon below instead. */
   icon?: string;
   /** The `[info]` / `[System]` / `[Worlds]` / `[<fc display name>]` / `[<cc name>]` tag shown
@@ -69,7 +69,7 @@ export interface ChatMessage {
   modStatus?: ModStatus;
   ironmanStatus?: IronmanStatus;
   /** Resolved icon path for the sender's Friends/Clan Chat rank — already translated from the
-   *  relay's raw numeric rank attribute via `getRankIcon` (see chatbox/chatIcons.ts), since that
+   *  relay's raw numeric rank attribute via `getRankIcon` (see chatbox/utils/chatIcons.ts), since that
    *  translation depends on which channel type the message came from. Undefined if the raw value
    *  has no mapped icon (e.g. UNRANKED, or an unmapped Clan Chat rank). */
   rankIcon?: string;
@@ -127,7 +127,7 @@ export interface CommunityChatConfig {
 
 /** A tab's own On/Filtered/Off status (the little colored line under its label — see
  *  ChatControls.tsx). Game/Public/Private/Trade only ever use 'on'/'off'; Channel/Clan cycle
- *  through all three. See chatbox/chatFilter.ts for what each state actually does. */
+ *  through all three. See chatbox/utils/chatFilter.ts for what each state actually does. */
 export type TabState = 'on' | 'filtered' | 'off';
 
 export type ChatTabStates = Record<ChatChannel, TabState>;
