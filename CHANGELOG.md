@@ -10,6 +10,12 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-08-28
+### Added
+- Add a collapsible "What is this?" info corner, pinned under the nav bar, shown on every logged-in view with page-specific text (Active Splashers, Sessions, Admin, Communities, Account, Discord Bot) via a new reusable `InfoCorner` component.
+### Changed
+- Move the Active Splashers view's intro paragraph into the new shared info corner, animating both its width and height when expanded/collapsed instead of snapping.
+
 ## [0.31.3] - 2026-08-28
 ### Fixed
 - Shrink link-preview thumbnails by 2px (300px → 298px max-height) so they no longer poke past the tooltip's rounded corner into its 1px border.

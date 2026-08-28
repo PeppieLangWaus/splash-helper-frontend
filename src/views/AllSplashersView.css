@@ -4,16 +4,27 @@
     padding: 2rem 1rem;
 }
 
-.all-splashers-intro {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: var(--text-muted);
-    max-width: 68ch;
-    margin: 0 0 1.5rem;
+.logo-container {
+    position: absolute;
+    background: rgb(28, 21, 15);
+    margin-left: -10rem;
+    padding-left: 2rem;
+    padding-top: 1rem;
+    height: 60px;
 }
 
-.all-splashers-intro strong {
-    color: var(--text);
+.logo-container span {
+    vertical-align: bottom;
+}
+
+nav {
+    border-bottom: 4px solid var(--border);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.4);
+    margin-left: 10rem;
+}
+.nav-items {
+    padding-left: 1.5rem;
+
 }
 
 .all-splashers-header {
