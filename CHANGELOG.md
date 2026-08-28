@@ -62,6 +62,10 @@ every version after it are real.
 ### Added
 - Add a Discord-style hover link preview component (`LinkPreview`) that fetches OSRS Wiki and Discord invite previews from the backend's `/link-preview` endpoint, replacing hand-written tooltip boilerplate.
 
+## [0.26.4] - 2026-08-28
+### Fixed
+- Stop reading the setup/reset-password/verify-email URL tokens via `setState` inside a `useEffect` (triggered an ESLint `react-hooks/set-state-in-effect` warning about cascading renders) — seed that state lazily via `useState`'s initializer instead, same pattern already used for the current view.
+
 ## [0.26.3] - 2026-08-19
 ### Fixed
 - Normalize spell names before looking up their icon, so real session data's "Fire Strike" (space-separated, as sent by the RuneLite plugin) resolves the same icon as dev/fake data's "FIRE_STRIKE" — previously only the latter shape matched, which is why the icon only ever appeared to be missing in production.
