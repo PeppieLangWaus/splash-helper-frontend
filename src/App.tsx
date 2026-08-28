@@ -131,34 +131,22 @@ function AppInner() {
   }, []);
 
   // Handle setup link: /setup?token=...
-  const [setupToken, setSetupToken] = useState<string | null>(null);
-  useEffect(() => {
-    if (window.location.pathname === '/setup') {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      if (token) setSetupToken(token);
-    }
-  }, []);
+  const [setupToken, setSetupToken] = useState<string | null>(() => {
+    if (window.location.pathname !== '/setup') return null;
+    return new URLSearchParams(window.location.search).get('token');
+  });
 
   // Handle password-reset link: /reset-password?token=...
-  const [resetToken, setResetToken] = useState<string | null>(null);
-  useEffect(() => {
-    if (window.location.pathname === '/reset-password') {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      if (token) setResetToken(token);
-    }
-  }, []);
+  const [resetToken, setResetToken] = useState<string | null>(() => {
+    if (window.location.pathname !== '/reset-password') return null;
+    return new URLSearchParams(window.location.search).get('token');
+  });
 
   // Handle email-verification link: /verify-email?token=...
-  const [verifyEmailTokenValue, setVerifyEmailTokenValue] = useState<string | null>(null);
-  useEffect(() => {
-    if (window.location.pathname === '/verify-email') {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      if (token) setVerifyEmailTokenValue(token);
-    }
-  }, []);
+  const [verifyEmailTokenValue, setVerifyEmailTokenValue] = useState<string | null>(() => {
+    if (window.location.pathname !== '/verify-email') return null;
+    return new URLSearchParams(window.location.search).get('token');
+  });
 
   // Standalone legal pages, e.g. linked from the Discord bot's settings —
   // always reachable at their own URL, outside the nav/login-gated shell.
