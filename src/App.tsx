@@ -25,6 +25,7 @@ import SoloSetupGuide from './views/guides/content/SoloSetupGuide';
 import ChatCommandsGuide from './views/guides/content/ChatCommandsGuide';
 import InfoCorner from './components/InfoCorner';
 import { colors, fontSerif } from './theme';
+import { getBrandName } from './utils/brand';
 
 type View =
   | { name: 'active' }
@@ -290,7 +291,7 @@ function AppInner() {
     <div style={{ minHeight: '100vh', background: colors.bg }}>
       <nav className="main-nav" style={nav.wrapper}>
         <div className='logo-container'>
-          <span style={nav.brand}>Splash Helper</span>
+          <span style={nav.brand}>{getBrandName()}</span>
         </div>
         <div className='nav-items'>
           <button
