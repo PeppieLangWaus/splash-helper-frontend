@@ -49,6 +49,14 @@
   border-color: var(--border-strong) !important;
 }
 
+/* Ordered-list markers (the number + '.') can't be bolded via inline style — `::marker` isn't
+   settable through a React style object — so guide `<ol>` elements also carry this class
+   alongside `gs.ol` in guideTheme.ts. */
+.guide-ol > li::marker {
+  font-weight: 700;
+  font-size: 16px;
+}
+
 /* Primary CTA link (e.g. "See live splash worlds"), gs.cta in guideTheme.ts. */
 .guide-cta {
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;

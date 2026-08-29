@@ -12,7 +12,7 @@ const steps = [
     title: 'Settings (All Settings menu)',
     body: (
       <>
-        <ol style={gs.ol}>
+        <ol className='guide-ol' style={gs.ol}>
           <li style={gs.li}>
             Go to: <span style={gs.code}>Interfaces {'>'} Game client layout</span> and set it to <span style={gs.code}>Resizable - Modern layout</span>
           </li>
@@ -27,7 +27,7 @@ const steps = [
     title: 'Install plugins',
     body: (
       <>
-        <ol style={gs.ol}>
+        <ol className='guide-ol' style={gs.ol}>
           <li style={gs.li}>
             From the Runelite Plugin Hub install:{' '}
             <LinkPreview href='https://runelite.net/plugin-hub/show/pickpocket-helper' style={gs.a}>

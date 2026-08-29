@@ -25,7 +25,7 @@ export default function PluginGuide() {
         </p>
 
         <h2 style={gs.h2}>Installing it</h2>
-        <ol style={gs.ol}>
+        <ol className='guide-ol' style={gs.ol}>
           <li style={gs.li}>Open RuneLite and click the <strong>Plugin Hub</strong> icon in the sidebar (the wrench-and-plug icon).</li>
           <li style={gs.li}>Search for <strong>"Splash Helper"</strong>.</li>
           <li style={gs.li}>Click <strong>Install</strong>. A new panel icon appears in your RuneLite sidebar once it's enabled.</li>
@@ -41,7 +41,7 @@ export default function PluginGuide() {
           configured, and counts down until you're expected to have gone idle — useful for
           knowing when to check back in on a semi-AFK session.
         </p>
-        <ol style={gs.ol}>
+        <ol className='guide-ol' style={gs.ol}>
           <li style={gs.li}>Open the plugin's settings from the RuneLite config panel.</li>
           <li style={gs.li}>Set <strong>Target NPC</strong> to <code style={gs.code}>Knight of Ardougne</code> (this is the default).</li>
           <li style={gs.li}>Set <strong>Timer Duration</strong> to how many minutes you expect to be away between checks.</li>

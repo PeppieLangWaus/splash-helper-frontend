@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.32.7] - 2026-08-29
+### Fixed
+- Bold the number and period in guide ordered-list markers (`OptimalSetupGuide`, `PluginGuide`) via a `.guide-ol::marker` CSS rule, since `::marker` isn't settable through a React inline style object.
+
 ## [0.32.6] - 2026-08-29
 ### Fixed
 - Fix all 11 outstanding ESLint problems (10 errors, 1 warning): a `no-case-declarations` in the chat input's Enter handler; an impure `Math.random()` shuffle inside a `useMemo` in the chat empty-state (now a lazy `useState` initializer); a mutated loop variable inside a `.map()` callback in the activity grid's month labels (now a plain `for` loop); and several `set-state-in-effect` cases in the chatbox (private/trade log reload, chat feed reload, the email-reminder spotlight) reworked to adjust state directly during render instead of via an effect, since they were just deriving state from a changed value rather than performing a real side effect. The DOM-measurement effect in `ChatChannelMenu`, the async `loadMembers` fetch effect in `AdminView`, and the colocated `useAuth` hook in `AuthContext` are genuine exceptions to those rules and are suppressed with a comment explaining why, rather than restructured.
