@@ -143,23 +143,22 @@ function LinkPreviewContent({
   }
 
   if (result.type === 'plugin-hub' && result.found) {
-    const { displayName, author, description, iconUrl, stars } = result.data;
+    const { displayName, author, description, iconUrl } = result.data;
     return (
       <div className="link-preview">
         <div className="link-preview-body">
-          <div className="link-preview-title">{displayName}</div>
+          <div className="link-preview-title">
+            {displayName}
+            <div className="link-preview-meta link-preview-author">
+              by {author}
+            </div>
+          </div>
           {description && <div className="link-preview-extract">{description}</div>}
-          <div className="link-preview-meta">
-            by {author}
-            {typeof stars === 'number' && (
-              <>
-                {' · '}
-                <span className="link-preview-star">★</span> {stars.toLocaleString()}
-              </>
-            )}
+          <div className="link-preview-site">
+            <a href={href} target='_blank' rel='noreferrer' className='link-preview-url'>oldschool.runescape.wiki</a>
           </div>
         </div>
-        {iconUrl && <img className="link-preview-thumb link-preview-thumb-round" src={iconUrl} alt="" />}
+        {iconUrl && <img className="link-preview-thumb link-preview-thumb-round plugin-hub-preview" src={iconUrl} alt="" />}
       </div>
     );
   }

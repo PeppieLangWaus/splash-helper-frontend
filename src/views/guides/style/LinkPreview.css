@@ -34,7 +34,7 @@
 
 .link-preview-wide .link-preview-thumb {
   order: -1;
-  border-radius: 8px 8px 0 0;
+  /* border-radius: 8px 8px 0 0; */
 }
 
 .link-preview-wide .link-preview-thumb img {
@@ -66,6 +66,14 @@
   image-rendering: pixelated;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
+}
+
+.plugin-hub-preview {
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: cover;
+  border-top-right-radius: 6px;
+  border-top-left-radius: 6px;
 }
 
 .link-preview-thumb img {
@@ -108,7 +116,7 @@
 
 .link-preview-site {
   position: absolute;
-  bottom: 1em;
+  bottom: 0.6em;
   font-size: 0.7rem;
   color: var(--text-faint);
   text-transform: uppercase;
@@ -126,6 +134,9 @@
   color: var(--text-faint);
   display: flex;
   align-items: center;
+}
+.link-preview-author {
+  margin-top: 0.1rem;
 }
 
 .link-preview-online-dot {
