@@ -5,15 +5,46 @@
 import GuideShell from '../components/GuideShell';
 import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
+import { LinkPreview } from '../components/LinkPreview';
 
 const steps = [
   {
-    title: 'Finish Ardougne Diary 2 (Medium)',
-    body: 'The Medium Ardougne Achievement Diary gives a +10% pickpocket success chance against Knights of Ardougne and increases your thieving pouch size to 56 — the single biggest success-rate upgrade available, so get this first.',
+    title: 'Settings (All Settings menu)',
+    body: (
+      <>
+        <ol style={gs.ol}>
+          <li style={gs.li}>
+            Go to: <span style={gs.code}>Interfaces {'>'} Game client layout</span> and set it to <span style={gs.code}>Resizable - Modern layout</span>
+          </li>
+          <li style={gs.li}>
+            Enable: <span style={gs.code}>Controls {'>'} Modern Layout - Side panel can be closed by the hotkeys</span>
+          </li>
+        </ol>
+      </>
+    )
   },
   {
-    title: 'Get full Rogues\' equipment',
-    body: 'The complete Rogue outfit gives a 100% chance to double any GP/loot from a successful pickpocket. It has no effect on success chance itself, but roughly doubles your GP/hour for free once you have it.',
+    title: 'Install plugins',
+    body: (
+      <>
+        <ol style={gs.ol}>
+          <li style={gs.li}>
+            From the Runelite Plugin Hub install:{' '}
+            <LinkPreview href='https://runelite.net/plugin-hub/show/pickpocket-helper' style={gs.a}>
+              Pickpocket Helper
+            </LinkPreview>
+          </li>
+          <li style={gs.li}>
+            From the Runelite Plugin Hub install:{' '}
+            <LinkPreview href='https://runelite.net/plugin-hub/show/hold-your-ground' style={gs.a}>
+              Hold Your Ground
+            </LinkPreview>
+            {' '}— set its "Hold your horses" and "Hold your pickpockets" toggles on so misclicks
+            can't walk you off your tile.
+          </li>
+        </ol>
+      </>
+    ),
   },
   {
     title: 'Unlock Shadow Veil and grab a Lava battlestaff',
@@ -46,30 +77,31 @@ export default function OptimalSetupGuide() {
         <a href="/guides" style={gs.back}>&larr; Guides</a>
         <h1 style={gs.heading}>Optimal Pickpocketing Setup</h1>
         <p style={gs.updated}>
-          For players in it for the long haul — the gear and unlock order that maximizes success
-          chance and GP/hour once you've got the basics down.
+          For players in it for the long haul. A guide focused on maximizing AFK
         </p>
 
         <p style={gs.intro}>
-          This builds on the <a style={gs.a} href="/guides/pickpocketing">bare minimum</a> to
-          pickpocket a Knight of Ardougne. None of it is required — you can thieve productively
-          with nothing but 55 Thieving and a splashed knight — but each step below either raises
-          your success chance, your GP/hour, or both.
+          So, you want to get that 99 Thieving? Maybe you're going for Rocky? Or thr coveted locked-in rank on the leaderboards with 200M XP?
+          This guide will show you how to set up your Runelite client in a way that allows you to click in a single spot for all actions.
+          This includes: pickpocketing knight, opening pouches and casting Shadow Veil.
         </p>
 
         <div style={gs.note}>
-          Chasing 200m XP or a leaderboard spot? This is the setup most long-term grinders end up
-          running. It's an investment, not a day-one requirement.
+          This guide changes quite a bit of how the game looks, so you might want to do this in a seperate Runelite profile. <br />
+          You  can do this by going to the settings (the wrench icon) and then clicking the second tab. Here you can open your default profile
+          and duplicate it. Make sure to switch over to the newly created profile before making any changes.
         </div>
 
-        <h2 style={gs.h2}>What you'll end up with</h2>
+        <h2 style={gs.h2}>Requirements</h2>
         <ul style={gs.ul}>
           <li style={gs.li}>Ardougne Diary 2 (Medium) completed</li>
           <li style={gs.li}>Full Rogues' equipment</li>
-          <li style={gs.li}>Shadow Veil unlocked, Lava battlestaff equipped</li>
-          <li style={gs.li}>A steady supply of Dodgy necklaces</li>
+          <li style={gs.li}>Shadow Veil unlocked, Lava battlestaff equipped and cosmic runes in inventory</li>
+          <li style={gs.li}>A supply of Dodgy necklaces and one equipped (if you're not 95 thieving yet)</li>
           <li style={gs.li}>Hitpoints cape and/or Regen bracelet, depending on what you're optimizing for</li>
         </ul>
+
+        
 
         <h2 style={gs.h2}>Build order</h2>
         <div style={gs.stepList}>
