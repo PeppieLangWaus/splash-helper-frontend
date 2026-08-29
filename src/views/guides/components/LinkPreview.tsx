@@ -16,9 +16,10 @@ interface LinkPreviewProps {
 /**
  * A link that grows a Discord-style hover preview once the backend resolves it — see
  * useLinkPreview.ts and splash-helper-backend's routes/linkPreview.ts. Only OSRS Wiki
- * articles and Discord invite links actually resolve to anything (the backend's own domain
- * allowlist decides that, not this component); any other href still renders as a plain working
- * link, just with a minimal "Open link" tooltip instead of a real preview.
+ * articles, Discord invite links, and RuneLite Plugin Hub links actually resolve to anything
+ * (the backend's own domain allowlist decides that, not this component); any other href still
+ * renders as a plain working link, just with a minimal "Open link" tooltip instead of a real
+ * preview.
  *
  * Replaces the old hand-paired `<Tooltip id="x-wiki" content="...">` + `<a data-tooltip-id="x-wiki">`
  * boilerplate every wiki-linked guide used to write out by hand (see views/guides/PickpocketGuide.tsx's
@@ -141,7 +142,30 @@ function LinkPreviewContent({
     );
   }
 
-  // "not found" (missing wiki page, invalid/revoked invite) or an unsupported domain — no real
-  // preview data, so fall back to a minimal cue rather than an empty-looking box.
+  if (result.type === 'plugin-hub' && result.found) {
+    const { displayName, author, description, iconUrl, stars } = result.data;
+    return (
+      <div className="link-preview">
+        <div className="link-preview-body">
+          <div className="link-preview-title">{displayName}</div>
+          {description && <div className="link-preview-extract">{description}</div>}
+          <div className="link-preview-meta">
+            by {author}
+            {typeof stars === 'number' && (
+              <>
+                {' · '}
+                <span className="link-preview-star">★</span> {stars.toLocaleString()}
+              </>
+            )}
+          </div>
+        </div>
+        {iconUrl && <img className="link-preview-thumb link-preview-thumb-round" src={iconUrl} alt="" />}
+      </div>
+    );
+  }
+
+  // "not found" (missing wiki page, invalid/revoked invite, unknown or disabled plugin) or an
+  // unsupported domain — no real preview data, so fall back to a minimal cue rather than an
+  // empty-looking box.
   return <div className="link-preview link-preview-fallback">Open link ↗</div>;
 }

@@ -19,8 +19,18 @@ export interface DiscordInvitePreviewData {
   channelName?: string;
 }
 
+export interface PluginHubPreviewData {
+  displayName: string;
+  author: string;
+  description?: string;
+  iconUrl?: string;
+  stars?: number;
+  repoUrl: string;
+}
+
 export type LinkPreviewResult =
   | { type: 'wiki'; found: true; data: WikiPreviewData }
   | { type: 'discord-invite'; found: true; data: DiscordInvitePreviewData }
-  | { type: 'wiki' | 'discord-invite'; found: false }
+  | { type: 'plugin-hub'; found: true; data: PluginHubPreviewData }
+  | { type: 'wiki' | 'discord-invite' | 'plugin-hub'; found: false }
   | { type: 'unsupported' };

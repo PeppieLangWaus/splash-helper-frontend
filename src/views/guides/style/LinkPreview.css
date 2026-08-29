@@ -136,3 +136,7 @@
   background: var(--success);
   margin-right: 0.35rem;
 }
+
+.link-preview-star {
+  color: #e3b341;
+}
