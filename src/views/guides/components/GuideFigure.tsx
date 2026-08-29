@@ -5,7 +5,8 @@ import Modal from '../../../components/Modal';
 const s = {
   figure: { margin: '0 0 1.25rem' },
   frame: {
-    border: `1px solid ${colors.border}`,
+    width: 'fit-content',
+    // border: `1px solid ${colors.border}`,
     borderRadius: 8,
     overflow: 'hidden',
     background: colors.panel,
@@ -23,8 +24,8 @@ interface Props {
    *  the shared `Modal` (bordered panel capped at 90vw/centered, not a true fullscreen takeover).
    *  Off by default; turn on per-image for screenshots worth zooming into. */
   zoomable?: boolean;
-  width?: number;
-  height?: number;
+  width?: number | string;
+  height?: number | string;
 }
 
 /** Standard image block for guide pages: bordered frame matching the guide theme, optional
@@ -39,11 +40,14 @@ export default function GuideFigure({ src, alt, caption, zoomable = false, width
         <img
           src={src}
           alt={alt}
-          width={width}
-          height={height}
           loading="lazy"
           decoding="async"
-          style={{ ...s.img, cursor: zoomable ? 'zoom-in' : undefined }}
+          style={{
+            ...s.img,
+            cursor: zoomable ? 'zoom-in' : undefined,
+            width: width,
+            height: height,
+          }}
           onClick={zoomable ? () => setOpen(true) : undefined}
           role={zoomable ? 'button' : undefined}
           tabIndex={zoomable ? 0 : undefined}
