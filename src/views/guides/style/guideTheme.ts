@@ -142,6 +142,7 @@ export const gs = {
     height: "2px",
     backgroundImage: `linear-gradient(to right, ${colors.borderStrong}, ${colors.borderStrong}, ${colors.bg})`,
   },
+  row: { display: 'flex', flexWrap: 'wrap' as const, gap: '0.6rem' },
 
   table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: '0.85rem', marginBottom: '1.25rem' },
   th: { textAlign: 'left' as const, color: colors.text, borderBottom: `1px solid ${colors.borderStrong}`, padding: '0.5rem 0.6rem', fontFamily: fontSerif },
