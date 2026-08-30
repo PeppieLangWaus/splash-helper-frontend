@@ -383,7 +383,7 @@ function DiscordConfigPanel({ communityId }: { communityId: string }) {
 const CHAT_RELAY_URLS = ['https://chat.splasher.help', 'https://chat.ardy.host'];
 
 type ChatConfigForm = {
-  friendsChatName: string;
+  friendsChatOwner: string;
   friendsChatDisplayName: string;
   clanChatName: string;
   discordFriendsChatWebhookUrl: string;
@@ -392,7 +392,7 @@ type ChatConfigForm = {
 
 function toChatConfigForm(config: CommunityChatConfig): ChatConfigForm {
   return {
-    friendsChatName: config.friendsChatName ?? '',
+    friendsChatOwner: config.friendsChatOwner ?? '',
     friendsChatDisplayName: config.friendsChatDisplayName ?? '',
     clanChatName: config.clanChatName ?? '',
     discordFriendsChatWebhookUrl: config.discordFriendsChatWebhookUrl ?? '',
@@ -401,15 +401,22 @@ function toChatConfigForm(config: CommunityChatConfig): ChatConfigForm {
 }
 
 /**
- * Lets the owner register this community's Friends/Clan Chat names (what the live chatbox on
- * the site matches incoming relay messages against — see splash-helper-backend's
- * services/chatRelay.ts) and, optionally, a Discord webhook to also post that chat to. Below
- * that, the two relay URLs to paste into the RuneLite Discord Chat Logger plugin's webhook
+ * Lets the owner register this community's Friends Chat (by its owner's RSN — see
+ * splash-helper-backend's ChatChannelName for why an FC's in-game *name* isn't trusted or
+ * settable here, since its owner can rename it at any time) and Clan Chat (still by name) — what
+ * the live chatbox on the site matches incoming relay messages against, see splash-helper-
+ * backend's services/chatRelay.ts — and, optionally, a Discord webhook to also post each to.
+ * Below that, the two relay URLs to paste into the RuneLite Discord Chat Logger plugin's webhook
  * fields — the same URL works for both Friends Chat and Clan Chat.
  */
 function ChatConfigPanel({ communityId }: { communityId: string }) {
   const { token } = useAuth();
   const [form, setForm] = useState<ChatConfigForm | null>(null);
+  // The FC's current in-game name — read-only, kept in sync from live chat traffic by the
+  // backend once a message has actually been relayed (see chatRelay.ts's
+  // syncFriendsChatIdentity). Tracked separately from `form` since (unlike every other field
+  // here) the owner never sets this directly.
+  const [liveFriendsChatName, setLiveFriendsChatName] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
 
@@ -418,10 +425,15 @@ function ChatConfigPanel({ communityId }: { communityId: string }) {
     setTimeout(() => setFeedback(null), 3000);
   }
 
+  function applyConfig(c: CommunityChatConfig) {
+    setForm(toChatConfigForm(c));
+    setLiveFriendsChatName(c.friendsChatName);
+  }
+
   useEffect(() => {
     if (!token) return;
     getCommunityChatConfig(communityId, token)
-      .then((c) => setForm(toChatConfigForm(c)))
+      .then(applyConfig)
       .catch((err) => flash('error', err instanceof Error ? err.message : 'Failed to load live chat settings'));
   }, [communityId, token]);
 
@@ -436,7 +448,7 @@ function ChatConfigPanel({ communityId }: { communityId: string }) {
       const updated = await setCommunityChatConfig(
         communityId,
         {
-          friendsChatName: form.friendsChatName.trim(),
+          friendsChatOwner: form.friendsChatOwner.trim(),
           friendsChatDisplayName: form.friendsChatDisplayName.trim(),
           clanChatName: form.clanChatName.trim(),
           discordFriendsChatWebhookUrl: form.discordFriendsChatWebhookUrl.trim(),
@@ -444,7 +456,7 @@ function ChatConfigPanel({ communityId }: { communityId: string }) {
         },
         token,
       );
-      setForm(toChatConfigForm(updated));
+      applyConfig(updated);
       flash('success', 'Saved');
       logSystemEvent('Updated live chat settings');
     } catch (err) {
@@ -464,13 +476,13 @@ function ChatConfigPanel({ communityId }: { communityId: string }) {
 
       <div style={s.fieldGrid}>
         <label>
-          <span style={s.fieldLabel}>Friends Chat name</span>
+          <span style={s.fieldLabel}>Friends Chat owner (RSN)</span>
           <input
             style={s.input}
             type="text"
-            placeholder="e.g. Ardy Splash"
-            value={form.friendsChatName}
-            onChange={(e) => setField('friendsChatName', e.target.value)}
+            placeholder="e.g. Zezima"
+            value={form.friendsChatOwner}
+            onChange={(e) => setField('friendsChatOwner', e.target.value)}
             disabled={saving}
           />
         </label>
@@ -486,13 +498,19 @@ function ChatConfigPanel({ communityId }: { communityId: string }) {
           />
         </label>
       </div>
+      <p style={s.fieldHint}>
+        Your Friends Chat's in-game name can change at any time, so it's registered by its{' '}
+        <strong>owner's RSN</strong> instead — whoever's account currently owns the Friends Chat.
+        Current live name:{' '}
+        {liveFriendsChatName ? <code>{liveFriendsChatName}</code> : 'not seen yet — waiting for the first message'}.
+      </p>
 
       <label style={{ display: 'block', marginBottom: '0.75rem' }}>
         <span style={s.fieldLabel}>Friends Chat display name (optional)</span>
         <input
           style={s.input}
           type="text"
-          placeholder={form.friendsChatName || 'Defaults to the Friends Chat name above'}
+          placeholder={liveFriendsChatName || 'Defaults to the Friends Chat name above'}
           value={form.friendsChatDisplayName}
           onChange={(e) => setField('friendsChatDisplayName', e.target.value)}
           disabled={saving}

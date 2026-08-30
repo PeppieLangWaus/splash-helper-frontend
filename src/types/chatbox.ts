@@ -114,8 +114,14 @@ export interface ChatChannelListing {
   clanChatName: string | null;
 }
 
-/** A community owner's chat-relay settings — GET/PUT /communities/:id/chat-config. */
+/** A community owner's chat-relay settings — GET/PUT /communities/:id/chat-config.
+ *  `friendsChatOwner` (the Friends Chat owner's RSN) is what's actually registered and settable
+ *  for Friends Chat — an FC's in-game name can be renamed by its owner at any time, so the backend
+ *  no longer trusts or accepts a name for it. `friendsChatName` is read-only: the FC's current
+ *  in-game name, kept in sync from live chat traffic by the backend, and null until its first
+ *  message has been relayed. */
 export interface CommunityChatConfig {
+  friendsChatOwner: string | null;
   friendsChatName: string | null;
   friendsChatDisplayName: string | null;
   clanChatName: string | null;

@@ -407,9 +407,11 @@ export async function getCommunityChatConfig(communityId: string, token: string)
   return data;
 }
 
-/** Every field is optional — omit one to leave it unchanged, or send '' to clear it. */
+/** Every field is optional — omit one to leave it unchanged, or send '' to clear it.
+ *  `friendsChatOwner` (the Friends Chat owner's RSN), not a chat name, is what registers Friends
+ *  Chat — see CommunityChatConfig. */
 export interface ChatConfigUpdate {
-  friendsChatName?: string;
+  friendsChatOwner?: string;
   friendsChatDisplayName?: string;
   clanChatName?: string;
   discordFriendsChatWebhookUrl?: string;
