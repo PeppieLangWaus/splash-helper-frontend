@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.26.5] - 2026-08-31
+### Fixed
+- Reconnect the live chat feed's WebSocket with exponential backoff and jitter instead of a flat 3-second retry, so a socket that keeps closing right away (e.g. a proxy idle timeout) doesn't hammer the server with a new connection every 3 seconds forever.
+
 ## [0.26.4] - 2026-08-31
 ### Fixed
 - Update the community settings page's live-chat panel to register Friends Chat by its owner's RSN instead of its in-game name, matching splash-helper-backend's updated chat-relay contract — the old "Friends Chat name" field was silently ignored by the backend, so saving it never actually registered anything.

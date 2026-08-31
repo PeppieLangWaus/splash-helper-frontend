@@ -7,7 +7,13 @@ import { ccKey, fcKey, loadStoredMessages, subscribeToStoredMessages, upsertStor
 // server (see splash-helper-backend's websocket/server.ts) accepts connections on any path.
 const WS_URL = `${import.meta.env.VITE_API_BASE_URL}`.replace(/^http/, 'ws');
 
-const RECONNECT_DELAY_MS = 3000;
+// Exponential backoff (mirrors the RuneLite plugin's SplashWebSocketClient), capped and jittered
+// so a socket that keeps closing right away — e.g. a reverse-proxy idle timeout silently killing
+// an otherwise-fine connection — doesn't hammer the server with a fresh "WS connection" every 3s
+// forever. Reset to the first delay on every successful open (see `onopen` below).
+const RECONNECT_DELAYS_MS = [2000, 4000, 8000, 16000, 30000];
+/** +/- this fraction of jitter, so many tabs reconnecting at once don't all land in lockstep. */
+const RECONNECT_JITTER = 0.2;
 
 interface ChatBroadcastPayload {
   id: string;
@@ -104,6 +110,7 @@ export function useChatFeed(communityId: string | null, channelType: LiveChatCha
   useEffect(() => {
     let cancelled = false;
     let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+    let reconnectAttempts = 0;
 
     function connect() {
       if (cancelled) return;
@@ -121,6 +128,7 @@ export function useChatFeed(communityId: string | null, channelType: LiveChatCha
 
       ws.onopen = () => {
         if (!isCurrent()) return;
+        reconnectAttempts = 0;
         setConnected(true);
         sendSubscribe(ws);
       };
@@ -162,7 +170,12 @@ export function useChatFeed(communityId: string | null, channelType: LiveChatCha
         if (!isCurrent()) return;
         setConnected(false);
         wsRef.current = null;
-        if (!cancelled) reconnectTimer = setTimeout(connect, RECONNECT_DELAY_MS);
+        if (!cancelled) {
+          const base = RECONNECT_DELAYS_MS[Math.min(reconnectAttempts, RECONNECT_DELAYS_MS.length - 1)];
+          reconnectAttempts++;
+          const jitter = base * RECONNECT_JITTER * (Math.random() * 2 - 1);
+          reconnectTimer = setTimeout(connect, base + jitter);
+        }
       };
 
       ws.onerror = () => ws.close();
