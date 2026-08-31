@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.26.4] - 2026-08-31
+### Fixed
+- Update the community settings page's live-chat panel to register Friends Chat by its owner's RSN instead of its in-game name, matching splash-helper-backend's updated chat-relay contract — the old "Friends Chat name" field was silently ignored by the backend, so saving it never actually registered anything.
+
 ## [0.26.3] - 2026-08-19
 ### Fixed
 - Normalize spell names before looking up their icon, so real session data's "Fire Strike" (space-separated, as sent by the RuneLite plugin) resolves the same icon as dev/fake data's "FIRE_STRIKE" — previously only the latter shape matched, which is why the icon only ever appeared to be missing in production.
