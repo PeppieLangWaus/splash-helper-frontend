@@ -1,34 +1,23 @@
-// NOTE FOR REVIEW: unlike the sticky-knight and plugin guides, this page is drafted from
-// general OSRS/splashing-community knowledge, not from anything in this workspace — there's
-// no equivalent "normal spot" tile data checked in anywhere (see GuideTiles.java for the
-// sticky-knight setup's authoritative coordinates, which this page deliberately does NOT
-// invent an equivalent of). Please fact-check the mechanics description and, ideally, replace
-// the generic "find a fence/wall the knight patrols along" framing with an actual named
-// spot/tile before this goes live.
 import GuideShell from '../components/GuideShell';
 import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
 
 const steps = [
   {
-    title: 'Gear up to guarantee the splash',
-    body: 'Remove or avoid any gear with a positive magic attack bonus — most splashers use plain robes or even bare-handed melee gear. The goal is a magic attack bonus low enough that your hit chance against the knight rounds to zero, so every cast visually "splashes" (misses) instead of risking an accidental hit that could end the fight early.',
+    title: 'Equipment',
+    body: '',
   },
   {
-    title: 'Pick your spell',
-    body: "Autocast a cheap combat spell — Wind Strike is the classic choice since it only needs an air and a mind rune, but anything you can afford to spam works. You're not trying to deal damage, just stay in combat and rack up Magic XP.",
+    title: 'Lure the knight',
+    body: '',
   },
   {
-    title: 'Find a knight patrolling along an obstacle near the bank',
-    body: "Knights of Ardougne patrol on foot around East Ardougne, and the area right around the South Ardougne bank has fences and walls they walk along. Watch a knight's patrol route and find a stretch where a fence or wall runs between you and where it would need to stand to reach you in melee.",
+    title: '(optional) Push knight back into corner',
+    body: '',
   },
   {
-    title: 'Position yourself on the far side',
-    body: "Stand on the opposite side of that obstacle from the knight, close enough to be in spell range but on a tile the knight can't path onto or attack you from. It should be forced to walk toward you and get stuck against the obstacle instead of reaching you.",
-  },
-  {
-    title: 'Attack it and keep it in combat',
-    body: "Cast your spell on the knight to aggro it. Once it's stuck against the obstacle and locked onto you, keep autocasting — as long as it's actively fighting you (even while whiffing every hit), it stays in place and can't return to its patrol.",
+    title: '(optional) Announce world',
+    body: '',
   },
 ];
 

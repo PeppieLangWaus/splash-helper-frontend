@@ -1,36 +1,73 @@
-// NOTE FOR REVIEW: boilerplate/example content only, drafted from general OSRS mobile client
-// knowledge, not from anything verified in this workspace. Treat the steps below as placeholders.
 import GuideShell from '../components/GuideShell';
 import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
+import GuideFigure from '../components/GuideFigure';
+import { colors } from '../../../theme';
 
 const steps = [
   {
-    title: 'Log in on OSRS Mobile',
-    body: 'Pickpocketing a splashed knight works identically on mobile — the knight is stuck in combat regardless of which client the thief uses. No special account setup is needed beyond the usual mobile login.',
+    title: 'Configure Settings',
+    body: (
+      <>
+        <p style={{ ...gs.p, fontSize: '17px', marginBottom: '-1em', color: colors.accentText}}>
+          <strong>Activities</strong>
+        </p>
+        <ul style={gs.ul}>
+          <li style={gs.li}><strong>NPC Highlight</strong>: <span style={gs.code}>Enabled</span></li>
+          <li style={gs.li}><strong>NPC Highlight – tagging</strong>: <span style={gs.code}>Enabled</span></li>
+        </ul>
+
+        <p style={{ ...gs.p, fontSize: '17px', marginBottom: '-1em', color: colors.accentText}}>
+          <strong>Controls</strong>
+        </p>
+        <ul style={gs.ul}>
+          <li style={gs.li}><strong>NPC Attack options</strong>: <span style={gs.code}>Always long-tap</span></li>
+          <li style={gs.li}><strong>Move follower options lower down</strong>: <span style={gs.code}>Enabled</span></li>
+        </ul>
+
+        <p style={{ ...gs.p, fontSize: '17px', marginBottom: '-1em', color: colors.accentText}}>
+          <strong>Hotkey Settings</strong> – <span style={{color: colors.textMuted}}>Button at the bottom of <i>Controls</i></span>
+        </p>
+        <ol style={gs.ol}>
+          <li style={gs.li}><strong>Select</strong> any unused loadout</li>
+          <li style={gs.li}><strong>Add</strong>: <span style={gs.code}>Tap-to-drop</span></li>
+          <li style={gs.li}><strong>Add</strong>: <span style={gs.code}>Disable walk</span></li>
+          <li style={gs.li}><strong>Add</strong>: <span style={gs.code}>NPC tags</span></li>
+          <li style={gs.li}><strong>Click</strong>: <i>Make active</i></li>
+        </ol>
+      </>
+    ),
   },
   {
-    title: 'Find a live world from Ardy Host on your phone',
-    body: 'Open splasher.help in your phone\'s browser (or add it to your home screen) to see who\'s currently splashing and on which world, without needing to be at a desktop.',
-  },
-  {
-    title: 'Use a wide tap target, not a precise click',
-    body: 'On touchscreens, tap slightly to the side of the knight\'s exact centre rather than trying to pinpoint it — it reduces mis-taps that select the tile behind the knight instead of the knight itself.',
-  },
-  {
-    title: 'Turn off screen auto-lock while playing',
-    body: 'Set your phone\'s display timeout to "never" (or the longest available) for your play session so the game doesn\'t pause mid-AFK when the screen locks. Remember to change it back afterward.',
-  },
-  {
-    title: 'Keep the pickpocket menu option pinned to one spot',
-    body: 'Whichever finger/hand position you tap from, keep it consistent — muscle memory for a fixed tap location is faster and more accurate than re-aiming every time on a small screen.',
+    title: 'Equipment',
+    body: (
+      <>
+        <p style={gs.note}>
+          Any part of the equipment below is optional, but <i>Dodgy Necklaces</i> are strongly recommended, and if you care about the GP rogues outfit is too
+        </p>
+        <div style={gs.row}>
+          <GuideFigure
+            src='/assets/images/guides/optimal/equipment.png'
+            alt='Equipment'
+            width='15em'
+            caption='Equipment'
+          />
+          <GuideFigure
+            src='/assets/images/guides/optimal/inventory.png'
+            alt='Inventory'
+            width='15em'
+            caption='Inventory'
+          />
+        </div>
+      </>
+    ),
   },
 ];
 
 export default function MobileSetupGuide() {
   useGuideMeta({
     title: 'Mobile Pickpocketing Setup for Ardougne Knights | Ardy Host',
-    description: 'A step-by-step guide to pickpocketing splashed Knights of Ardougne on OSRS Mobile — finding a world, tap technique, and keeping your screen awake.',
+    description: 'A step-by-step guide to pickpocketing splashed Knights of Ardougne on OSRS Mobile',
     path: '/guides/mobile-setup',
   });
 
@@ -40,8 +77,7 @@ export default function MobileSetupGuide() {
         <a href="/guides" style={gs.back}>&larr; Guides</a>
         <h1 style={gs.heading}>Mobile Pickpocketing Setup</h1>
         <p style={gs.updated}>
-          Chilling with your phone out? Here's the simple, low-effort way to pickpocket a splashed
-          knight from OSRS Mobile.
+          Chilling with your phone out watching a show? Here's the settings you need for OSRS Mobile.
         </p>
 
         <p style={gs.intro}>
@@ -53,15 +89,14 @@ export default function MobileSetupGuide() {
 
         <div style={gs.note}>
           No special gear is required for mobile specifically — see the{' '}
-          <a style={gs.a} href="/guides/optimal-setup">optimal setup guide</a> if you also want to
-          maximize GP/hour and success chance.
+          <a style={gs.a} href="/guides/optimal-setup">optimal setup guide</a> if you want to
+          switch over to your PC. Don't forget to switch back NPC attack options when you're done!
         </div>
 
         <h2 style={gs.h2}>What you need</h2>
         <ul style={gs.ul}>
           <li style={gs.li}>OSRS Mobile installed, logged into an account with 55+ Thieving.</li>
-          <li style={gs.li}>A phone browser to check <a style={gs.a} href="/">Ardy Host's live list</a> for a world.</li>
-          <li style={gs.li}>Nothing else — the "bare minimum" requirements are identical to desktop.</li>
+          <li style={gs.li}>Level 55 Thieving</li>
         </ul>
 
         <h2 style={gs.h2}>How to do it</h2>
@@ -79,8 +114,8 @@ export default function MobileSetupGuide() {
 
         <h2 style={gs.h2}>Related</h2>
         <p style={gs.p}>
-          Want more GP/hour instead? See the <a style={gs.a} href="/guides/optimal-setup">optimal
-          setup guide</a>. Just want to be left alone and AFK? See the{' '}
+          Switching over to desktop soon? See the <a style={gs.a} href="/guides/optimal-setup">optimal
+          setup guide</a>. No splasher online? See the{' '}
           <a style={gs.a} href="/guides/solo-setup">solo setup guide</a>.
         </p>
 

@@ -179,7 +179,7 @@ const mouseKeysTooltip = (
 export default function OptimalSetupGuide() {
   useGuideMeta({
     title: 'Optimal Pickpocketing Setup for Ardougne Knights | Ardy Host',
-    description: 'A step-by-step gear and unlock order for maximizing GP/hour and success rate while pickpocketing splashed Knights of Ardougne.',
+    description: 'A step-by-step guide for pickpocketing splashed Knights of Ardougne.',
     path: '/guides/optimal-setup',
   });
 

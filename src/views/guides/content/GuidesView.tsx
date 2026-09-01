@@ -32,8 +32,8 @@ function GuideCard({ guide }: { guide: Guide }) {
 
 export default function GuidesView() {
   useGuideMeta({
-    title: 'OSRS Ardougne Knight Splashing Guides | Ardy Host',
-    description: 'Guides for OSRS Ardougne Knight splashing: setting up a normal or sticky knight at South Ardougne bank, installing the Splash Helper plugin, and pickpocketing for Thieving XP.',
+    title: 'OSRS Ardougne Knight Thieving/Splashing Guides | Ardy Host',
+    description: 'Guides for OSRS Ardougne Knight splashing: setting up a splasher with either a normal or sticky knight at South Ardougne bank, pickpocketing for Thieving XP, and installing the Splash Helper plugin.',
     path: '/guides',
   });
 

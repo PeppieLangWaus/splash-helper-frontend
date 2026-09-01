@@ -9,7 +9,6 @@ import { gs } from '../style/guideTheme';
 import { useGuideMeta } from '../hooks/useGuideMeta';
 import { Tooltip } from 'react-tooltip';
 
-
 const faqs = [
   {
     q: 'Is pickpocketing Ardougne Knights a good way to train OSRS Thieving?',
@@ -167,20 +166,19 @@ export default function PickpocketGuide() {
         <ul style={gs.ul}>
           <li style={gs.li}><strong>55 Thieving</strong> — the level required to pickpocket a Knight of Ardougne.</li>
           <li style={gs.li}><strong>A splashed knight</strong> — this is the part Ardy Host solves; see below.</li>
-          <li style={gs.li}><strong>Finished Plague City</strong> — {tooltip.wiki.plagueCity} reward 'Ardougne Scroll' unlocks the Ardougne Teleport spell.</li>
         </ul>
 
         <h3 style={gs.h3}>Recommended setup</h3>
-        <p style={gs.subtext}>These are optional, so pick the ones that seem useful to you. <br />The first 3 are strongly recommended though.</p>
+        <p style={gs.subtext}>These are optional, so pick the ones that seem useful to you. <br />The first 4 are strongly recommended though.</p>
         <ul style={gs.ul}>
           <li style={gs.li}><strong>Rogues equipment</strong> — the full sets gives a 100% chance to double GP/loot when thieving.</li>
           <li style={gs.li}><strong>Ardougne diary 2</strong> — the {tooltip.wiki.ardyDiary} increases pickpocket succes chance by 10%, and pouch size to 56.</li>
-          <li style={gs.li}><strong>Dodgy necklace</strong> — these have a 20% chance to make a stun not block actions, each necklace has 10 uses.</li>
+          <li style={gs.li}><strong>Dodgy necklace</strong> — these have a 25% chance to make a stun not block actions, each necklace has 10 uses.</li>
+          <li style={gs.li}><strong>Finished Plague City</strong> — {tooltip.wiki.plagueCity} reward 'Ardougne Scroll' unlocks the Ardougne Teleport spell.</li>
           <li style={gs.li}><strong>Hitpoints Cape</strong> — this makes you regenerate HP faster and makes you use less food.</li>
           <li style={gs.li}><strong>Shadow Veil</strong> — {tooltip.wiki.shadowVeil} that gives 15% chance to dodge stun, which {tooltip.dodgeChance} with dodgy necklaces.</li>
           <li style={gs.li}><strong>Lava battlestaff</strong> — only useful when casting Shadow Veil, allowing you to only use one cosmic rune per cast.</li>
           <li style={gs.li}><strong>Regen bracelet</strong> — regens HP faster, use this bracelet when you prioritize AFK over GP (about 10% less GP).</li>
-          {/* <li style={gs.li}><strong></strong> — </li> */}
         </ul>
 
         <h3 style={gs.h3}>The optimal setup</h3>
@@ -218,7 +216,7 @@ export default function PickpocketGuide() {
           having a low enough {tooltip.atkBonus} that they never hit the knight. 
           This method is used to trap the knight in the corner of the south-east Ardougne bank.
           Once a knight is splashed, it won't despawn. Normally, when an NPC has been stuck on the same tile for more
-          than 15 minutes, it despawns, but since the splasher keeps it in combat, it doesn't. Aside from this, it also makes the knight move much, much less, 
+          than 5 minutes, it despawns, but since the splasher keeps it in combat, it doesn't. Aside from this, it also makes the knight move much, much less, 
           allowing you to pickpocket the knight to your hearts content.
         </p>
 
