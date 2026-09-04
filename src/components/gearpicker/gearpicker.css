@@ -2,99 +2,10 @@
    src/views/GearPickerView.tsx — same pattern as the chatbox subsystem's Chatbox.css. Only
    genuinely per-instance/computed values (asset URLs, grid-derived pixel positions) stay inline
    as `style`; numeric dimensions shared between JS and CSS are passed through as custom
-   properties (--ns-*, --eq-*) so they can't drift out of sync with gearGridLayout.ts. */
-
-/* ---- NineSlicePanel ------------------------------------------------------------------ */
-
-.nine-slice {
-    position: relative;
-}
-
-.nine-slice__bg {
-    position: absolute;
-    inset: var(--ns-border-thickness);
-    background-repeat: repeat;
-    image-rendering: pixelated;
-}
-
-.nine-slice__border {
-    position: absolute;
-    image-rendering: pixelated;
-}
-
-.nine-slice__border--top {
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--ns-border-thickness);
-    background-repeat: repeat-x;
-}
-
-.nine-slice__border--bottom {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: var(--ns-border-thickness);
-    background-repeat: repeat-x;
-}
-
-.nine-slice__border--left {
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: var(--ns-border-thickness);
-    background-repeat: repeat-y;
-}
-
-.nine-slice__border--right {
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: var(--ns-border-thickness);
-    background-repeat: repeat-y;
-}
-
-.nine-slice__corner {
-    position: absolute;
-    image-rendering: pixelated;
-    background-repeat: no-repeat;
-    width: var(--ns-corner-width);
-    height: var(--ns-corner-height);
-}
-
-/* 1px inset on the two edges each corner touches, so the art sits flush against the border
-   beneath it rather than exactly overlapping its outer pixel row/column. */
-.nine-slice__corner--tl {
-    top: 0;
-    left: 0;
-    margin: 1px 0 0 1px;
-}
-
-.nine-slice__corner--tr {
-    top: 0;
-    right: 0;
-    margin: 1px 1px 0 0;
-}
-
-.nine-slice__corner--bl {
-    bottom: 0;
-    left: 0;
-    margin: 0 0 1px 1px;
-}
-
-.nine-slice__corner--br {
-    bottom: 0;
-    right: 0;
-    margin: 0 1px 1px 0;
-}
-
-.nine-slice__content {
-    position: relative;
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    padding: var(--ns-border-thickness);
-}
+   properties (--eq-*) so they can't drift out of sync with gearGridLayout.ts.
+   The 9-slice panel/tile chrome itself now lives in the reusable src/components/osrs/
+   (OSRSPanel.css / OSRSTile.css) — see SlotTile.tsx and GearPickerView.tsx for how this
+   subsystem uses those. */
 
 /* ---- SlotTile -------------------------------------------------------------------------- */
 

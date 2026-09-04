@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import NineSlicePanel from '../components/gearpicker/NineSlicePanel';
+import OSRSPanel from '../components/osrs/OSRSPanel';
 import EquipmentDisplay from '../components/gearpicker/EquipmentDisplay';
 import EquipmentSlotGrid from '../components/gearpicker/EquipmentSlotGrid';
 import BonusSummaryPanel from '../components/gearpicker/BonusSummaryPanel';
@@ -15,7 +15,7 @@ import {
   updateGearLoadout,
 } from '../api';
 import { computeTotalBonuses } from '../components/gearpicker/gearBonuses';
-import { CLEAR_EQUIPMENT_ICON, DELETE_ICON, PANEL_ASSETS } from '../components/gearpicker/gearpickerAssets';
+import { CLEAR_EQUIPMENT_ICON, DELETE_ICON, PANEL_ASSETS_STEEL } from '../components/gearpicker/gearpickerAssets';
 import type { EquipmentItem, EquipmentSlot, GearLoadout, GearLoadoutSlots } from '../types/gear';
 import '../components/gearpicker/gearpicker.css';
 import './GearPickerView.css';
@@ -29,8 +29,6 @@ interface Props {
    *  changing it. */
   readOnly?: boolean;
 }
-
-const panelBgStyle = { display: 'block', padding: '0.9rem' };
 
 export default function GearPickerView({ initialSlug, readOnly = false }: Props) {
   const { token, user } = useAuth();
@@ -173,100 +171,112 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
       </p>
 
       <div className="gear-picker-layout">
-        <NineSlicePanel assets={PANEL_ASSETS} bgStyle={panelBgStyle}>
-          <div className="gear-picker-equipment-col">
-            {effectiveReadOnly ? (
-              <EquipmentDisplay slots={slots} itemsById={itemsById} />
-            ) : (
-              <EquipmentSlotGrid slots={slots} itemsById={itemsById} itemsBySlot={itemsBySlot} onChange={setSlots} />
-            )}
+        <OSRSPanel
+          assets={PANEL_ASSETS_STEEL}
+          borderType="steel"
+          type="freeform"
+          width="fit-content"
+          content={
+            <div className="gear-picker-equipment-col">
+              {effectiveReadOnly ? (
+                <EquipmentDisplay slots={slots} itemsById={itemsById} />
+              ) : (
+                <EquipmentSlotGrid slots={slots} itemsById={itemsById} itemsBySlot={itemsBySlot} onChange={setSlots} />
+              )}
 
-            {effectiveReadOnly ? (
-              <button
-                type="button"
-                className="gear-picker-btn gear-picker-btn--secondary"
-                onClick={() => setForceEdit(true)}
-              >
-                Load into editor
-              </button>
-            ) : (
-              <button type="button" className="gear-picker-icon-btn" onClick={handleClearAll} title="Clear all slots">
-                <img src={CLEAR_EQUIPMENT_ICON} alt="" className="gear-picker-icon-btn__img" />
-                <span>Clear all</span>
-              </button>
-            )}
-          </div>
-        </NineSlicePanel>
+              {effectiveReadOnly ? (
+                <button
+                  type="button"
+                  className="gear-picker-btn gear-picker-btn--secondary"
+                  onClick={() => setForceEdit(true)}
+                >
+                  Load into editor
+                </button>
+              ) : (
+                <button type="button" className="gear-picker-icon-btn" onClick={handleClearAll} title="Clear all slots">
+                  <img src={CLEAR_EQUIPMENT_ICON} alt="" className="gear-picker-icon-btn__img" />
+                  <span>Clear all</span>
+                </button>
+              )}
+            </div>
+          }
+        />
 
-        <NineSlicePanel assets={PANEL_ASSETS} bgStyle={panelBgStyle}>
-          <div className="gear-picker-side-col">
-            <SplashSafetyIndicator totalMagicAttack={totals.magicAttack} />
-            <BonusSummaryPanel totals={totals} />
+        <OSRSPanel
+          assets={PANEL_ASSETS_STEEL}
+          borderType="steel"
+          type="freeform"
+          width="fit-content"
+          content={
+            <div className="gear-picker-side-col">
+              <SplashSafetyIndicator totalMagicAttack={totals.magicAttack} />
+              <BonusSummaryPanel totals={totals} />
 
-            {!effectiveReadOnly && (
-              <div className="gear-picker-actions">
-                <label className="gear-picker-field-label" htmlFor="gear-loadout-name">
-                  Loadout name
-                </label>
-                <input
-                  id="gear-loadout-name"
-                  className="gear-picker-input"
-                  type="text"
-                  placeholder="e.g. Ice Barrage splash gear"
-                  value={loadoutName}
-                  onChange={(e) => setLoadoutName(e.target.value)}
-                  maxLength={100}
-                />
+              {!effectiveReadOnly && (
+                <div className="gear-picker-actions">
+                  <label className="gear-picker-field-label" htmlFor="gear-loadout-name">
+                    Loadout name
+                  </label>
+                  <input
+                    id="gear-loadout-name"
+                    className="gear-picker-input"
+                    type="text"
+                    placeholder="e.g. Ice Barrage splash gear"
+                    value={loadoutName}
+                    onChange={(e) => setLoadoutName(e.target.value)}
+                    maxLength={100}
+                  />
 
-                <div className="gear-picker-btn-row">
-                  {token ? (
+                  <div className="gear-picker-btn-row">
+                    {token ? (
+                      <button
+                        type="button"
+                        className="gear-picker-btn"
+                        onClick={() => void handleSave()}
+                        disabled={saving}
+                      >
+                        {saving ? 'Saving…' : savedSlug ? 'Update saved loadout' : 'Save loadout'}
+                      </button>
+                    ) : (
+                      <span className="gear-picker-hint">Sign in to save this loadout.</span>
+                    )}
                     <button
                       type="button"
-                      className="gear-picker-btn"
-                      onClick={() => void handleSave()}
-                      disabled={saving}
+                      className="gear-picker-btn gear-picker-btn--secondary"
+                      onClick={() => void handleShare()}
+                      disabled={sharing}
                     >
-                      {saving ? 'Saving…' : savedSlug ? 'Update saved loadout' : 'Save loadout'}
+                      {sharing ? 'Sharing…' : 'Share'}
                     </button>
-                  ) : (
-                    <span className="gear-picker-hint">Sign in to save this loadout.</span>
+                    {savedSlug && (
+                      <button
+                        type="button"
+                        className="gear-picker-icon-btn gear-picker-icon-btn--danger"
+                        onClick={() => void handleDelete()}
+                        disabled={deleting}
+                        title="Delete this saved loadout"
+                      >
+                        <img src={DELETE_ICON} alt="" className="gear-picker-icon-btn__img" />
+                        <span>{deleting ? 'Deleting…' : 'Delete'}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {shareUrl && (
+                    <CopyableField
+                      label="Share link"
+                      value={shareUrl}
+                      hint="Anyone with this link can view this loadout — no account needed."
+                    />
                   )}
-                  <button
-                    type="button"
-                    className="gear-picker-btn gear-picker-btn--secondary"
-                    onClick={() => void handleShare()}
-                    disabled={sharing}
-                  >
-                    {sharing ? 'Sharing…' : 'Share'}
-                  </button>
-                  {savedSlug && (
-                    <button
-                      type="button"
-                      className="gear-picker-icon-btn gear-picker-icon-btn--danger"
-                      onClick={() => void handleDelete()}
-                      disabled={deleting}
-                      title="Delete this saved loadout"
-                    >
-                      <img src={DELETE_ICON} alt="" className="gear-picker-icon-btn__img" />
-                      <span>{deleting ? 'Deleting…' : 'Delete'}</span>
-                    </button>
+                  {feedback && (
+                    <p className={`gear-picker-feedback gear-picker-feedback--${feedback.type}`}>{feedback.message}</p>
                   )}
                 </div>
-
-                {shareUrl && (
-                  <CopyableField
-                    label="Share link"
-                    value={shareUrl}
-                    hint="Anyone with this link can view this loadout — no account needed."
-                  />
-                )}
-                {feedback && (
-                  <p className={`gear-picker-feedback gear-picker-feedback--${feedback.type}`}>{feedback.message}</p>
-                )}
-              </div>
-            )}
-          </div>
-        </NineSlicePanel>
+              )}
+            </div>
+          }
+        />
       </div>
     </div>
   );

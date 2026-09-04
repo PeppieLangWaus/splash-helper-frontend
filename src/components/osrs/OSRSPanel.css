@@ -1,0 +1,114 @@
+/* OSRSPanel — see OSRSPanel.tsx. Numeric dimensions that differ per asset set (stone vs steel
+   border thickness/corner size) come in as CSS custom properties (--rp-*) so the stylesheet
+   can't drift out of sync with whatever RSPanelAssets a caller passes in. */
+
+.osrs-panel {
+    position: relative;
+    box-sizing: border-box;
+}
+
+.osrs-panel__bg-container {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.osrs-panel__bg {
+    position: absolute;
+    inset: var(--rp-border-thickness);
+    background-repeat: repeat;
+    image-rendering: pixelated;
+}
+
+.osrs-panel__border {
+    position: absolute;
+    image-rendering: pixelated;
+}
+
+.osrs-panel__border--top {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--rp-border-thickness);
+    background-repeat: repeat-x;
+}
+
+.osrs-panel__border--bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--rp-border-thickness);
+    background-repeat: repeat-x;
+}
+
+.osrs-panel__border--left {
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--rp-border-thickness);
+    background-repeat: repeat-y;
+}
+
+.osrs-panel__border--right {
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--rp-border-thickness);
+    background-repeat: repeat-y;
+}
+
+.osrs-panel__corner {
+    position: absolute;
+    image-rendering: pixelated;
+    background-repeat: no-repeat;
+    width: var(--rp-corner-width);
+    height: var(--rp-corner-height);
+}
+
+.osrs-panel__corner--tl {
+    top: 0;
+    left: 0;
+}
+
+.osrs-panel__corner--tr {
+    top: 0;
+    right: 0;
+}
+
+.osrs-panel__corner--bl {
+    bottom: 0;
+    left: 0;
+}
+
+.osrs-panel__corner--br {
+    bottom: 0;
+    right: 0;
+}
+
+/* Separate from .osrs-panel__bg-container (which spans edge-to-edge for the decorative layer)
+   so padding here can inset the actual content without affecting where the border/corner art
+   is anchored. */
+.osrs-panel__inner {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: var(--rp-border-thickness);
+    display: flex;
+    flex-direction: column;
+}
+
+.osrs-panel__header {
+    flex: 0 0 auto;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    text-align: center;
+    color: var(--accent-text);
+    margin-bottom: 0.5rem;
+}
+
+.osrs-panel__content {
+    flex: 1 1 auto;
+    min-height: 0;
+}

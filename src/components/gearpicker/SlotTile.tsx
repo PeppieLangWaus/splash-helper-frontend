@@ -1,11 +1,9 @@
-import NineSlicePanel from './NineSlicePanel';
+import OSRSTile from '../osrs/OSRSTile';
 import { itemIconUrl } from '../chatbox/itemIcons';
-import { BLOCKED_ICON, SLOT_PLACEHOLDER_ICON, SLOT_TILE_ASSETS } from './gearpickerAssets';
+import { BLOCKED_ICON, SLOT_PLACEHOLDER_ICON, TILE_ASSETS } from './gearpickerAssets';
 import { SLOT_SIZE } from './gearGridLayout';
 import type { EquipmentItem, EquipmentSlot } from '../../types/gear';
 import { EQUIPMENT_SLOT_LABELS } from '../../types/gear';
-
-const tileSizeStyle = { width: SLOT_SIZE, height: SLOT_SIZE };
 
 interface Props {
   slot: EquipmentSlot;
@@ -16,11 +14,11 @@ interface Props {
   onClick?: () => void;
 }
 
-/** One equipment slot tile: the user-provided OSRS-style 9-slice tile background (grey normally,
- *  red when blocked), with either the equipped item's icon, the slot's outline placeholder icon,
- *  or a blocked badge centered on top. */
+/** One equipment slot tile: an OSRSTile (gray normally, red when blocked), with either the
+ *  equipped item's icon, the slot's outline placeholder icon, or a blocked badge centered
+ *  on top. Thin gear-picker-specific wrapper: OSRSTile itself knows nothing about equipment
+ *  slots or "blocked" states. */
 export default function SlotTile({ slot, item, blocked, onClick }: Props) {
-  const assets = blocked ? SLOT_TILE_ASSETS.red : SLOT_TILE_ASSETS.grey;
   const title = item?.name ?? (blocked ? `${EQUIPMENT_SLOT_LABELS[slot]} (blocked by two-handed weapon)` : EQUIPMENT_SLOT_LABELS[slot]);
 
   const icon = item ? (
@@ -31,19 +29,25 @@ export default function SlotTile({ slot, item, blocked, onClick }: Props) {
     <img src={SLOT_PLACEHOLDER_ICON[slot]} alt="" className="slot-tile__icon" />
   );
 
-  const panel = (
-    <NineSlicePanel assets={assets} style={tileSizeStyle} bgStyle={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {icon}
-    </NineSlicePanel>
+  const tile = (
+    <OSRSTile
+      assets={blocked ? TILE_ASSETS.red : TILE_ASSETS.gray}
+      type={blocked ? 'red' : 'gray'}
+      sizeType="square"
+      width={SLOT_SIZE}
+      height={SLOT_SIZE}
+      contentType="equipment"
+      content={icon}
+    />
   );
 
   if (!onClick) {
-    return <div title={title}>{panel}</div>;
+    return <div title={title}>{tile}</div>;
   }
 
   return (
     <button type="button" className="slot-tile__button" onClick={onClick} disabled={blocked} title={title}>
-      {panel}
+      {tile}
     </button>
   );
 }
