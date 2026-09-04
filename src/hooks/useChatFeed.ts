@@ -79,8 +79,12 @@ function toChatMessage(raw: ChatBroadcastPayload, channelType: LiveChatChannelTy
  * login: this is the same read-only SUBSCRIBE_CHAT flow for any visitor (see the backend's
  * websocket/handlers.ts, which handles it before the AUTH gate).
  *
- * Pass null for communityId/channelType while nothing is selected yet — the socket still
- * connects (so it's ready the moment a selection is made) but never subscribes.
+ * Pass null for communityId/channelType while there's nothing to watch yet — no socket is opened
+ * at all until a real target is set (see useChatFeeds, whose fixed-but-mostly-unlinked slots are
+ * the main reason this matters: a viewer with only 2 linked communities shouldn't hold open 5
+ * idle sockets per channel type just because the slot array is sized for headroom). Once a target
+ * is set, the connection opens and is kept alive/reconnected for the life of the component same
+ * as before, including across a later target change — only a null target actually closes it.
  *
  * Messages are persisted to localStorage per (communityId, channelType) — see utils/chatStorage
  * — so history survives a reload. On (re)subscribe, whatever the relay has buffered server-side
@@ -106,8 +110,15 @@ export function useChatFeed(communityId: string | null, channelType: LiveChatCha
     ws.send(JSON.stringify({ type: 'SUBSCRIBE_CHAT', communityId: target.communityId, channelType: target.channelType }));
   }, []);
 
-  // Persistent connection: opened once on mount, auto-reconnected if it drops.
+  // Persistent connection: opened once a real target is set (not on mount if there isn't one
+  // yet), auto-reconnected if it drops. Re-runs — closing any existing connection and opening a
+  // fresh one — only when hasTarget itself flips, not on every communityId/channelType change;
+  // swapping between two real targets is handled by the re-subscribe effect below without a
+  // reconnect, same as before this hasTarget gating was added.
+  const hasTarget = Boolean(communityId && channelType);
   useEffect(() => {
+    if (!hasTarget) return;
+
     let cancelled = false;
     let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
     let reconnectAttempts = 0;
@@ -194,7 +205,7 @@ export function useChatFeed(communityId: string | null, channelType: LiveChatCha
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [sendSubscribe]);
+  }, [hasTarget, sendSubscribe]);
 
   // Re-subscribe (and load that channel's stored history) whenever the selected community/
   // channel changes. No-ops quietly if the socket isn't open yet; onopen above will pick up the

@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.26.7] - 2026-09-04
+### Fixed
+- Stop the chat feed from opening a WebSocket for every one of `useChatFeeds`' fixed slots regardless of use — a slot with no linked community now opens no socket at all until one is actually linked, instead of sitting connected-but-idle. Cuts a typical page load (2 linked communities today) from up to 10 sockets down to ~2.
+
 ## [0.26.6] - 2026-09-04
 ### Fixed
 - Send a lightweight `HELLO` message the instant the chat-feed WebSocket opens, even before a community/channel is selected — the backend now closes any connection that stays silent for a few seconds (to cut off scanner traffic), which was also closing legitimate idle chat viewers and forcing a reconnect loop.
