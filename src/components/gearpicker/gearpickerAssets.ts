@@ -2,58 +2,49 @@ import type { EquipmentSlot } from '../../types/gear';
 import type { RSPanelAssets } from '../osrs/OSRSPanel';
 import type { RSTileAssets } from '../osrs/OSRSTile';
 
-/** Asset pack for the gear picker's OSRS-styled chrome — see public/assets/gearpicker/.
- *  Provided by the user: a 9-slice panel frame (4 corners + 4 repeating borders + 1 tiled
- *  background), reused at panel scale for OSRSPanel and at tile scale for OSRSTile, plus
- *  placeholder slot-outline icons, a blocked-slot badge, splash-safety icons, and a couple of
- *  button icons. */
-const BASE = '/assets/gearpicker';
+/** Asset pack for the gear picker's OSRS-styled chrome. The panel/tile 9-slice chrome itself
+ *  lives at the shared public/assets/panel/ and public/assets/tile/ (not gearpicker-specific —
+ *  other OSRS-styled surfaces can reuse it); everything else (slot-outline icons, the
+ *  blocked-slot badge, splash-safety icons, button icons) stays under public/assets/gearpicker/. */
+const ICON_BASE = '/assets/gearpicker';
+const PANEL_BASE = '/assets/panel';
+const TILE_BASE = '/assets/tile';
 
-const PANEL_BORDER = {
-  top: `${BASE}/panel/border/top.png`,
-  bottom: `${BASE}/panel/border/bottom.png`,
-  left: `${BASE}/panel/border/left.png`,
-  right: `${BASE}/panel/border/right.png`,
-};
+function panelBorder(style: 'stone' | 'steel') {
+  const dir = `${PANEL_BASE}/border/${style}`;
+  return {
+    topLeft: `${dir}/topLeft.png`,
+    topRight: `${dir}/topRight.png`,
+    bottomLeft: `${dir}/bottomLeft.png`,
+    bottomRight: `${dir}/bottomRight.png`,
+    top: `${dir}/top.png`,
+    bottom: `${dir}/bottom.png`,
+    left: `${dir}/left.png`,
+    right: `${dir}/right.png`,
+  };
+}
 
-/** OSRSPanel's `borderType="stone"` — the plain, small 9x9-corner frame. Side/freeform only. */
+/** OSRSPanel's `borderType="stone"` — 32x32 corners, 7px borders. Side/freeform only. */
 export const PANEL_ASSETS_STONE: RSPanelAssets = {
-  cornerWidth: 9,
-  cornerHeight: 9,
+  cornerWidth: 32,
+  cornerHeight: 32,
   borderThickness: 7,
-  topLeft: `${BASE}/panel/corner/topLeft.png`,
-  topRight: `${BASE}/panel/corner/topRight.png`,
-  bottomLeft: `${BASE}/panel/corner/bottomLeft.png`,
-  bottomRight: `${BASE}/panel/corner/bottomRight.png`,
-  ...PANEL_BORDER,
-  bg: `${BASE}/panel/bg/2.png`, // side/freeform per the user's spec
+  ...panelBorder('stone'),
+  bg: `${PANEL_BASE}/bg/2.png`, // side/freeform per the user's spec
 };
 
-const PANEL_CONNECTOR_BORDER = {
-  top: `${BASE}/panel/connector/top.png`,
-  bottom: `${BASE}/panel/connector/bottom.png`,
-  left: `${BASE}/panel/connector/left.png`,
-  right: `${BASE}/panel/connector/right.png`,
-};
-
-/** OSRSPanel's `borderType="steel"` — the bolder connector/* set (asymmetric 25x30 L-bracket
- *  corners, 6px-thick borders), the same asset family EquipmentSlotFrame.tsx uses for the rack
- *  behind the equipment slots. Works for side/freeform or bank. */
+/** OSRSPanel's `borderType="steel"` — 25x30 corners, 6px borders. Works for side/freeform or
+ *  bank; this gear picker only actually uses it for the "bank" bonuses panel. */
 export const PANEL_ASSETS_STEEL: RSPanelAssets = {
   cornerWidth: 25,
   cornerHeight: 30,
   borderThickness: 6,
-  topLeft: `${BASE}/panel/connector/topLeft.png`,
-  topRight: `${BASE}/panel/connector/topRight.png`,
-  bottomLeft: `${BASE}/panel/connector/bottomLeft.png`,
-  bottomRight: `${BASE}/panel/connector/bottomRight.png`,
-  ...PANEL_CONNECTOR_BORDER,
-  bg: `${BASE}/panel/bg/2.png`, // side/freeform per the user's spec (a "bank" consumer would
-  // want a variant of this with bg/1.png instead — not needed yet, nothing uses type="bank").
+  ...panelBorder('steel'),
+  bg: `${PANEL_BASE}/bg/1.png`, // bank per the user's spec
 };
 
 function slotTileAssets(dirName: 'grey' | 'red'): RSTileAssets {
-  const dir = `${BASE}/tile/${dirName}`;
+  const dir = `${TILE_BASE}/${dirName}`;
   return {
     cornerWidth: 6,
     cornerHeight: 6,
@@ -80,41 +71,33 @@ export const TILE_ASSETS = {
 
 /** Outline icon shown in an empty (non-blocked) slot, matching OSRS's own equipment tab. */
 export const SLOT_PLACEHOLDER_ICON: Record<EquipmentSlot, string> = {
-  head: `${BASE}/tile/icon/head.png`,
-  cape: `${BASE}/tile/icon/cape.png`,
-  neck: `${BASE}/tile/icon/necklace.png`,
-  weapon: `${BASE}/tile/icon/weapon.png`,
-  body: `${BASE}/tile/icon/chest.png`,
-  shield: `${BASE}/tile/icon/shield.png`,
-  legs: `${BASE}/tile/icon/legs.png`,
-  hands: `${BASE}/tile/icon/hands.png`,
-  feet: `${BASE}/tile/icon/feet.png`,
-  ring: `${BASE}/tile/icon/ring.png`,
-  ammo: `${BASE}/tile/icon/ammo.png`,
+  head: `${TILE_BASE}/icon/head.png`,
+  cape: `${TILE_BASE}/icon/cape.png`,
+  neck: `${TILE_BASE}/icon/necklace.png`,
+  weapon: `${TILE_BASE}/icon/weapon.png`,
+  body: `${TILE_BASE}/icon/chest.png`,
+  shield: `${TILE_BASE}/icon/shield.png`,
+  legs: `${TILE_BASE}/icon/legs.png`,
+  hands: `${TILE_BASE}/icon/hands.png`,
+  feet: `${TILE_BASE}/icon/feet.png`,
+  ring: `${TILE_BASE}/icon/ring.png`,
+  ammo: `${TILE_BASE}/icon/ammo.png`,
 };
 
-/** The bigger, bolder frame-bracket pieces used to draw a connecting rack/spine shape behind
- *  the equipment slot tiles (see EquipmentSlotFrame.tsx) — corners here are asymmetric L-brackets
- *  (25x30: a 25px-wide horizontal arm + a 30px-tall vertical arm meeting at the bend), not simple
- *  square corners, so they're kept as their own flat set rather than forced into RSPanelAssets. */
+/** The two plain bar pieces used to draw a connecting rack/spine shape behind the equipment
+ *  slot tiles (see EquipmentSlotFrame.tsx) — just a straight horizontal and vertical bar;
+ *  corner junctions are formed by simply butting a horizontal and vertical bar up against each
+ *  other rather than a dedicated bent-corner image. */
 export const CONNECTOR_ASSETS = {
-  top: `${BASE}/panel/connector/top.png`,
-  bottom: `${BASE}/panel/connector/bottom.png`,
-  left: `${BASE}/panel/connector/left.png`,
-  right: `${BASE}/panel/connector/right.png`,
-  topLeft: `${BASE}/panel/connector/topLeft.png`,
-  topRight: `${BASE}/panel/connector/topRight.png`,
-  bottomLeft: `${BASE}/panel/connector/bottomLeft.png`,
-  bottomRight: `${BASE}/panel/connector/bottomRight.png`,
-  cornerArmWidth: 25,
-  cornerArmHeight: 30,
+  horizontal: `${PANEL_BASE}/connector/horizontal.png`,
+  vertical: `${PANEL_BASE}/connector/vertical.png`,
   barThickness: 6,
 };
 
-export const BLOCKED_ICON = `${BASE}/blocked.png`;
-export const SPLASH_TRUE_ICON = `${BASE}/splashTrue.png`;
-export const SPLASH_FALSE_ICON = `${BASE}/splashFalse.png`;
-export const SEARCH_ICON = `${BASE}/search.png`;
-export const CLEAR_EQUIPMENT_ICON = `${BASE}/clearEquipment.png`;
-export const DELETE_ICON = `${BASE}/delete.png`;
-export const HELP_BUTTON_ICON = `${BASE}/button/normal/help.png`;
+export const BLOCKED_ICON = `${ICON_BASE}/blocked.png`;
+export const SPLASH_TRUE_ICON = `${ICON_BASE}/splashTrue.png`;
+export const SPLASH_FALSE_ICON = `${ICON_BASE}/splashFalse.png`;
+export const SEARCH_ICON = `${ICON_BASE}/search.png`;
+export const CLEAR_EQUIPMENT_ICON = `${ICON_BASE}/clearEquipment.png`;
+export const DELETE_ICON = `${ICON_BASE}/delete.png`;
+export const HELP_BUTTON_ICON = `${ICON_BASE}/button/normal/help.png`;

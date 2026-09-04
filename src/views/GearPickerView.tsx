@@ -15,7 +15,7 @@ import {
   updateGearLoadout,
 } from '../api';
 import { computeTotalBonuses } from '../components/gearpicker/gearBonuses';
-import { CLEAR_EQUIPMENT_ICON, DELETE_ICON, PANEL_ASSETS_STEEL } from '../components/gearpicker/gearpickerAssets';
+import { CLEAR_EQUIPMENT_ICON, DELETE_ICON, PANEL_ASSETS_STEEL, PANEL_ASSETS_STONE } from '../components/gearpicker/gearpickerAssets';
 import type { EquipmentItem, EquipmentSlot, GearLoadout, GearLoadoutSlots } from '../types/gear';
 import '../components/gearpicker/gearpicker.css';
 import './GearPickerView.css';
@@ -172,8 +172,8 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
       <div className="gear-picker-layout">
         <OSRSPanel
-          assets={PANEL_ASSETS_STEEL}
-          borderType="steel"
+          assets={PANEL_ASSETS_STONE}
+          borderType="stone"
           type="side"
           width={200}
           content={

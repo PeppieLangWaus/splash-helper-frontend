@@ -64,11 +64,6 @@ interface Props {
  *   (`width` itself is always required, but accepts any CSS value, not just a pixel size).
  * - `type="bank"` is the larger bank-interface style with a header row (`header` prop). Must use
  *   `borderType="steel"` — `"stone"` is side/freeform-only.
- *
- * `borderType="steel"` currently reuses the boldest asset set actually supplied so far
- * (panel/corner/full/*) as a placeholder — true bank-interface chrome (skull/gargoyle corner
- * ornaments, matching the reference screenshot) hasn't been supplied yet, the same situation as
- * OSRSTile's `type="black"`.
  */
 export default function OSRSPanel({ assets, width, height, content, header, borderType, type }: Props) {
   if (import.meta.env.DEV && borderType === 'stone' && type === 'bank') {
