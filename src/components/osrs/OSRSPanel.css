@@ -105,7 +105,9 @@
     font-weight: 700;
     text-align: center;
     color: var(--accent-text);
+    padding-bottom: 0.5rem;
     margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-strong);
 }
 
 .osrs-panel__content {

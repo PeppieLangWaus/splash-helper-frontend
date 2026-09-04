@@ -29,20 +29,25 @@ export const PANEL_ASSETS_STONE: RSPanelAssets = {
   bg: `${BASE}/panel/bg/2.png`, // side/freeform per the user's spec
 };
 
-/** OSRSPanel's `borderType="steel"` — the bolder 32x32-corner frame. Works for side/freeform or
- *  bank. NOTE: this reuses the boldest asset set actually supplied so far (panel/corner/full/*)
- *  as a placeholder for true bank-interface chrome (skull/gargoyle corner ornaments, matching
- *  the reference screenshot), which hasn't been supplied yet — same situation as the tile
- *  `type="black"` variant below. */
+const PANEL_CONNECTOR_BORDER = {
+  top: `${BASE}/panel/connector/top.png`,
+  bottom: `${BASE}/panel/connector/bottom.png`,
+  left: `${BASE}/panel/connector/left.png`,
+  right: `${BASE}/panel/connector/right.png`,
+};
+
+/** OSRSPanel's `borderType="steel"` — the bolder connector/* set (asymmetric 25x30 L-bracket
+ *  corners, 6px-thick borders), the same asset family EquipmentSlotFrame.tsx uses for the rack
+ *  behind the equipment slots. Works for side/freeform or bank. */
 export const PANEL_ASSETS_STEEL: RSPanelAssets = {
-  cornerWidth: 32,
-  cornerHeight: 32,
-  borderThickness: 7,
-  topLeft: `${BASE}/panel/corner/full/topLeft.png`,
-  topRight: `${BASE}/panel/corner/full/topRight.png`,
-  bottomLeft: `${BASE}/panel/corner/full/bottomLeft.png`,
-  bottomRight: `${BASE}/panel/corner/full/bottomRight.png`,
-  ...PANEL_BORDER,
+  cornerWidth: 25,
+  cornerHeight: 30,
+  borderThickness: 6,
+  topLeft: `${BASE}/panel/connector/topLeft.png`,
+  topRight: `${BASE}/panel/connector/topRight.png`,
+  bottomLeft: `${BASE}/panel/connector/bottomLeft.png`,
+  bottomRight: `${BASE}/panel/connector/bottomRight.png`,
+  ...PANEL_CONNECTOR_BORDER,
   bg: `${BASE}/panel/bg/2.png`, // side/freeform per the user's spec (a "bank" consumer would
   // want a variant of this with bg/1.png instead — not needed yet, nothing uses type="bank").
 };
