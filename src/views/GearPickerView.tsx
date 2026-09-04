@@ -174,8 +174,8 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
         <OSRSPanel
           assets={PANEL_ASSETS_STEEL}
           borderType="steel"
-          type="freeform"
-          width="fit-content"
+          type="side"
+          width={200}
           content={
             <div className="gear-picker-equipment-col">
               {effectiveReadOnly ? (
@@ -205,8 +205,9 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
         <OSRSPanel
           assets={PANEL_ASSETS_STEEL}
           borderType="steel"
-          type="freeform"
-          width="fit-content"
+          type="bank"
+          width={280}
+          header="Bonuses"
           content={
             <div className="gear-picker-side-col">
               <SplashSafetyIndicator totalMagicAttack={totals.magicAttack} />
