@@ -8,16 +8,20 @@ import type { EquipmentSlot } from '../types/gear';
 const BASE = '/assets/gearpicker';
 
 export interface NineSliceAssets {
-  /** Corner assets are square; this is both their width and height in px. */
-  cornerSize: number;
+  /** Corner assets' native width/height in px — rendered at native size, never stretched. */
+  cornerWidth: number;
+  cornerHeight: number;
+  /** Native thickness of the border strips: height for top/bottom, width for left/right. */
+  borderThickness: number;
   topLeft: string;
   topRight: string;
   bottomLeft: string;
   bottomRight: string;
-  /** Repeats horizontally (background-repeat: repeat-x). */
+  /** Repeats horizontally (background-repeat: repeat-x), spanning the full outer edge — corners
+   *  are layered on top of it, not carved out of it. */
   top: string;
   bottom: string;
-  /** Repeats vertically (background-repeat: repeat-y). */
+  /** Repeats vertically (background-repeat: repeat-y), spanning the full outer edge. */
   left: string;
   right: string;
   /** Tiles both directions to fill the interior. */
@@ -25,7 +29,9 @@ export interface NineSliceAssets {
 }
 
 export const PANEL_ASSETS: NineSliceAssets = {
-  cornerSize: 9,
+  cornerWidth: 9,
+  cornerHeight: 9,
+  borderThickness: 7,
   topLeft: `${BASE}/panel/corner/topLeft.png`,
   topRight: `${BASE}/panel/corner/topRight.png`,
   bottomLeft: `${BASE}/panel/corner/bottomLeft.png`,
@@ -40,7 +46,9 @@ export const PANEL_ASSETS: NineSliceAssets = {
 function slotTileAssets(color: 'grey' | 'red'): NineSliceAssets {
   const dir = `${BASE}/tile/${color}`;
   return {
-    cornerSize: 6,
+    cornerWidth: 6,
+    cornerHeight: 6,
+    borderThickness: 6,
     topLeft: `${dir}/topLeft.png`,
     topRight: `${dir}/topRight.png`,
     bottomLeft: `${dir}/bottomLeft.png`,
@@ -71,6 +79,24 @@ export const SLOT_PLACEHOLDER_ICON: Record<EquipmentSlot, string> = {
   feet: `${BASE}/tile/icon/feet.png`,
   ring: `${BASE}/tile/icon/ring.png`,
   ammo: `${BASE}/tile/icon/ammo.png`,
+};
+
+/** The bigger, bolder frame-bracket pieces used to draw a connecting rack/spine shape behind
+ *  the equipment slot tiles (see EquipmentSlotFrame.tsx) — corners here are asymmetric L-brackets
+ *  (25x30: a 25px-wide horizontal arm + a 30px-tall vertical arm meeting at the bend), not simple
+ *  square corners, so they're kept as their own flat set rather than forced into NineSliceAssets. */
+export const CONNECTOR_ASSETS = {
+  top: `${BASE}/panel/connector/top.png`,
+  bottom: `${BASE}/panel/connector/bottom.png`,
+  left: `${BASE}/panel/connector/left.png`,
+  right: `${BASE}/panel/connector/right.png`,
+  topLeft: `${BASE}/panel/connector/topLeft.png`,
+  topRight: `${BASE}/panel/connector/topRight.png`,
+  bottomLeft: `${BASE}/panel/connector/bottomLeft.png`,
+  bottomRight: `${BASE}/panel/connector/bottomRight.png`,
+  cornerArmWidth: 25,
+  cornerArmHeight: 30,
+  barThickness: 6,
 };
 
 export const BLOCKED_ICON = `${BASE}/blocked.png`;
