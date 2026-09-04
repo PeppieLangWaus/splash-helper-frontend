@@ -1,12 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import NineSlicePanel from '../components/NineSlicePanel';
 import EquipmentDisplay from '../components/EquipmentDisplay';
 import EquipmentSlotGrid from '../components/EquipmentSlotGrid';
 import BonusSummaryPanel from '../components/BonusSummaryPanel';
 import SplashSafetyIndicator from '../components/SplashSafetyIndicator';
 import CopyableField from '../components/CopyableField';
-import { fetchEquipmentData, fetchGearLoadout, saveGearLoadout, shareGearLoadout, updateGearLoadout } from '../api';
+import {
+  deleteGearLoadout,
+  fetchEquipmentData,
+  fetchGearLoadout,
+  saveGearLoadout,
+  shareGearLoadout,
+  updateGearLoadout,
+} from '../api';
 import { computeTotalBonuses } from '../utils/gearBonuses';
+import { CLEAR_EQUIPMENT_ICON, DELETE_ICON, PANEL_ASSETS } from '../utils/gearpickerAssets';
 import type { EquipmentItem, EquipmentSlot, GearLoadout, GearLoadoutSlots } from '../types/gear';
 import './GearPickerView.css';
 
@@ -19,6 +28,8 @@ interface Props {
    *  changing it. */
   readOnly?: boolean;
 }
+
+const panelBgStyle = { display: 'block', padding: '0.9rem' };
 
 export default function GearPickerView({ initialSlug, readOnly = false }: Props) {
   const { token, user } = useAuth();
@@ -40,6 +51,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   const [loadoutError, setLoadoutError] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
@@ -101,6 +113,21 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     }
   }
 
+  async function handleDelete() {
+    if (!token || !savedSlug) return;
+    setDeleting(true);
+    setFeedback(null);
+    try {
+      await deleteGearLoadout(savedSlug, token);
+      setSavedSlug(null);
+      setFeedback({ type: 'success', message: 'Saved loadout deleted.' });
+    } catch (err) {
+      setFeedback({ type: 'error', message: err instanceof Error ? err.message : 'Failed to delete loadout' });
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   async function handleShare() {
     setSharing(true);
     setFeedback(null);
@@ -112,6 +139,12 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     } finally {
       setSharing(false);
     }
+  }
+
+  function handleClearAll() {
+    setSlots({});
+    setShareUrl(null);
+    setFeedback(null);
   }
 
   if (loadingData || loadingLoadout) {
@@ -139,79 +172,100 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
       </p>
 
       <div className="gear-picker-layout">
-        <div className="gear-picker-grid-col">
-          {effectiveReadOnly ? (
-            <EquipmentDisplay slots={slots} itemsById={itemsById} />
-          ) : (
-            <EquipmentSlotGrid slots={slots} itemsById={itemsById} itemsBySlot={itemsBySlot} onChange={setSlots} />
-          )}
+        <NineSlicePanel assets={PANEL_ASSETS} bgStyle={panelBgStyle}>
+          <div className="gear-picker-equipment-col">
+            {effectiveReadOnly ? (
+              <EquipmentDisplay slots={slots} itemsById={itemsById} />
+            ) : (
+              <EquipmentSlotGrid slots={slots} itemsById={itemsById} itemsBySlot={itemsBySlot} onChange={setSlots} />
+            )}
 
-          {effectiveReadOnly && (
-            <button
-              type="button"
-              className="gear-picker-btn gear-picker-btn--secondary"
-              onClick={() => setForceEdit(true)}
-            >
-              Load into editor
-            </button>
-          )}
-        </div>
+            {effectiveReadOnly ? (
+              <button
+                type="button"
+                className="gear-picker-btn gear-picker-btn--secondary"
+                onClick={() => setForceEdit(true)}
+              >
+                Load into editor
+              </button>
+            ) : (
+              <button type="button" className="gear-picker-icon-btn" onClick={handleClearAll} title="Clear all slots">
+                <img src={CLEAR_EQUIPMENT_ICON} alt="" className="gear-picker-icon-btn__img" />
+                <span>Clear all</span>
+              </button>
+            )}
+          </div>
+        </NineSlicePanel>
 
-        <div className="gear-picker-side-col">
-          <SplashSafetyIndicator totalMagicAttack={totals.magicAttack} />
-          <BonusSummaryPanel totals={totals} />
+        <NineSlicePanel assets={PANEL_ASSETS} bgStyle={panelBgStyle}>
+          <div className="gear-picker-side-col">
+            <SplashSafetyIndicator totalMagicAttack={totals.magicAttack} />
+            <BonusSummaryPanel totals={totals} />
 
-          {!effectiveReadOnly && (
-            <div className="gear-picker-actions">
-              <label className="gear-picker-field-label" htmlFor="gear-loadout-name">
-                Loadout name
-              </label>
-              <input
-                id="gear-loadout-name"
-                className="gear-picker-input"
-                type="text"
-                placeholder="e.g. Ice Barrage splash gear"
-                value={loadoutName}
-                onChange={(e) => setLoadoutName(e.target.value)}
-                maxLength={100}
-              />
+            {!effectiveReadOnly && (
+              <div className="gear-picker-actions">
+                <label className="gear-picker-field-label" htmlFor="gear-loadout-name">
+                  Loadout name
+                </label>
+                <input
+                  id="gear-loadout-name"
+                  className="gear-picker-input"
+                  type="text"
+                  placeholder="e.g. Ice Barrage splash gear"
+                  value={loadoutName}
+                  onChange={(e) => setLoadoutName(e.target.value)}
+                  maxLength={100}
+                />
 
-              <div className="gear-picker-btn-row">
-                {token ? (
+                <div className="gear-picker-btn-row">
+                  {token ? (
+                    <button
+                      type="button"
+                      className="gear-picker-btn"
+                      onClick={() => void handleSave()}
+                      disabled={saving}
+                    >
+                      {saving ? 'Saving…' : savedSlug ? 'Update saved loadout' : 'Save loadout'}
+                    </button>
+                  ) : (
+                    <span className="gear-picker-hint">Sign in to save this loadout.</span>
+                  )}
                   <button
                     type="button"
-                    className="gear-picker-btn"
-                    onClick={() => void handleSave()}
-                    disabled={saving}
+                    className="gear-picker-btn gear-picker-btn--secondary"
+                    onClick={() => void handleShare()}
+                    disabled={sharing}
                   >
-                    {saving ? 'Saving…' : savedSlug ? 'Update saved loadout' : 'Save loadout'}
+                    {sharing ? 'Sharing…' : 'Share'}
                   </button>
-                ) : (
-                  <span className="gear-picker-hint">Sign in to save this loadout.</span>
-                )}
-                <button
-                  type="button"
-                  className="gear-picker-btn gear-picker-btn--secondary"
-                  onClick={() => void handleShare()}
-                  disabled={sharing}
-                >
-                  {sharing ? 'Sharing…' : 'Share'}
-                </button>
-              </div>
+                  {savedSlug && (
+                    <button
+                      type="button"
+                      className="gear-picker-icon-btn gear-picker-icon-btn--danger"
+                      onClick={() => void handleDelete()}
+                      disabled={deleting}
+                      title="Delete this saved loadout"
+                    >
+                      <img src={DELETE_ICON} alt="" className="gear-picker-icon-btn__img" />
+                      <span>{deleting ? 'Deleting…' : 'Delete'}</span>
+                    </button>
+                  )}
+                </div>
 
-              {shareUrl && (
-                <CopyableField
-                  label="Share link"
-                  value={shareUrl}
-                  hint="Anyone with this link can view this loadout — no account needed."
-                />
-              )}
-              {feedback && (
-                <p className={`gear-picker-feedback gear-picker-feedback--${feedback.type}`}>{feedback.message}</p>
-              )}
-            </div>
-          )}
-        </div>
+                {shareUrl && (
+                  <CopyableField
+                    label="Share link"
+                    value={shareUrl}
+                    hint="Anyone with this link can view this loadout — no account needed."
+                  />
+                )}
+                {feedback && (
+                  <p className={`gear-picker-feedback gear-picker-feedback--${feedback.type}`}>{feedback.message}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </NineSlicePanel>
       </div>
     </div>
   );

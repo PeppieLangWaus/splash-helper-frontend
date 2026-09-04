@@ -2,21 +2,23 @@ import { useState } from 'react';
 import Modal from './Modal';
 import { itemIconUrl } from './chatbox/itemIcons';
 import { colors } from '../theme';
+import { SEARCH_ICON } from '../utils/gearpickerAssets';
 import type { EquipmentItem, EquipmentSlot } from '../types/gear';
 import { EQUIPMENT_SLOT_LABELS } from '../types/gear';
 
 const s = {
+  inputWrap: { position: 'relative' as const, marginBottom: '0.6rem' },
+  inputIcon: { position: 'absolute' as const, left: 8, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, imageRendering: 'pixelated' as const },
   input: {
     width: '100%',
     boxSizing: 'border-box' as const,
-    padding: '0.5rem 0.7rem',
+    padding: '0.5rem 0.7rem 0.5rem 2rem',
     border: `1px solid ${colors.inputBorder}`,
     borderRadius: 6,
     fontSize: '0.85rem',
     outline: 'none',
     background: colors.inputBg,
     color: colors.text,
-    marginBottom: '0.6rem',
   },
   list: { maxHeight: '18rem', overflowY: 'auto' as const, display: 'flex', flexDirection: 'column' as const, gap: '0.15rem' },
   item: {
@@ -68,14 +70,17 @@ export default function ItemSearchPicker({ slot, items, hasCurrentItem, onSelect
 
   return (
     <Modal title={`Choose ${EQUIPMENT_SLOT_LABELS[slot]}`} onClose={onClose}>
-      <input
-        style={s.input}
-        type="text"
-        autoFocus
-        placeholder="Search item name…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      <div style={s.inputWrap}>
+        <img src={SEARCH_ICON} alt="" style={s.inputIcon} />
+        <input
+          style={s.input}
+          type="text"
+          autoFocus
+          placeholder="Search item name…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
       <div style={s.list}>
         {results.length === 0 && <div style={s.empty}>No items found.</div>}
         {results.map((item) => (
