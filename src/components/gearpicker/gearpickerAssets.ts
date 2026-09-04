@@ -29,13 +29,13 @@ export interface NineSliceAssets {
 }
 
 export const PANEL_ASSETS: NineSliceAssets = {
-  cornerWidth: 9,
-  cornerHeight: 9,
+  cornerWidth: 32,
+  cornerHeight: 32,
   borderThickness: 7,
-  topLeft: `${BASE}/panel/corner/topLeft.png`,
-  topRight: `${BASE}/panel/corner/topRight.png`,
-  bottomLeft: `${BASE}/panel/corner/bottomLeft.png`,
-  bottomRight: `${BASE}/panel/corner/bottomRight.png`,
+  topLeft: `${BASE}/panel/corner/full/topLeft.png`,
+  topRight: `${BASE}/panel/corner/full/topRight.png`,
+  bottomLeft: `${BASE}/panel/corner/full/bottomLeft.png`,
+  bottomRight: `${BASE}/panel/corner/full/bottomRight.png`,
   top: `${BASE}/panel/border/top.png`,
   bottom: `${BASE}/panel/border/bottom.png`,
   left: `${BASE}/panel/border/left.png`,
