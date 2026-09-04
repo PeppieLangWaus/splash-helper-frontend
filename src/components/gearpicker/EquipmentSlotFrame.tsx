@@ -1,31 +1,28 @@
 import type { CSSProperties } from 'react';
-import { CONNECTOR_ASSETS } from '../utils/gearpickerAssets';
-import { GRID_HEIGHT, GRID_WIDTH, colCenter, rowCenter } from '../utils/gearGridLayout';
+import { CONNECTOR_ASSETS } from './gearpickerAssets';
+import { GRID_HEIGHT, GRID_WIDTH, colCenter, rowCenter } from './gearGridLayout';
 
 const { barThickness, cornerArmWidth, cornerArmHeight, top, left, right, topLeft, topRight } = CONNECTOR_ASSETS;
 
-const base: CSSProperties = {
-  position: 'absolute',
-  imageRendering: 'pixelated',
-};
-
+// Every piece here is computed from grid geometry at render time, so position/size stay inline;
+// only the repeat mode is static enough to live in gearpicker.css (.equipment-slot-frame__bar).
 function hBar(y: number, x1: number, x2: number, src: string): CSSProperties {
-  return { ...base, top: y - barThickness / 2, left: x1, width: x2 - x1, height: barThickness, backgroundImage: `url(${src})`, backgroundRepeat: 'repeat-x' };
+  return { top: y - barThickness / 2, left: x1, width: x2 - x1, height: barThickness, backgroundImage: `url(${src})`, backgroundRepeat: 'repeat-x' };
 }
 
 function vBar(x: number, y1: number, y2: number, src: string): CSSProperties {
-  return { ...base, left: x - barThickness / 2, top: y1, width: barThickness, height: y2 - y1, backgroundImage: `url(${src})`, backgroundRepeat: 'repeat-y' };
+  return { left: x - barThickness / 2, top: y1, width: barThickness, height: y2 - y1, backgroundImage: `url(${src})`, backgroundRepeat: 'repeat-y' };
 }
 
 /** Positions an L-corner so its vertical arm (drawn at the image's own left edge for topLeft,
  *  right edge for topRight) lines up with the given column center, and its horizontal arm's top
  *  edge lines up with the given row center. */
 function leftCorner(colX: number, rowY: number, src: string): CSSProperties {
-  return { ...base, left: colX - barThickness / 2, top: rowY - barThickness / 2, width: cornerArmWidth, height: cornerArmHeight, backgroundImage: `url(${src})`, backgroundRepeat: 'no-repeat' };
+  return { left: colX - barThickness / 2, top: rowY - barThickness / 2, width: cornerArmWidth, height: cornerArmHeight, backgroundImage: `url(${src})`, backgroundRepeat: 'no-repeat' };
 }
 
 function rightCorner(colX: number, rowY: number, src: string): CSSProperties {
-  return { ...base, left: colX + barThickness / 2 - cornerArmWidth, top: rowY - barThickness / 2, width: cornerArmWidth, height: cornerArmHeight, backgroundImage: `url(${src})`, backgroundRepeat: 'no-repeat' };
+  return { left: colX + barThickness / 2 - cornerArmWidth, top: rowY - barThickness / 2, width: cornerArmWidth, height: cornerArmHeight, backgroundImage: `url(${src})`, backgroundRepeat: 'no-repeat' };
 }
 
 /**
@@ -50,24 +47,24 @@ export default function EquipmentSlotFrame() {
   const legContinuesFrom = row3 - barThickness / 2 + cornerArmHeight;
 
   return (
-    <div style={{ position: 'absolute', inset: 0, width: GRID_WIDTH, height: GRID_HEIGHT, zIndex: 0 }}>
+    <div className="equipment-slot-frame" style={{ width: GRID_WIDTH, height: GRID_HEIGHT }}>
       {/* Center spine: runs the full height, unbroken, through head/neck/legs/feet. */}
-      <div style={vBar(col2, 0, GRID_HEIGHT, left)} />
+      <div className="equipment-slot-frame__bar" style={vBar(col2, 0, GRID_HEIGHT, left)} />
 
       {/* Crossbar at the cape/neck/ammo row — a simple straight crossing, no bend. */}
-      <div style={hBar(row2, 0, GRID_WIDTH, top)} />
+      <div className="equipment-slot-frame__bar" style={hBar(row2, 0, GRID_WIDTH, top)} />
 
       {/* Bracket at the weapon/body/shield row: ends bend down into the left/right legs via the
           connector's own L-corners; the straight middle segment fills between them, crossing
           over the center spine. */}
-      <div style={leftCorner(col1, row3, topLeft)} />
-      <div style={rightCorner(col3, row3, topRight)} />
-      <div style={hBar(row3, col1 + cornerArmWidth - barThickness / 2, col3 - cornerArmWidth + barThickness / 2, top)} />
+      <div className="equipment-slot-frame__bar" style={leftCorner(col1, row3, topLeft)} />
+      <div className="equipment-slot-frame__bar" style={rightCorner(col3, row3, topRight)} />
+      <div className="equipment-slot-frame__bar" style={hBar(row3, col1 + cornerArmWidth - barThickness / 2, col3 - cornerArmWidth + barThickness / 2, top)} />
 
       {/* Left/right legs continuing down from the corner pieces' own vertical arm to the bottom
           of the grid (hands/ring row). */}
-      <div style={vBar(col1, legContinuesFrom, GRID_HEIGHT, left)} />
-      <div style={vBar(col3, legContinuesFrom, GRID_HEIGHT, right)} />
+      <div className="equipment-slot-frame__bar" style={vBar(col1, legContinuesFrom, GRID_HEIGHT, left)} />
+      <div className="equipment-slot-frame__bar" style={vBar(col3, legContinuesFrom, GRID_HEIGHT, right)} />
     </div>
   );
 }

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import NineSlicePanel from '../components/NineSlicePanel';
-import EquipmentDisplay from '../components/EquipmentDisplay';
-import EquipmentSlotGrid from '../components/EquipmentSlotGrid';
-import BonusSummaryPanel from '../components/BonusSummaryPanel';
-import SplashSafetyIndicator from '../components/SplashSafetyIndicator';
+import NineSlicePanel from '../components/gearpicker/NineSlicePanel';
+import EquipmentDisplay from '../components/gearpicker/EquipmentDisplay';
+import EquipmentSlotGrid from '../components/gearpicker/EquipmentSlotGrid';
+import BonusSummaryPanel from '../components/gearpicker/BonusSummaryPanel';
+import SplashSafetyIndicator from '../components/gearpicker/SplashSafetyIndicator';
 import CopyableField from '../components/CopyableField';
 import {
   deleteGearLoadout,
@@ -14,9 +14,10 @@ import {
   shareGearLoadout,
   updateGearLoadout,
 } from '../api';
-import { computeTotalBonuses } from '../utils/gearBonuses';
-import { CLEAR_EQUIPMENT_ICON, DELETE_ICON, PANEL_ASSETS } from '../utils/gearpickerAssets';
+import { computeTotalBonuses } from '../components/gearpicker/gearBonuses';
+import { CLEAR_EQUIPMENT_ICON, DELETE_ICON, PANEL_ASSETS } from '../components/gearpicker/gearpickerAssets';
 import type { EquipmentItem, EquipmentSlot, GearLoadout, GearLoadoutSlots } from '../types/gear';
+import '../components/gearpicker/gearpicker.css';
 import './GearPickerView.css';
 
 interface Props {

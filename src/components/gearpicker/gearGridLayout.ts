@@ -1,4 +1,4 @@
-import type { EquipmentSlot } from '../types/gear';
+import type { EquipmentSlot } from '../../types/gear';
 
 /** Shared pixel geometry for the equipment diamond grid — used by both EquipmentDisplay.tsx (the
  *  slot tiles themselves) and EquipmentSlotFrame.tsx (the connecting rack/spine drawn behind

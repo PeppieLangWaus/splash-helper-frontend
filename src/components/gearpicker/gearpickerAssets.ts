@@ -1,4 +1,4 @@
-import type { EquipmentSlot } from '../types/gear';
+import type { EquipmentSlot } from '../../types/gear';
 
 /** Asset pack for the gear picker's OSRS-styled chrome — see public/assets/gearpicker/.
  *  Provided by the user: a 9-slice panel frame (4 corners + 4 repeating borders + 1 tiled

@@ -1,22 +1,11 @@
 import NineSlicePanel from './NineSlicePanel';
-import { itemIconUrl } from './chatbox/itemIcons';
-import { BLOCKED_ICON, SLOT_PLACEHOLDER_ICON, SLOT_TILE_ASSETS } from '../utils/gearpickerAssets';
-import type { EquipmentItem, EquipmentSlot } from '../types/gear';
-import { EQUIPMENT_SLOT_LABELS } from '../types/gear';
+import { itemIconUrl } from '../chatbox/itemIcons';
+import { BLOCKED_ICON, SLOT_PLACEHOLDER_ICON, SLOT_TILE_ASSETS } from './gearpickerAssets';
+import { SLOT_SIZE } from './gearGridLayout';
+import type { EquipmentItem, EquipmentSlot } from '../../types/gear';
+import { EQUIPMENT_SLOT_LABELS } from '../../types/gear';
 
-const SLOT_SIZE = 36;
-
-const tileStyle = { width: SLOT_SIZE, height: SLOT_SIZE };
-const bgStyle = { display: 'flex', alignItems: 'center', justifyContent: 'center' } as const;
-const iconStyle = { maxWidth: '80%', maxHeight: '80%', imageRendering: 'pixelated' as const };
-const buttonReset = {
-  padding: 0,
-  border: 'none',
-  background: 'none',
-  cursor: 'pointer',
-  font: 'inherit',
-  color: 'inherit',
-} as const;
+const tileSizeStyle = { width: SLOT_SIZE, height: SLOT_SIZE };
 
 interface Props {
   slot: EquipmentSlot;
@@ -35,15 +24,15 @@ export default function SlotTile({ slot, item, blocked, onClick }: Props) {
   const title = item?.name ?? (blocked ? `${EQUIPMENT_SLOT_LABELS[slot]} (blocked by two-handed weapon)` : EQUIPMENT_SLOT_LABELS[slot]);
 
   const icon = item ? (
-    <img src={itemIconUrl(item.id)} alt={item.name} style={iconStyle} />
+    <img src={itemIconUrl(item.id)} alt={item.name} className="slot-tile__icon" />
   ) : blocked ? (
-    <img src={BLOCKED_ICON} alt="Blocked" style={iconStyle} />
+    <img src={BLOCKED_ICON} alt="Blocked" className="slot-tile__icon" />
   ) : (
-    <img src={SLOT_PLACEHOLDER_ICON[slot]} alt="" style={iconStyle} />
+    <img src={SLOT_PLACEHOLDER_ICON[slot]} alt="" className="slot-tile__icon" />
   );
 
   const panel = (
-    <NineSlicePanel assets={assets} style={tileStyle} bgStyle={bgStyle}>
+    <NineSlicePanel assets={assets} style={tileSizeStyle} bgStyle={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {icon}
     </NineSlicePanel>
   );
@@ -53,7 +42,7 @@ export default function SlotTile({ slot, item, blocked, onClick }: Props) {
   }
 
   return (
-    <button type="button" style={buttonReset} onClick={onClick} disabled={blocked} title={title}>
+    <button type="button" className="slot-tile__button" onClick={onClick} disabled={blocked} title={title}>
       {panel}
     </button>
   );

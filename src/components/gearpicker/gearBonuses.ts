@@ -1,4 +1,4 @@
-import type { EquipmentItem, GearLoadoutSlots } from '../types/gear';
+import type { EquipmentItem, GearLoadoutSlots } from '../../types/gear';
 
 export type TotalBonuses = EquipmentItem['bonuses'];
 

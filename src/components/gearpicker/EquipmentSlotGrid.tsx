@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import EquipmentDisplay from './EquipmentDisplay';
 import ItemSearchPicker from './ItemSearchPicker';
-import type { EquipmentItem, EquipmentSlot, GearLoadoutSlots } from '../types/gear';
+import type { EquipmentItem, EquipmentSlot, GearLoadoutSlots } from '../../types/gear';
 
 interface Props {
   slots: GearLoadoutSlots;
