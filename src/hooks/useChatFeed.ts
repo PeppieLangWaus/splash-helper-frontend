@@ -130,6 +130,11 @@ export function useChatFeed(communityId: string | null, channelType: LiveChatCha
         if (!isCurrent()) return;
         reconnectAttempts = 0;
         setConnected(true);
+        // Always send something immediately, even with nothing selected yet (sendSubscribe
+        // no-ops in that case) — the backend closes any connection that stays silent for a
+        // few seconds, since that's indistinguishable from a scanner just holding the socket
+        // open. See splash-helper-backend's websocket/server.ts.
+        ws.send(JSON.stringify({ type: 'HELLO' }));
         sendSubscribe(ws);
       };
 

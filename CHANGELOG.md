@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.26.6] - 2026-09-04
+### Fixed
+- Send a lightweight `HELLO` message the instant the chat-feed WebSocket opens, even before a community/channel is selected — the backend now closes any connection that stays silent for a few seconds (to cut off scanner traffic), which was also closing legitimate idle chat viewers and forcing a reconnect loop.
+
 ## [0.26.5] - 2026-08-31
 ### Fixed
 - Reconnect the live chat feed's WebSocket with exponential backoff and jitter instead of a flat 3-second retry, so a socket that keeps closing right away (e.g. a proxy idle timeout) doesn't hammer the server with a new connection every 3 seconds forever.
