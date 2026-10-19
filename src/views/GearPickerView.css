@@ -27,7 +27,7 @@
     color: var(--danger-text);
 }
 
-/* Two OSRS-chrome panels (see components/gearpicker/NineSlicePanel.tsx) side by side: the equipment grid
+/* Two OSRS-chrome panels (see components/osrs/OSRSPanel.tsx) side by side: the equipment grid
    on the left, splash-safety + bonuses + save/share on the right — matching the reference
    screenshots' two-panel layout. Wraps to a single column on narrow viewports. */
 .gear-picker-layout {
@@ -48,15 +48,20 @@
 .gear-picker-side-col {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: .7rem;
     width: 15rem;
 }
 
+/* Sits below .gear-picker-layout's two panels (not inside either one anymore — see
+   GearPickerView.tsx), horizontally centered under the pair of them. */
 .gear-picker-actions {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    padding-top: 0.6rem;
+    width: 100%;
+    max-width: 22rem;
+    margin: 1.5rem auto 0;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--border);
 }
 
