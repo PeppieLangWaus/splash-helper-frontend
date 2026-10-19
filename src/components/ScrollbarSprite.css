@@ -1,0 +1,79 @@
+/* ScrollbarSprite — see ScrollbarSprite.tsx/useScrollbarThumb.ts. Sprites from
+   public/assets/chatbox/scroll (shared with the chatbox, not duplicated per consumer). */
+
+.osrs-scrollbar {
+    flex: 0 0 16px;
+    width: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.osrs-scrollbar-btn {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    image-rendering: pixelated;
+}
+
+.osrs-scrollbar-btn-up {
+    background-image: url(/assets/chatbox/scroll/up.png);
+}
+
+.osrs-scrollbar-btn-down {
+    background-image: url(/assets/chatbox/scroll/down.png);
+}
+
+.osrs-scrollbar-track {
+    position: relative;
+    flex: 1 1 auto;
+    width: 16px;
+    cursor: pointer;
+    background-image: url(/assets/chatbox/scroll/background.png);
+    background-repeat: repeat-y;
+    background-size: 16px 5px;
+    image-rendering: pixelated;
+}
+
+.osrs-scrollbar-thumb {
+    position: absolute;
+    left: 0;
+    width: 16px;
+    display: flex;
+    flex-direction: column;
+    cursor: grab;
+    touch-action: none;
+}
+
+.osrs-scrollbar-thumb-top,
+.osrs-scrollbar-thumb-bottom {
+    flex: 0 0 5px;
+    width: 16px;
+    height: 5px;
+    background-repeat: no-repeat;
+    background-size: 16px 5px;
+    image-rendering: pixelated;
+}
+
+.osrs-scrollbar-thumb-top {
+    background-image: url(/assets/chatbox/scroll/top.png);
+}
+
+.osrs-scrollbar-thumb-bottom {
+    background-image: url(/assets/chatbox/scroll/bottom.png);
+}
+
+.osrs-scrollbar-thumb-middle {
+    flex: 1 1 auto;
+    min-height: 2px;
+    width: 16px;
+    background-image: url(/assets/chatbox/scroll/middle.png);
+    background-repeat: repeat-y;
+    background-size: 16px 5px;
+    image-rendering: pixelated;
+}
