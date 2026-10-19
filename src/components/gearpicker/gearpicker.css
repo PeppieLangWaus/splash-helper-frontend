@@ -15,6 +15,10 @@
     transform: scale(var(--icon-scale, 1));
 }
 
+.slot-tile__icon--item {
+    margin-left: .3rem;
+}
+
 /* Both the read-only wrapper div and the clickable button need this — it gives OSRSTile's
    width="100%" height="100%" (see SlotTile.tsx) something definite to resolve against. */
 .slot-tile__frame {
@@ -59,11 +63,9 @@
 /* ---- ItemPickerPanel -------------------------------------------------------------------- */
 
 .item-picker__hint {
-    color: var(--text-faint);
-    font-size: 0.85rem;
-    text-align: center;
+    display: flex;
+    justify-content: center;
     margin: 0.5rem 0;
-    font-family: "Runescape Plain 12";
 }
 
 .item-picker {
@@ -99,7 +101,7 @@
 .item-search__input {
     width: 100%;
     box-sizing: border-box;
-    padding: 0.5rem 0.7rem 0.5rem 2rem;
+    padding: 0.5rem 2.2rem 0.5rem 2rem;
     border: 1px solid var(--input-border);
     /* border-radius: 6px; */
     font-size: 0.95rem;
@@ -110,12 +112,28 @@
 
 /* Pairs the scrollable item list with a ScrollbarSprite (see ../ScrollbarSprite.tsx) — the same
    one the chatbox uses — at its top-right corner, running down only as far as the list itself
-   (not the search bar below). */
+   (not the search bar below). `position: relative` anchors the ::after fade below to this row's
+   own box, so it stays put at the bottom of the visible list instead of scrolling with its
+   content. */
 .item-picker__list-row {
+    position: relative;
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
     gap: 0.3rem;
+}
+
+/* Fades the list's last row into shadow, cueing that it's scrollable without needing a harder
+   edge/divider above the search bar. */
+.item-picker__list-row::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 14px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.55));
+    pointer-events: none;
 }
 
 .item-search__list {
@@ -145,9 +163,6 @@
     cursor: pointer;
     width: 100%;
     text-align: left;
-    color: var(--text-muted);
-    /* font: inherit; */
-    font-size: 1rem;
 }
 
 .item-search__item:hover {
@@ -160,21 +175,39 @@
 }
 
 .item-search__empty {
-    color: var(--text-faint);
-    font-size: 0.85rem;
     padding: 0.5rem 0;
 }
 
-.item-search__clear-btn {
-    margin-top: 0.6rem;
-    padding: 0.4rem 0.8rem;
-    background: var(--danger-soft);
-    border: 1px solid var(--danger);
-    border-radius: 6px;
-    color: var(--danger-text);
+.item-search__remove-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: none;
+    border: none;
     cursor: pointer;
-    font-size: 0.82rem;
-    font-weight: 600;
+}
+
+.item-search__remove-btn:disabled {
+    cursor: default;
+    opacity: 0.4;
+}
+
+.item-search__remove-img {
+    grid-area: 1 / 1;
+    image-rendering: pixelated;
+}
+
+.item-search__remove-img--pressed,
+.item-search__remove-btn:active:not(:disabled) .item-search__remove-img--normal {
+    visibility: hidden;
+}
+
+.item-search__remove-btn:active:not(:disabled) .item-search__remove-img--pressed {
+    visibility: visible;
 }
 
 /* ---- BonusSummaryPanel ------------------------------------------------------------------ */
@@ -182,73 +215,43 @@
 .bonus-summary {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-}
-
-.bonus-summary__heading {
-    font-family: "Runescape Bold 12";
-    font-weight: 400;
-    font-size: 1.25rem;
-    color: var(--accent-text);
+    gap: 0.4rem;
 }
 
 .bonus-summary__row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 0.75rem;
-    font-size: 0.9rem;
 }
 
-.bonus-summary__stat-name {
-    color: var(--text-faint);
-}
-
-.bonus-summary__stat-value {
-    color: var(--text);
+.bonus-summary__stat {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3em;
     white-space: nowrap;
-}
-
-.bonus-summary__stat-value--zero {
-    color: var(--text-muted);
 }
 
 /* ---- GearLoadoutCost ---------------------------------------------------------------------- */
 
 .gear-picker-ge-cost {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-muted);
-}
-
-.gear-picker-ge-cost--empty,
-.gear-picker-ge-cost--loading {
-    color: var(--text-faint);
-    font-weight: 400;
+    display: flex;
+    align-items: baseline;
+    gap: 0.3em;
 }
 
 /* ---- GearLoadoutGuideCard --------------------------------------------------------------- */
 
 .gear-loadout-card__name {
-    font-family: 'Runescape Plain 12';
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: var(--accent-text);
-    text-align: center;
-    text-decoration: none;
+    display: inline-block;
 }
 
 .gear-loadout-card__name:hover {
-    text-decoration: underline;
+    border-bottom: 1px solid var(--accent-text);
 }
 
 .gear-loadout-card__status {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    text-align: center;
-}
-
-.gear-loadout-card__status--error {
-    color: var(--danger-text);
+    display: flex;
+    justify-content: center;
 }
 
 /* ---- SplashSafetyIndicator -------------------------------------------------------------- */
@@ -272,21 +275,3 @@
     gap: 0.1rem;
 }
 
-.splash-safety__title {
-    font-family: "Runescape Bold 12";
-    font-weight: 400;
-    font-size: 1.25rem;
-}
-
-.splash-safety__title--safe {
-    color: var(--success-text);
-}
-
-.splash-safety__title--unsafe {
-    color: var(--danger-text);
-}
-
-.splash-safety__detail {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}

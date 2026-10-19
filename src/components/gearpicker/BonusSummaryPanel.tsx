@@ -1,16 +1,12 @@
+import PixelText from '../PixelText';
+import { colors } from '../../theme';
 import type { TotalBonuses } from './gearBonuses';
 
-function fmt(n: number, suffix = ''): string {
-  return `${n > 0 ? '+' : ''}${n}${suffix}`;
-}
-
-function Stat({ label, value, suffix }: { label: string; value: number; suffix?: string }) {
+function Stat({ label, value }: { label: string; value: number; suffix?: string }) {
   return (
-    <span>
-      <span className="bonus-summary__stat-name">{label}:</span>{' '}
-      <span className={`bonus-summary__stat-value${value === 0 ? ' bonus-summary__stat-value--zero' : ''}`}>
-        {fmt(value, suffix)}
-      </span>
+    <span className="bonus-summary__stat">
+      <PixelText text={`${label}:`} fontSize={16} color={colors.accentText} fixedBaseline />
+      <PixelText text={`+${value}`} fontSize={16} color={colors.accentText} fixedBaseline />
     </span>
   );
 }
@@ -30,7 +26,7 @@ export default function BonusSummaryPanel({ totals }: Props) {
   return (
     <div className="bonus-summary">
       <div>
-        <div className="bonus-summary__heading">Attack bonus</div>
+        <div className="bonus-summary__heading"><PixelText text="Attack bonus" fontSize={20} color={colors.accentText} bold /></div>
         <div className="bonus-summary__row">
           <Stat label="Stab" value={totals.stabAttack} />
           <Stat label="Magic" value={totals.magicAttack} />
@@ -45,7 +41,7 @@ export default function BonusSummaryPanel({ totals }: Props) {
       </div>
 
       <div>
-        <div className="bonus-summary__heading">Defence bonus</div>
+        <div className="bonus-summary__heading"><PixelText text="Defence bonus" fontSize={20} color={colors.accentText} bold /></div>
         <div className="bonus-summary__row">
           <Stat label="Stab" value={totals.stabDefence} />
           <Stat label="Magic" value={totals.magicDefence} />
@@ -60,7 +56,7 @@ export default function BonusSummaryPanel({ totals }: Props) {
       </div>
 
       <div>
-        <div className="bonus-summary__heading">Other bonuses</div>
+        <div className="bonus-summary__heading"><PixelText text="Other bonuses" fontSize={20} color={colors.accentText} bold /></div>
         <div className="bonus-summary__row">
           <Stat label="Melee STR" value={totals.strength} />
         </div>

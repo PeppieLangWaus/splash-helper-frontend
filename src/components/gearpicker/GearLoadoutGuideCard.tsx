@@ -3,8 +3,10 @@ import type { ReactNode } from 'react';
 import OSRSPanel from '../osrs/OSRSPanel';
 import EquipmentDisplay from './EquipmentDisplay';
 import GearLoadoutCost from './GearLoadoutCost';
+import PixelText from '../PixelText';
 import { fetchEquipmentData, fetchGearLoadout } from '../../api';
 import { PANEL_ASSETS_STONE } from './gearpickerAssets';
+import { colors } from '../../theme';
 import type { EquipmentItem, GearLoadoutSlots } from '../../types/gear';
 import './gearpicker.css';
 
@@ -52,14 +54,22 @@ export default function GearLoadoutGuideCard({ slug }: Props) {
 
   let body: ReactNode;
   if (error) {
-    body = <p className="gear-loadout-card__status gear-loadout-card__status--error">{error}</p>;
+    body = (
+      <p className="gear-loadout-card__status">
+        <PixelText text={error} fontSize={13.6} color={colors.dangerText} />
+      </p>
+    );
   } else if (!slots) {
-    body = <p className="gear-loadout-card__status">Loading…</p>;
+    body = (
+      <p className="gear-loadout-card__status">
+        <PixelText text="Loading…" fontSize={13.6} color={colors.textMuted} />
+      </p>
+    );
   } else {
     body = (
       <div className="gear-picker-equipment-col">
         <a className="gear-loadout-card__name" href={`/gear/${encodeURIComponent(slug)}`}>
-          {name || 'View this setup'}
+          <PixelText text={name || 'View this setup'} fontSize={20} color={colors.accentText} bold />
         </a>
         <EquipmentDisplay slots={slots} itemsById={itemsById} />
         <GearLoadoutCost slots={slots} />

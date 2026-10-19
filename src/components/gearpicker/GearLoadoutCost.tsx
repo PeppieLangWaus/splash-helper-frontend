@@ -1,40 +1,47 @@
 import { useGearLoadoutPrice } from './useGearLoadoutPrice';
-import type { GearLoadoutSlots } from '../../types/gear';
+import PixelText from '../PixelText';
 import { colors } from '../../theme';
+import type { GearLoadoutSlots } from '../../types/gear';
 
 interface Props {
   slots: GearLoadoutSlots;
-  /** Extra class(es) appended alongside the base gear-picker-ge-cost one — e.g. a modifier for
+  /** Extra class appended alongside the base gear-picker-ge-cost one — e.g. a modifier for
    *  placement under the Bonuses panel's header title (see GearPickerView.tsx). */
   className?: string;
 }
 
-/**
- * The combined GE cost of a loadout's currently-equipped items: "Total cost: 1,234,567 gp" once
- * every equipped item's price is in, "Pricing…" while any are still loading, a trailing "+" if
- * any equipped item has no GE price (untradeable, or no recent trade data), and "Total cost: 0 gp"
- * when nothing is equipped. Fetches lazily via useGearLoadoutPrice — only equipped items are ever
- * priced.
- */
+/** The combined GE cost of a loadout's equipped items; trailing "+" means at least one has no
+ *  GE price (untradeable, or no recent trade data). */
 export default function GearLoadoutCost({ slots, className }: Props) {
   const price = useGearLoadoutPrice(slots);
   const equipped = Object.values(slots).some((id) => id !== undefined);
 
-  const classes = (...modifiers: string[]) => ['gear-picker-ge-cost', ...modifiers, className].filter(Boolean).join(' ');
+  const rootClass = ['gear-picker-ge-cost', className].filter(Boolean).join(' ');
 
   if (!equipped) {
     return (
-    <div className={classes('gear-picker-ge-cost--empty')}>
-      <strong><span style={{color: colors.accentText}}>Total cost:</span></strong> <span style={{color: colors.textFaint}}>0 gp</span>
+      <div className={rootClass}>
+        <PixelText text="Total cost:" fontSize={19.2} color={colors.accentText} bold fixedBaseline />
+        <PixelText text="0 gp" fontSize={19.2} color={colors.textFaint} fixedBaseline />
       </div>
     );
   }
   if (price.loading) {
-    return <div className={classes('gear-picker-ge-cost--loading')}>Pricing…</div>;
+    return (
+      <div className={rootClass}>
+        <PixelText text="Pricing..." fontSize={19.2} color={colors.textFaint} fixedBaseline />
+      </div>
+    );
   }
   return (
-    <div className={classes()}>
-      <strong><span style={{color: colors.accentText}}>Total cost:</span></strong> <span style={{color: colors.textFaint}}>{price.total.toLocaleString()} gp{price.hasUnpriced ? '+' : ''}</span>
+    <div className={rootClass}>
+      <PixelText text="Total cost:" fontSize={19.2} color={colors.accentText} bold fixedBaseline />
+      <PixelText
+        text={`${price.total.toLocaleString()} gp${price.hasUnpriced ? '+' : ''}`}
+        fontSize={19.2}
+        color={colors.textFaint}
+        fixedBaseline
+      />
     </div>
   );
 }

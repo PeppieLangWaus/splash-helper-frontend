@@ -10,6 +10,11 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-10-20
+### Added
+- Draw the gear picker's panels, bonuses, safety indicator and cost in the game's pixel font, with a remove-item button in the item picker.
+- Keep the item picker open after choosing or removing an item, and remember the in-progress loadout across page refreshes.
+
 ## [0.26.7] - 2026-10-20
 ### Changed
 - Move the pixel-font text renderer out of the chatbox folder so other pages can share it, and let it draw bold text and keep a consistent baseline across strings.

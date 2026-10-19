@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { itemIconUrl } from '../chatbox/itemIcons';
-import { SEARCH_ICON } from './gearpickerAssets';
+import { REMOVE_BUTTON_ICON, SEARCH_ICON } from './gearpickerAssets';
 import ScrollbarSprite from '../ScrollbarSprite';
+import PixelText from '../PixelText';
 import { SCROLLBAR_STEP_PX, useScrollbarThumb } from '../useScrollbarThumb';
+import { colors } from '../../theme';
 import type { EquipmentItem, EquipmentSlot } from '../../types/gear';
 
 interface Props {
@@ -37,19 +39,28 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
   // thumb needs an explicit nudge whenever the result count changes.
   useEffect(() => updateThumb(), [results.length, updateThumb]);
 
+
   if (!selectedSlot) {
-    return <p className="item-picker__hint">Click an equipment slot to choose an item for it.</p>;
+    return (
+      <p className="item-picker__hint">
+        <PixelText text="Click an equipment slot to choose an item for it." fontSize={13.6} color={colors.textFaint} />
+      </p>
+    );
   }
 
   return (
     <div className="item-picker">
       <div className="item-picker__list-row">
         <div className="item-search__list" ref={viewportRef} onScroll={handleViewportScroll}>
-          {results.length === 0 && <div className="item-search__empty">No items found.</div>}
+          {results.length === 0 && (
+            <div className="item-search__empty">
+              <PixelText text="No items found." fontSize={13.6} color={colors.textFaint} />
+            </div>
+          )}
           {results.map((item) => (
             <button key={item.id} type="button" className="item-search__item" onClick={() => onSelect(item)}>
               <img src={itemIconUrl(item.id)} alt="" className="item-search__item-img" />
-              <span>{item.name}</span>
+              <PixelText text={item.name} fontSize={16} color={colors.textMuted} />
             </button>
           ))}
         </div>
@@ -65,12 +76,6 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
         />
       </div>
 
-      {hasCurrentItem && (
-        <button type="button" className="item-search__clear-btn" onClick={onClear}>
-          Remove from slot
-        </button>
-      )}
-
       <div className="item-search__input-wrap">
         <img src={SEARCH_ICON} alt="" className="item-search__input-icon" />
         <input
@@ -81,6 +86,17 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+        <button
+          type="button"
+          className="item-search__remove-btn"
+          title="Remove equipped item"
+          aria-label="Remove equipped item"
+          disabled={!hasCurrentItem}
+          onClick={onClear}
+        >
+          <img src={REMOVE_BUTTON_ICON.normal} alt="" className="item-search__remove-img item-search__remove-img--normal" />
+          <img src={REMOVE_BUTTON_ICON.pressed} alt="" className="item-search__remove-img item-search__remove-img--pressed" />
+        </button>
       </div>
     </div>
   );

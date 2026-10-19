@@ -27,7 +27,7 @@ export default function SlotTile({ slot, item, blocked, onClick }: Props) {
   const iconStyle = { '--icon-scale': SLOT_ICON_SCALE[slot] } as CSSProperties;
 
   const icon = item ? (
-    <img src={itemIconUrl(item.id)} alt={item.name} className="slot-tile__icon" style={iconStyle} />
+    <img src={itemIconUrl(item.id)} alt={item.name} className="slot-tile__icon slot-tile__icon--item" style={iconStyle} />
   ) : blocked ? (
     <img src={BLOCKED_ICON} alt="Blocked" className="slot-tile__icon" style={iconStyle} />
   ) : (

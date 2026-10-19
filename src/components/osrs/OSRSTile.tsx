@@ -88,8 +88,8 @@ export default function OSRSTile({ assets, content, type, width, height, sizeTyp
         <div className="osrs-tile__corner osrs-tile__corner--tr" style={{ backgroundImage: `url(${assets.topRight})` }} />
         <div className="osrs-tile__corner osrs-tile__corner--bl" style={{ backgroundImage: `url(${assets.bottomLeft})` }} />
         <div className="osrs-tile__corner osrs-tile__corner--br" style={{ backgroundImage: `url(${assets.bottomRight})` }} />
-        {contentType === 'equipment' && <div className="osrs-tile__equipment-icon">{content}</div>}
       </div>
+      {contentType === 'equipment' && <div className="osrs-tile__equipment-icon">{content}</div>}
       {contentType === 'text' && <div className="osrs-tile__content">{content}</div>}
     </div>
   );

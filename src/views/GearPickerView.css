@@ -51,7 +51,7 @@
 .gear-picker-side-col {
     display: flex;
     flex-direction: column;
-    gap: .7rem;
+    gap: .2rem;
     width: 15rem;
 }
 

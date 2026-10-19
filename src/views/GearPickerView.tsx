@@ -8,6 +8,8 @@ import GearLoadoutCost from '../components/gearpicker/GearLoadoutCost';
 import BonusSummaryPanel from '../components/gearpicker/BonusSummaryPanel';
 import SplashSafetyIndicator from '../components/gearpicker/SplashSafetyIndicator';
 import CopyableField from '../components/CopyableField';
+import PixelText from '../components/PixelText';
+import { colors } from '../theme';
 import {
   deleteGearLoadout,
   fetchEquipmentData,
@@ -18,6 +20,7 @@ import {
 } from '../api';
 import { computeTotalBonuses } from '../components/gearpicker/gearBonuses';
 import { CLEAR_EQUIPMENT_ICON, CONNECTOR_ASSETS, DELETE_ICON, PANEL_ASSETS_STEEL, PANEL_ASSETS_STONE } from '../components/gearpicker/gearpickerAssets';
+import { loadGearPickerDraft, saveGearPickerDraft } from '../utils/gearPickerStorage';
 import type { EquipmentItem, EquipmentSlot, GearLoadout, GearLoadoutSlots } from '../types/gear';
 import { EQUIPMENT_SLOT_LABELS } from '../types/gear';
 import '../components/gearpicker/gearpicker.css';
@@ -40,14 +43,16 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   const [loadingData, setLoadingData] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
 
-  const [slots, setSlots] = useState<GearLoadoutSlots>({});
+  // Seeded from the persisted draft on the plain /gear editor; a /gear/:slug view loads its own
+  // loadout below instead, so it starts blank here.
+  const [slots, setSlots] = useState<GearLoadoutSlots>(() => (initialSlug ? {} : loadGearPickerDraft().slots));
   const [selectedSlot, setSelectedSlot] = useState<EquipmentSlot | null>(null);
-  const [loadoutName, setLoadoutName] = useState('');
+  const [loadoutName, setLoadoutName] = useState(() => (initialSlug ? '' : loadGearPickerDraft().loadoutName));
   // The slug of a loadout the signed-in user owns and can update in place. Deliberately left
   // null when viewing someone else's (or an anonymous) shared loadout — Save should fork a new
   // copy in that case, not attempt to overwrite a record the requester doesn't own (which the
   // backend would 403 on anyway).
-  const [savedSlug, setSavedSlug] = useState<string | null>(null);
+  const [savedSlug, setSavedSlug] = useState<string | null>(() => (initialSlug ? null : loadGearPickerDraft().savedSlug));
   const [forceEdit, setForceEdit] = useState(false);
 
   const [loadingLoadout, setLoadingLoadout] = useState(!!initialSlug);
@@ -118,6 +123,13 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
   const effectiveReadOnly = readOnly && !forceEdit;
 
+  // Only persist while the loadout is actually editable — a plain read-only shared view (no
+  // forceEdit yet) shouldn't overwrite the user's own in-progress draft.
+  useEffect(() => {
+    if (effectiveReadOnly) return;
+    saveGearPickerDraft({ slots, loadoutName, savedSlug });
+  }, [slots, loadoutName, savedSlug, effectiveReadOnly]);
+
   async function handleSave() {
     if (!token) return;
     setSaving(true);
@@ -177,7 +189,6 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     // an impossible combination in state.
     if (selectedSlot === 'weapon' && item.isTwoHanded) delete next.shield;
     setSlots(next);
-    setSelectedSlot(null);
   }
 
   function handleClearSelectedSlot() {
@@ -185,7 +196,6 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     const next = { ...slots };
     delete next[selectedSlot];
     setSlots(next);
-    setSelectedSlot(null);
   }
 
   if (loadingData || loadingLoadout) {
@@ -221,7 +231,14 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
             type="bank"
             width={280}
             height={matchedPanelHeight}
-            header={selectedSlot ? `Choose ${EQUIPMENT_SLOT_LABELS[selectedSlot]}` : 'Item Picker'}
+            header={
+              <PixelText
+                text={selectedSlot ? `${EQUIPMENT_SLOT_LABELS[selectedSlot]} Slot` : 'Item Picker'}
+                fontSize={24}
+                color={colors.accentText}
+                bold
+              />
+            }
             headerDivider={CONNECTOR_ASSETS.horizontal}
             content={
               <ItemPickerPanel
@@ -274,7 +291,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
           type="bank"
           width={280}
           height={matchedPanelHeight}
-          header="Bonuses"
+          header={<PixelText text="Bonuses" fontSize={24} color={colors.accentText} bold />}
           headerDivider={CONNECTOR_ASSETS.horizontal}
           content={
             <div className="gear-picker-side-col">

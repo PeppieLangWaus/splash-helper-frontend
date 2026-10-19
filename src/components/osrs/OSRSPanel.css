@@ -5,7 +5,7 @@
 .osrs-panel {
     position: relative;
     box-sizing: border-box;
-    font-family: 'Runescape';
+    font-family: 'Runescape Plain 12';
 }
 
 .osrs-panel__bg-container {
@@ -102,14 +102,13 @@
 
 .osrs-panel__header {
     flex: 0 0 auto;
-    font-family: var(--font-serif);
-    font-weight: 700;
-    text-align: center;
-    color: var(--accent-text);
+    display: flex;
+    justify-content: center;
     padding-bottom: calc(0.2rem + var(--rp-border-thickness));
     background-repeat: repeat-x;
     background-position: left bottom;
     image-rendering: pixelated;
+    margin-top: .3em;
 }
 
 .osrs-panel__content {

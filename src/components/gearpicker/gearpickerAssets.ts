@@ -98,17 +98,17 @@ export const CONNECTOR_ASSETS = {
  *  (render-item-icons.ts) regardless of item, so a slot whose icons should read as bigger or
  *  smaller than the others (e.g. weapon vs. ring) needs an explicit multiplier here. */
 export const SLOT_ICON_SCALE: Record<EquipmentSlot, number> = {
-  head: 1.45,
-  cape: 1.45,
-  neck: 1.45,
-  weapon: 1.45,
-  body: 1.45,
-  shield: 1.45,
-  legs: 1.45,
-  hands: 1.45,
-  feet: 1.45,
-  ring: 1.45,
-  ammo: 1.45,
+  head: 1.35,
+  cape: 1.35,
+  neck: 1.35,
+  weapon: 1.35,
+  body: 1.35,
+  shield: 1.35,
+  legs: 1.35,
+  hands: 1.35,
+  feet: 1.35,
+  ring: 1.35,
+  ammo: 1.35,
 };
 
 export const BLOCKED_ICON = `${ICON_BASE}/blocked.png`;
@@ -116,5 +116,9 @@ export const SPLASH_TRUE_ICON = `${ICON_BASE}/splashTrue.png`;
 export const SPLASH_FALSE_ICON = `${ICON_BASE}/splashFalse.png`;
 export const SEARCH_ICON = `${ICON_BASE}/search.png`;
 export const CLEAR_EQUIPMENT_ICON = `${ICON_BASE}/clearEquipment.png`;
+export const REMOVE_BUTTON_ICON = {
+  normal: '/assets/icons/components/buttons/remove/normal.png',
+  pressed: '/assets/icons/components/buttons/remove/pressed.png',
+};
 export const DELETE_ICON = `${ICON_BASE}/delete.png`;
 export const HELP_BUTTON_ICON = `${ICON_BASE}/button/normal/help.png`;
