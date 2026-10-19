@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import './OSRSPanel.css';
 
@@ -52,6 +53,7 @@ interface Props {
   headerDivider?: string;
   borderType: OSRSPanelBorderType;
   type: OSRSPanelType;
+  className?: string;
 }
 
 /**
@@ -68,7 +70,10 @@ interface Props {
  * - `type="bank"` is the larger bank-interface style with a header row (`header` prop). Must use
  *   `borderType="steel"` — `"stone"` is side/freeform-only.
  */
-export default function OSRSPanel({ assets, width, height, content, header, headerDivider, borderType, type }: Props) {
+const OSRSPanel = forwardRef<HTMLDivElement, Props>(function OSRSPanel(
+  { assets, width, height, content, header, headerDivider, borderType, type, className },
+  ref,
+) {
   if (import.meta.env.DEV && borderType === 'stone' && type === 'bank') {
     console.warn('OSRSPanel: borderType="stone" is side/freeform-only — bank panels require "steel".');
   }
@@ -97,7 +102,7 @@ export default function OSRSPanel({ assets, width, height, content, header, head
   } as CSSProperties;
 
   return (
-    <div className={`osrs-panel osrs-panel--${type}`} style={{ ...cssVars, ...sizeStyle }}>
+    <div ref={ref} className={`osrs-panel osrs-panel--${type}`} style={{ ...cssVars, ...sizeStyle }}>
       <div className="osrs-panel__bg-container">
         <div className="osrs-panel__bg" style={{ backgroundImage: `url(${assets.bg})` }} />
         <div className="osrs-panel__border osrs-panel__border--top" style={{ backgroundImage: `url(${assets.top})` }} />
@@ -115,8 +120,10 @@ export default function OSRSPanel({ assets, width, height, content, header, head
             {header}
           </div>
         )}
-        <div className="osrs-panel__content">{content}</div>
+        <div className={"osrs-panel__content" + (className ? ` ${className}` : "")}>{content}</div>
       </div>
     </div>
   );
-}
+});
+
+export default OSRSPanel;

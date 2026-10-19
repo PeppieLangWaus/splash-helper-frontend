@@ -27,9 +27,12 @@
     color: var(--danger-text);
 }
 
-/* Two OSRS-chrome panels (see components/osrs/OSRSPanel.tsx) side by side: the equipment grid
-   on the left, splash-safety + bonuses + save/share on the right — matching the reference
-   screenshots' two-panel layout. Wraps to a single column on narrow viewports. */
+/* Up to three OSRS-chrome panels (see components/osrs/OSRSPanel.tsx) side by side: the item
+   picker, the equipment grid, and splash-safety + bonuses + GE cost — matching the reference
+   screenshots' panel layout. The item picker/bonuses panels get an explicit `height` prop pegged
+   to the equipment panel's own height (see GearPickerView.tsx) rather than a generic CSS
+   `align-items: stretch`, so the item list's length can't feed back into resizing it. Wraps to a
+   single column on narrow viewports. */
 .gear-picker-layout {
     display: flex;
     gap: 1.25rem;

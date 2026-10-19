@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import OSRSPanel from '../components/osrs/OSRSPanel';
 import EquipmentDisplay from '../components/gearpicker/EquipmentDisplay';
@@ -58,6 +58,25 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   const [sharing, setSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+
+  // The item picker and bonuses panels are pegged to the equipment panel's own height, so neither
+  // the item list's length nor the bonuses text can feed back into resizing it. A ref-via-state
+  // (not useRef) is needed since this panel only mounts once equipment data finishes loading.
+  const [equipmentPanelEl, setEquipmentPanelEl] = useState<HTMLDivElement | null>(null);
+  const [matchedPanelHeight, setMatchedPanelHeight] = useState<number>();
+
+  // useLayoutEffect for an immediate first measurement (synchronous with the commit, so there's
+  // no flash of mismatched heights); ResizeObserver then keeps it in sync as content changes.
+  useLayoutEffect(() => {
+    if (equipmentPanelEl) setMatchedPanelHeight(equipmentPanelEl.getBoundingClientRect().height);
+  }, [equipmentPanelEl]);
+
+  useEffect(() => {
+    if (!equipmentPanelEl) return;
+    const observer = new ResizeObserver(([entry]) => setMatchedPanelHeight(entry.contentRect.height));
+    observer.observe(equipmentPanelEl);
+    return () => observer.disconnect();
+  }, [equipmentPanelEl]);
 
   useEffect(() => {
     fetchEquipmentData()
@@ -197,9 +216,11 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
         {!effectiveReadOnly && (
           <OSRSPanel
             assets={PANEL_ASSETS_STEEL}
+            className='itempicker'
             borderType="steel"
             type="bank"
             width={280}
+            height={matchedPanelHeight}
             header={selectedSlot ? `Choose ${EQUIPMENT_SLOT_LABELS[selectedSlot]}` : 'Item Picker'}
             headerDivider={CONNECTOR_ASSETS.horizontal}
             content={
@@ -216,6 +237,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
         )}
 
         <OSRSPanel
+          ref={setEquipmentPanelEl}
           assets={PANEL_ASSETS_STONE}
           borderType="stone"
           type="side"
@@ -251,6 +273,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
           borderType="steel"
           type="bank"
           width={280}
+          height={matchedPanelHeight}
           header="Bonuses"
           headerDivider={CONNECTOR_ASSETS.horizontal}
           content={
