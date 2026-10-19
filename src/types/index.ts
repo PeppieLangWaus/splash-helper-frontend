@@ -20,6 +20,10 @@ export interface SessionData {
   /** Live nearby-player count at the moment of this update (as opposed to highest/average). */
   currentPlayerCount?: number;
   pickpocketerCount: number;
+  playerDeaths?: number;
+  /** Usernames of nearby players observed reaching level 99, in the order observed — see
+   *  hooks/usePublicSessionEvents.ts, which turns new entries into chatbox announcements. */
+  level99Players?: string[];
   startingRuneCount: number;
   currentRuneCount: number;
   runeUsageMap: RuneUsageMap;
