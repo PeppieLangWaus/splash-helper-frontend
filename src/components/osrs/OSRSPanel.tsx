@@ -47,6 +47,9 @@ interface Props {
   content: ReactNode;
   /** `header` is only rendered for `type="bank"`. */
   header?: ReactNode;
+  /** Image used as the header's bottom divider (repeat-x). Defaults to `assets.bottom` — pass a
+   *  different strip (e.g. the gear picker's connector bar) to use something else there. */
+  headerDivider?: string;
   borderType: OSRSPanelBorderType;
   type: OSRSPanelType;
 }
@@ -65,18 +68,22 @@ interface Props {
  * - `type="bank"` is the larger bank-interface style with a header row (`header` prop). Must use
  *   `borderType="steel"` — `"stone"` is side/freeform-only.
  */
-export default function OSRSPanel({ assets, width, height, content, header, borderType, type }: Props) {
+export default function OSRSPanel({ assets, width, height, content, header, headerDivider, borderType, type }: Props) {
   if (import.meta.env.DEV && borderType === 'stone' && type === 'bank') {
     console.warn('OSRSPanel: borderType="stone" is side/freeform-only — bank panels require "steel".');
   }
 
   const sizeStyle: CSSProperties = { width: toCssSize(width) };
   if (type === 'side' && height === undefined) {
+    // A *minimum* height, not a hard cap — min-height (rather than aspect-ratio or a fixed height)
+    // leaves the panel's own height content-driven, so taller content (e.g. once the equipment
+    // panel grew a GE cost line) pushes the panel taller instead of overflowing its chrome.
     if (typeof width === 'number') {
-      sizeStyle.height = `${width / SIDE_PANEL_RATIO}px`;
+      sizeStyle.minHeight = `${width / SIDE_PANEL_RATIO}px`;
     } else {
-      // A non-numeric width (e.g. a percentage) can't be ratio-derived in JS — fall back to the
-      // CSS aspect-ratio property, which works for any resolved width.
+      // A non-numeric width can't be ratio-derived into a min-height in JS; aspect-ratio is the
+      // closest CSS equivalent, though it treats the size as definite, so this case won't grow
+      // for overflowing content the way the numeric-width branch above does.
       sizeStyle.aspectRatio = `${SIDE_PANEL_RATIO}`;
     }
   } else if (height !== undefined) {
@@ -103,7 +110,11 @@ export default function OSRSPanel({ assets, width, height, content, header, bord
         <div className="osrs-panel__corner osrs-panel__corner--br" style={{ backgroundImage: `url(${assets.bottomRight})` }} />
       </div>
       <div className="osrs-panel__inner">
-        {type === 'bank' && header !== undefined && <div className="osrs-panel__header">{header}</div>}
+        {type === 'bank' && header !== undefined && (
+          <div className="osrs-panel__header" style={{ backgroundImage: `url(${headerDivider ?? assets.bottom})` }}>
+            {header}
+          </div>
+        )}
         <div className="osrs-panel__content">{content}</div>
       </div>
     </div>

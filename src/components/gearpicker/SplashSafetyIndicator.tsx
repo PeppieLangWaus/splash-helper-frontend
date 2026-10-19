@@ -6,11 +6,9 @@ interface Props {
 }
 
 /**
- * Flags whether a loadout's summed Magic Attack bonus is low enough to reliably splash — the
- * same rule already enforced in-game by the RuneLite plugin (splash-helper's
- * SplashHelperPlugin.hasBadMagicAttackBonus()): the total must be -64 or lower, a negative
- * number, not just "low." The wizard-hat icon (blue = safe, red = not) mirrors that plugin's own
- * in-game overlay.
+ * Flags whether a loadout's summed Magic Attack bonus is low enough to reliably splash — mirrors
+ * the threshold RuneLite's SplashHelperPlugin.hasBadMagicAttackBonus() enforces in-game, including
+ * its icon (blue = safe, red = not) matching that plugin's own overlay.
  */
 export default function SplashSafetyIndicator({ totalMagicAttack }: Props) {
   const safe = totalMagicAttack <= SPLASH_SAFE_MAGIC_ATTACK_THRESHOLD;
@@ -22,8 +20,7 @@ export default function SplashSafetyIndicator({ totalMagicAttack }: Props) {
           {safe ? 'Splash-safe' : 'Not splash-safe'}
         </span>
         <span className="splash-safety__detail">
-          Total Magic Attack bonus: <strong>{totalMagicAttack}</strong> (needs to be{' '}
-          {SPLASH_SAFE_MAGIC_ATTACK_THRESHOLD} or lower)
+          Magic Attack bonus: <strong>{totalMagicAttack}</strong> must be {SPLASH_SAFE_MAGIC_ATTACK_THRESHOLD} or lower
         </span>
       </div>
     </div>

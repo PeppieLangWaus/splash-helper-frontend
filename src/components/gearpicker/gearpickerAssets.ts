@@ -94,6 +94,23 @@ export const CONNECTOR_ASSETS = {
   barThickness: 6,
 };
 
+/** Per-slot uniform scale for SlotTile's icon. Every icon PNG is the same fixed 36x32 canvas
+ *  (render-item-icons.ts) regardless of item, so a slot whose icons should read as bigger or
+ *  smaller than the others (e.g. weapon vs. ring) needs an explicit multiplier here. */
+export const SLOT_ICON_SCALE: Record<EquipmentSlot, number> = {
+  head: 1.45,
+  cape: 1.45,
+  neck: 1.45,
+  weapon: 1.45,
+  body: 1.45,
+  shield: 1.45,
+  legs: 1.45,
+  hands: 1.45,
+  feet: 1.45,
+  ring: 1.45,
+  ammo: 1.45,
+};
+
 export const BLOCKED_ICON = `${ICON_BASE}/blocked.png`;
 export const SPLASH_TRUE_ICON = `${ICON_BASE}/splashTrue.png`;
 export const SPLASH_FALSE_ICON = `${ICON_BASE}/splashFalse.png`;

@@ -700,6 +700,18 @@ export async function fetchGearLoadout(slug: string): Promise<GearLoadout> {
   return data.loadout!;
 }
 
+/** Current Grand Exchange price for each of the given item ids (null for an id the backend has
+ *  no price data for — untradeable, or new enough it hasn't traded yet). Backed by the backend's
+ *  own cached OSRS Wiki snapshot (see splash-helper-backend's services/gePrices.ts), so this is
+ *  cheap to call per-item as items get equipped rather than needing to be batched upfront. */
+export async function fetchItemPrices(ids: number[]): Promise<Record<number, number | null>> {
+  if (ids.length === 0) return {};
+  const res = await fetch(`${BASE}/items/prices?ids=${ids.join(',')}`);
+  const data = (await res.json()) as { prices?: Record<string, number | null>; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to load item prices');
+  return Object.fromEntries(Object.entries(data.prices ?? {}).map(([id, price]) => [Number(id), price]));
+}
+
 // ─── Dev-only fake sessions (backend rejects these outside NODE_ENV=production check) ─────────
 
 export async function devGetAdminToken(): Promise<{ token: string; username: string; isAdmin: boolean; communityEligible: boolean }> {

@@ -1,19 +1,14 @@
 import type { CSSProperties } from 'react';
 import SlotTile from './SlotTile';
 import EquipmentSlotFrame from './EquipmentSlotFrame';
-import { GRID_COLS, GRID_HEIGHT, GRID_POSITION, GRID_ROWS, GRID_WIDTH, SLOT_GAP, SLOT_SIZE } from './gearGridLayout';
+import { GRID_HEIGHT, GRID_POSITION, GRID_WIDTH, SLOT_HEIGHT_PCT, SLOT_WIDTH_PCT, colLeft, rowTop } from './gearGridLayout';
 import type { EquipmentItem, EquipmentSlot, GearLoadoutSlots } from '../../types/gear';
 
-const wrapVars = {
-  '--eq-grid-width': `${GRID_WIDTH}px`,
-  '--eq-grid-height': `${GRID_HEIGHT}px`,
-} as CSSProperties;
-
-const gridVars = {
-  '--eq-grid-cols': `repeat(${GRID_COLS}, ${SLOT_SIZE}px)`,
-  '--eq-grid-rows': `repeat(${GRID_ROWS}, ${SLOT_SIZE}px)`,
-  '--eq-grid-gap': `${SLOT_GAP}px`,
-} as CSSProperties;
+// Fills the container's width; height follows from the aspect-ratio so the diamond scales with
+// whatever panel it's placed in (see gearGridLayout.ts's top-of-file note).
+const wrapStyle: CSSProperties = {
+  aspectRatio: `${GRID_WIDTH} / ${GRID_HEIGHT}`,
+};
 
 interface Props {
   slots: GearLoadoutSlots;
@@ -27,37 +22,40 @@ interface Props {
 }
 
 /**
- * Renders the 11-slot equipment grid in OSRS's own diamond arrangement, read-only. This is the
- * shared visual core used both for the "just show the gear" display mode and (via
- * EquipmentSlotGrid, which adds click handling and the two-handed-weapon shield rule) the
- * interactive picker. EquipmentSlotFrame draws the connecting rack/spine behind the tiles.
+ * Renders the 11-slot equipment grid in OSRS's own diamond arrangement, read-only — the shared
+ * visual core for both the plain display mode and (via EquipmentSlotGrid) the interactive picker.
+ * EquipmentSlotFrame draws the connecting rack/spine behind the tiles.
  *
- * Sizing comes from gearGridLayout.ts's shared constants (so it can't drift from
- * EquipmentSlotFrame's own geometry) via CSS custom properties; the rest of the layout is in
- * gearpicker.css (.equipment-diamond*).
+ * Tile position/size come from gearGridLayout.ts as percentages, not a CSS `gap`, because each
+ * row can use its own horizontal gap (see ROW_HORIZONTAL_GAP) — so the grid scales with its
+ * container instead.
  */
 export default function EquipmentDisplay({ slots, itemsById, onSlotClick, disabledSlots }: Props) {
   return (
-    <div className="equipment-diamond-wrap" style={wrapVars}>
+    <div className="equipment-diamond-wrap" style={wrapStyle}>
       <EquipmentSlotFrame />
-      <div className="equipment-diamond-grid" style={gridVars}>
-        {(Object.keys(GRID_POSITION) as EquipmentSlot[]).map((slot) => {
-          const { row, col } = GRID_POSITION[slot];
-          const itemId = slots[slot];
-          const item = itemId ? itemsById.get(itemId) : undefined;
-          const blocked = disabledSlots?.has(slot) ?? false;
-          return (
-            <div key={slot} style={{ gridRow: row, gridColumn: col }}>
-              <SlotTile
-                slot={slot}
-                item={item}
-                blocked={blocked}
-                onClick={onSlotClick ? () => onSlotClick(slot) : undefined}
-              />
-            </div>
-          );
-        })}
-      </div>
+      {(Object.keys(GRID_POSITION) as EquipmentSlot[]).map((slot) => {
+        const { row, col } = GRID_POSITION[slot];
+        const itemId = slots[slot];
+        const item = itemId ? itemsById.get(itemId) : undefined;
+        const blocked = disabledSlots?.has(slot) ?? false;
+        const tileStyle: CSSProperties = {
+          left: `${colLeft(row, col)}%`,
+          top: `${rowTop(row)}%`,
+          width: `${SLOT_WIDTH_PCT}%`,
+          height: `${SLOT_HEIGHT_PCT}%`,
+        };
+        return (
+          <div key={slot} className="equipment-diamond-tile" style={tileStyle}>
+            <SlotTile
+              slot={slot}
+              item={item}
+              blocked={blocked}
+              onClick={onSlotClick ? () => onSlotClick(slot) : undefined}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

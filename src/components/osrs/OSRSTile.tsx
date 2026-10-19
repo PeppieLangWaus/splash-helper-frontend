@@ -42,7 +42,11 @@ interface Props {
   type: OSRSTileType;
   width?: string | number;
   height?: string | number;
-  /** Preset size, used when width/height are omitted. Defaults to "normal". */
+  /** Reference size the chrome assets were designed at — used to scale border-thickness and
+   *  corner size proportionally to whatever `width`/`height` actually render at (see `cssVars`
+   *  below), and as the literal default size when `width`/`height` are omitted. Always pass this
+   *  when giving a responsive `width`/`height` (e.g. a percentage) so the chrome scales along with
+   *  it instead of staying pinned to the assets' native pixel size. Defaults to "normal". */
   sizeType?: OSRSTileSize;
   /** "equipment" centers `content` (typically an item icon) over the tile background;
    *  "text" renders it in a padded content area instead. */
@@ -62,10 +66,14 @@ export default function OSRSTile({ assets, content, type, width, height, sizeTyp
   const cssWidth = toCssSize(width) ?? `${preset.width}px`;
   const cssHeight = toCssSize(height) ?? `${preset.height}px`;
 
+  // Expressed as percentages of `preset`'s reference dimensions (not cssWidth/cssHeight, which
+  // may be an unresolved value like "100%") so borders/corners scale proportionally with however
+  // big the tile actually renders, instead of staying pinned to a fixed native-asset pixel size.
   const cssVars = {
-    '--rt-border-thickness': `${assets.borderThickness}px`,
-    '--rt-corner-width': `${assets.cornerWidth}px`,
-    '--rt-corner-height': `${assets.cornerHeight}px`,
+    '--rt-border-thickness-x': `${(assets.borderThickness / preset.width) * 100}%`,
+    '--rt-border-thickness-y': `${(assets.borderThickness / preset.height) * 100}%`,
+    '--rt-corner-width': `${(assets.cornerWidth / preset.width) * 100}%`,
+    '--rt-corner-height': `${(assets.cornerHeight / preset.height) * 100}%`,
   } as CSSProperties;
 
   return (

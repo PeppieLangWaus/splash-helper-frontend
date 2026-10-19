@@ -33,14 +33,14 @@ export default function BonusSummaryPanel({ totals }: Props) {
         <div className="bonus-summary__heading">Attack bonus</div>
         <div className="bonus-summary__row">
           <Stat label="Stab" value={totals.stabAttack} />
-        </div>
-        <div className="bonus-summary__row">
-          <Stat label="Slash" value={totals.slashAttack} />
           <Stat label="Magic" value={totals.magicAttack} />
         </div>
         <div className="bonus-summary__row">
-          <Stat label="Crush" value={totals.crushAttack} />
+          <Stat label="Slash" value={totals.slashAttack} />
           <Stat label="Range" value={totals.rangeAttack} />
+        </div>
+        <div className="bonus-summary__row">
+          <Stat label="Crush" value={totals.crushAttack} />
         </div>
       </div>
 
@@ -48,14 +48,14 @@ export default function BonusSummaryPanel({ totals }: Props) {
         <div className="bonus-summary__heading">Defence bonus</div>
         <div className="bonus-summary__row">
           <Stat label="Stab" value={totals.stabDefence} />
-        </div>
-        <div className="bonus-summary__row">
-          <Stat label="Slash" value={totals.slashDefence} />
           <Stat label="Magic" value={totals.magicDefence} />
         </div>
         <div className="bonus-summary__row">
-          <Stat label="Crush" value={totals.crushDefence} />
+          <Stat label="Slash" value={totals.slashDefence} />
           <Stat label="Range" value={totals.rangeDefence} />
+        </div>
+        <div className="bonus-summary__row">
+          <Stat label="Crush" value={totals.crushDefence} />
         </div>
       </div>
 
