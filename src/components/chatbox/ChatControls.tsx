@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChatChannel, ChatChannelListing, ChatTabStates, LiveChatChannelType } from '../../types/chatbox';
-import PixelText from './PixelText';
+import PixelText from '../PixelText';
 import ChatChannelMenu from './ChatChannelMenu';
 import { TAB_STATE_COLORS } from './chatColors';
 import { TAB_STATE_LABEL } from './chatFilter';

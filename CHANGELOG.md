@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.26.7] - 2026-10-20
+### Changed
+- Move the pixel-font text renderer out of the chatbox folder so other pages can share it, and let it draw bold text and keep a consistent baseline across strings.
+
 ## [0.26.5] - 2026-08-31
 ### Fixed
 - Reconnect the live chat feed's WebSocket with exponential backoff and jitter instead of a flat 3-second retry, so a socket that keeps closing right away (e.g. a proxy idle timeout) doesn't hammer the server with a new connection every 3 seconds forever.
