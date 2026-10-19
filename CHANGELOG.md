@@ -10,6 +10,11 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-10-20
+### Added
+- Preview an item's effect on the gear picker's bonuses by hovering it in the item picker, with each stat's change shown in green, red or unchanged.
+- Keep the item picker's search text when switching equipment slots, and select it so the next keystroke replaces it.
+
 ## [0.27.0] - 2026-10-20
 ### Added
 - Draw the gear picker's panels, bonuses, safety indicator and cost in the game's pixel font, with a remove-item button in the item picker.

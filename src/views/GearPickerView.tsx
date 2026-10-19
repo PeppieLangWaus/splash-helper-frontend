@@ -36,6 +36,14 @@ interface Props {
   readOnly?: boolean;
 }
 
+function slotsWithItem(slots: GearLoadoutSlots, slot: EquipmentSlot, item: EquipmentItem): GearLoadoutSlots {
+  const next: GearLoadoutSlots = { ...slots, [slot]: item.id };
+  // Equipping a two-handed weapon can't coexist with a shield — clear it rather than leaving
+  // an impossible combination in state.
+  if (slot === 'weapon' && item.isTwoHanded) delete next.shield;
+  return next;
+}
+
 export default function GearPickerView({ initialSlug, readOnly = false }: Props) {
   const { token, user } = useAuth();
 
@@ -47,6 +55,8 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   // loadout below instead, so it starts blank here.
   const [slots, setSlots] = useState<GearLoadoutSlots>(() => (initialSlug ? {} : loadGearPickerDraft().slots));
   const [selectedSlot, setSelectedSlot] = useState<EquipmentSlot | null>(null);
+  const [itemSearchQuery, setItemSearchQuery] = useState('');
+  const [hoveredItem, setHoveredItem] = useState<EquipmentItem | null>(null);
   const [loadoutName, setLoadoutName] = useState(() => (initialSlug ? '' : loadGearPickerDraft().loadoutName));
   // The slug of a loadout the signed-in user owns and can update in place. Deliberately left
   // null when viewing someone else's (or an anonymous) shared loadout — Save should fork a new
@@ -121,6 +131,11 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
   const totals = useMemo(() => computeTotalBonuses(slots, itemsById), [slots, itemsById]);
 
+  const previewTotals = useMemo(() => {
+    if (!hoveredItem || !selectedSlot) return null;
+    return computeTotalBonuses(slotsWithItem(slots, selectedSlot, hoveredItem), itemsById);
+  }, [hoveredItem, selectedSlot, slots, itemsById]);
+
   const effectiveReadOnly = readOnly && !forceEdit;
 
   // Only persist while the loadout is actually editable — a plain read-only shared view (no
@@ -184,11 +199,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
   function handleSelectItem(item: EquipmentItem) {
     if (!selectedSlot) return;
-    const next: GearLoadoutSlots = { ...slots, [selectedSlot]: item.id };
-    // Equipping a two-handed weapon can't coexist with a shield — clear it rather than leaving
-    // an impossible combination in state.
-    if (selectedSlot === 'weapon' && item.isTwoHanded) delete next.shield;
-    setSlots(next);
+    setSlots(slotsWithItem(slots, selectedSlot, item));
   }
 
   function handleClearSelectedSlot() {
@@ -247,6 +258,9 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
                 items={selectedSlot ? itemsBySlot.get(selectedSlot) ?? [] : []}
                 hasCurrentItem={selectedSlot ? slots[selectedSlot] !== undefined : false}
                 onSelect={handleSelectItem}
+                onHoverItem={setHoveredItem}
+                query={itemSearchQuery}
+                onQueryChange={setItemSearchQuery}
                 onClear={handleClearSelectedSlot}
               />
             }
@@ -296,7 +310,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
           content={
             <div className="gear-picker-side-col">
               <SplashSafetyIndicator totalMagicAttack={totals.magicAttack} />
-              <BonusSummaryPanel totals={totals} />
+              <BonusSummaryPanel totals={totals} previewTotals={previewTotals} />
               <GearLoadoutCost slots={slots} />
             </div>
           }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { itemIconUrl } from '../chatbox/itemIcons';
 import { REMOVE_BUTTON_ICON, SEARCH_ICON } from './gearpickerAssets';
 import ScrollbarSprite from '../ScrollbarSprite';
@@ -12,14 +12,18 @@ interface Props {
   items: EquipmentItem[];
   hasCurrentItem: boolean;
   onSelect: (item: EquipmentItem) => void;
+  onHoverItem: (item: EquipmentItem | null) => void;
+  query: string;
+  onQueryChange: (query: string) => void;
   onClear: () => void;
 }
 
 /** The parent remounts this (via a `key` on selectedSlot) whenever the selected slot changes, so
- *  the query resets and autoFocus re-fires for each newly opened slot. */
-export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, onSelect, onClear }: Props) {
-  const [query, setQuery] = useState('');
+ *  the list scroll resets and the search input is re-focused, with its text selected, for each
+ *  newly opened slot. The query itself lives in the parent so it survives that remount. */
+export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, onSelect, onHoverItem, query, onQueryChange, onClear }: Props) {
   const viewportRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const {
     trackRef,
     thumb,
@@ -32,6 +36,11 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
     handleTrackClick,
   } = useScrollbarThumb(viewportRef);
 
+  useEffect(() => {
+    searchInputRef.current?.focus();
+    searchInputRef.current?.select();
+  }, []);
+
   const q = query.trim().toLowerCase();
   const results = q ? items.filter((i) => i.name.toLowerCase().includes(q)).slice(0, 30) : items.slice(0, 30);
 
@@ -39,6 +48,9 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
   // thumb needs an explicit nudge whenever the result count changes.
   useEffect(() => updateThumb(), [results.length, updateThumb]);
 
+  // Rows unmount without a mouseleave when the list is filtered or the panel is remounted for
+  // another slot, which would otherwise leave a stale preview showing.
+  useEffect(() => () => onHoverItem(null), [onHoverItem]);
 
   if (!selectedSlot) {
     return (
@@ -58,7 +70,16 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
             </div>
           )}
           {results.map((item) => (
-            <button key={item.id} type="button" className="item-search__item" onClick={() => onSelect(item)}>
+            <button
+              key={item.id}
+              type="button"
+              className="item-search__item"
+              onClick={() => onSelect(item)}
+              onMouseEnter={() => onHoverItem(item)}
+              onMouseLeave={() => onHoverItem(null)}
+              onFocus={() => onHoverItem(item)}
+              onBlur={() => onHoverItem(null)}
+            >
               <img src={itemIconUrl(item.id)} alt="" className="item-search__item-img" />
               <PixelText text={item.name} fontSize={16} color={colors.textMuted} />
             </button>
@@ -81,10 +102,10 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
         <input
           className="item-search__input"
           type="text"
-          autoFocus
+          ref={searchInputRef}
           placeholder="Search item name…"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => onQueryChange(e.target.value)}
         />
         <button
           type="button"
