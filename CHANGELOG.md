@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-10-21
+### Added
+- Navigate the gear picker's item list with the arrow keys and press Enter to equip the highlighted item, with its stat difference previewed as you move.
+
 ## [0.31.0] - 2026-10-21
 ### Added
 - Make the gear picker's search button a toggle between searching items for the selected slot and searching every slot, equipping a picked item into its own slot.

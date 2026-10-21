@@ -170,7 +170,7 @@
     text-align: left;
 }
 
-.item-search__item:hover {
+.item-search__item--highlighted {
     background: var(--panel-hover);
 }
 

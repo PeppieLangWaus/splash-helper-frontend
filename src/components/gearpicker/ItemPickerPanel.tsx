@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef } from 'react';
-import type { CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, KeyboardEvent } from 'react';
 import { itemIconUrl } from '../chatbox/itemIcons';
 import { REMOVE_BUTTON_ICON, SEARCH_ICON } from './gearpickerAssets';
 import ScrollbarSprite from '../ScrollbarSprite';
@@ -61,9 +61,42 @@ export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, h
   // thumb needs an explicit nudge whenever the result count changes.
   useEffect(() => updateThumb(), [results.length, updateThumb]);
 
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const activeIndex = Math.min(highlightedIndex, results.length - 1);
+
+  // Previews the highlighted item, including the one highlighted by default when the list first appears.
+  useEffect(() => onHoverItem(results[activeIndex] ?? null), [results, activeIndex, onHoverItem]);
+
   function handleQueryChange(nextQuery: string) {
     if (viewportRef.current) viewportRef.current.scrollTop = 0;
+    setHighlightedIndex(0);
     onQueryChange(nextQuery);
+  }
+
+  function scrollRowIntoView(index: number) {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const rowTop = index * ITEM_ROW_HEIGHT_PX;
+    const rowBottom = rowTop + ITEM_ROW_HEIGHT_PX;
+    if (rowTop < viewport.scrollTop) viewport.scrollTop = rowTop;
+    else if (rowBottom > viewport.scrollTop + viewport.clientHeight) viewport.scrollTop = rowBottom - viewport.clientHeight;
+  }
+
+  function moveHighlight(step: 1 | -1) {
+    if (results.length === 0) return;
+    const nextIndex = Math.max(0, Math.min(results.length - 1, activeIndex + step));
+    setHighlightedIndex(nextIndex);
+    scrollRowIntoView(nextIndex);
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      moveHighlight(event.key === 'ArrowDown' ? 1 : -1);
+    } else if (event.key === 'Enter' && event.target === searchInputRef.current && results[activeIndex]) {
+      event.preventDefault();
+      onSelect(results[activeIndex]);
+    }
   }
 
   function handleViewportScroll() {
@@ -84,7 +117,7 @@ export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, h
   }
 
   return (
-    <div className="item-picker">
+    <div className="item-picker" onKeyDown={handleKeyDown}>
       <div className="item-picker__list-row">
         <div
           className="item-search__list"
@@ -98,21 +131,27 @@ export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, h
             </div>
           )}
           <div className="item-search__spacer" style={{ height: startIndex * ITEM_ROW_HEIGHT_PX }} />
-          {results.slice(startIndex, endIndex).map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className="item-search__item"
-              onClick={() => onSelect(item)}
-              onMouseEnter={() => onHoverItem(item)}
-              onMouseLeave={() => onHoverItem(null)}
-              onFocus={() => onHoverItem(item)}
-              onBlur={() => onHoverItem(null)}
-            >
-              <img src={itemIconUrl(item.id)} alt="" className="item-search__item-img" />
-              <PixelText text={item.name} fontSize={16} color={colors.textMuted} />
-            </button>
-          ))}
+          {results.slice(startIndex, endIndex).map((item, offset) => {
+            const index = startIndex + offset;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={'item-search__item' + (index === activeIndex ? ' item-search__item--highlighted' : '')}
+                onClick={() => onSelect(item)}
+                onMouseEnter={() => {
+                  setHighlightedIndex(index);
+                  onHoverItem(item);
+                }}
+                onMouseLeave={() => onHoverItem(null)}
+                onFocus={() => onHoverItem(item)}
+                onBlur={() => onHoverItem(null)}
+              >
+                <img src={itemIconUrl(item.id)} alt="" className="item-search__item-img" />
+                <PixelText text={item.name} fontSize={16} color={colors.textMuted} />
+              </button>
+            );
+          })}
           <div className="item-search__spacer" style={{ height: (results.length - endIndex) * ITEM_ROW_HEIGHT_PX }} />
         </div>
         <ScrollbarSprite
