@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.35.3] - 2026-10-21
+### Changed
+- Make the gear picker's mode button show the icon of the panel it switches to: the inventory icon on the equipment panel and the equipment icon on the inventory panel, instead of glowing while inventory mode is on.
+
 ## [0.35.2] - 2026-10-21
 ### Removed
 - Remove the optional title from the read-only inventory guide panel, so it shows only the slots and items.

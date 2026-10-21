@@ -31,6 +31,7 @@ import {
   CLEAR_EQUIPMENT_ICON,
   CONNECTOR_ASSETS,
   DELETE_ICON,
+  EQUIPMENT_ICON,
   INVENTORY_ICON,
   PANEL_ASSETS_STEEL,
   PANEL_ASSETS_STONE,
@@ -668,12 +669,11 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
               width={TOOLBAR_BUTTON_SIZE}
               height={TOOLBAR_BUTTON_SIZE}
               scaleWithSize={false}
-              aria-pressed={inventoryMode}
               onClick={togglePanelMode}
-              title="Inventory mode"
-              aria-label="Inventory mode"
+              title={inventoryMode ? 'Equipment mode' : 'Inventory mode'}
+              aria-label={inventoryMode ? 'Equipment mode' : 'Inventory mode'}
             >
-              <ToolbarIcon src={INVENTORY_ICON} nativeWidth={21} glowing={inventoryMode} />
+              <ToolbarIcon src={inventoryMode ? EQUIPMENT_ICON : INVENTORY_ICON} nativeWidth={inventoryMode ? 27 : 26} />
             </OSRSSquareButton>
           )}
         </div>
