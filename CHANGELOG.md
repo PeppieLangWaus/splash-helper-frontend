@@ -10,6 +10,12 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-10-21
+### Added
+- Let the gear picker's item list scroll through every item for a slot instead of stopping at the first 30, rendering only the rows on screen so long lists stay fast.
+### Changed
+- Scroll the item list back to the top whenever the search text changes.
+
 ## [0.29.0] - 2026-10-21
 ### Added
 - Add a row of square, pixel-art buttons under the gear picker's equipment grid: Stats, Clear all, Value and Search, with a hover look and an accent-coloured glow on the icons that toggle.

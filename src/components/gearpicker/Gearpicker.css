@@ -144,7 +144,10 @@
     scrollbar-width: none; /* Firefox: hide native scrollbar, ScrollbarSprite renders its own */
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+}
+
+.item-search__spacer {
+    flex: none;
 }
 
 .item-search__list::-webkit-scrollbar {
@@ -155,7 +158,10 @@
     display: flex;
     align-items: center;
     gap: 0.2rem;
-    padding: 0.2rem 0rem;
+    flex: none;
+    box-sizing: border-box;
+    height: var(--item-row-height);
+    padding: 0;
     background: none;
     border: none;
     border-radius: 6px;

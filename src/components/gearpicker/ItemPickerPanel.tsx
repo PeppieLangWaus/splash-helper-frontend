@@ -1,11 +1,16 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import type { CSSProperties } from 'react';
 import { itemIconUrl } from '../chatbox/itemIcons';
 import { REMOVE_BUTTON_ICON, SEARCH_ICON } from './gearpickerAssets';
 import ScrollbarSprite from '../ScrollbarSprite';
 import PixelText from '../PixelText';
 import { SCROLLBAR_STEP_PX, useScrollbarThumb } from '../useScrollbarThumb';
+import { useVirtualWindow } from '../useVirtualWindow';
 import { colors } from '../../theme';
 import type { EquipmentItem, EquipmentSlot } from '../../types/gear';
+
+const ITEM_ROW_HEIGHT_PX = 40;
+const OVERSCAN_ROWS = 6;
 
 interface Props {
   selectedSlot: EquipmentSlot | null;
@@ -28,7 +33,7 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
     trackRef,
     thumb,
     updateThumb,
-    handleViewportScroll,
+    handleViewportScroll: handleThumbScroll,
     scrollBy,
     handleThumbPointerDown,
     handleThumbPointerMove,
@@ -42,11 +47,27 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
   }, []);
 
   const q = query.trim().toLowerCase();
-  const results = q ? items.filter((i) => i.name.toLowerCase().includes(q)).slice(0, 30) : items.slice(0, 30);
+  const results = useMemo(() => (q ? items.filter((i) => i.name.toLowerCase().includes(q)) : items), [items, q]);
+  const { startIndex, endIndex, handleScroll: handleWindowScroll } = useVirtualWindow(
+    viewportRef,
+    results.length,
+    ITEM_ROW_HEIGHT_PX,
+    OVERSCAN_ROWS,
+  );
 
   // The viewport element itself doesn't resize as the filtered list gets longer/shorter, so the
   // thumb needs an explicit nudge whenever the result count changes.
   useEffect(() => updateThumb(), [results.length, updateThumb]);
+
+  function handleQueryChange(nextQuery: string) {
+    if (viewportRef.current) viewportRef.current.scrollTop = 0;
+    onQueryChange(nextQuery);
+  }
+
+  function handleViewportScroll() {
+    handleThumbScroll();
+    handleWindowScroll();
+  }
 
   // Rows unmount without a mouseleave when the list is filtered or the panel is remounted for
   // another slot, which would otherwise leave a stale preview showing.
@@ -63,13 +84,19 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
   return (
     <div className="item-picker">
       <div className="item-picker__list-row">
-        <div className="item-search__list" ref={viewportRef} onScroll={handleViewportScroll}>
+        <div
+          className="item-search__list"
+          ref={viewportRef}
+          onScroll={handleViewportScroll}
+          style={{ '--item-row-height': `${ITEM_ROW_HEIGHT_PX}px` } as CSSProperties}
+        >
           {results.length === 0 && (
             <div className="item-search__empty">
               <PixelText text="No items found." fontSize={13.6} color={colors.textFaint} />
             </div>
           )}
-          {results.map((item) => (
+          <div className="item-search__spacer" style={{ height: startIndex * ITEM_ROW_HEIGHT_PX }} />
+          {results.slice(startIndex, endIndex).map((item) => (
             <button
               key={item.id}
               type="button"
@@ -84,6 +111,7 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
               <PixelText text={item.name} fontSize={16} color={colors.textMuted} />
             </button>
           ))}
+          <div className="item-search__spacer" style={{ height: (results.length - endIndex) * ITEM_ROW_HEIGHT_PX }} />
         </div>
         <ScrollbarSprite
           trackRef={trackRef}
@@ -105,7 +133,7 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
           ref={searchInputRef}
           placeholder="Search item name…"
           value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
+          onChange={(e) => handleQueryChange(e.target.value)}
         />
         <button
           type="button"
