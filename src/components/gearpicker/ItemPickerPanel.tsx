@@ -17,6 +17,8 @@ interface Props {
   /** Lists items for every slot rather than just `selectedSlot`; selecting one equips it in its own slot. */
   searchAllSlots: boolean;
   items: EquipmentItem[];
+  /** When set, items found in it get 1 to 3 green "+" (positive level) or red "-" (negative level) signs after their name. */
+  statChangeLevelById?: Map<number, number>;
   hasCurrentItem: boolean;
   onSelect: (item: EquipmentItem) => void;
   onHoverItem: (item: EquipmentItem | null) => void;
@@ -28,7 +30,7 @@ interface Props {
 /** The parent remounts this (via a `key` on selectedSlot or the all-slots mode) whenever either changes, so
  *  the list scroll resets and the search input is re-focused, with its text selected, for each
  *  newly opened slot. The query itself lives in the parent so it survives that remount. */
-export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, hasCurrentItem, onSelect, onHoverItem, query, onQueryChange, onClear }: Props) {
+export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, statChangeLevelById, hasCurrentItem, onSelect, onHoverItem, query, onQueryChange, onClear }: Props) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const {
@@ -133,6 +135,7 @@ export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, h
           <div className="item-search__spacer" style={{ height: startIndex * ITEM_ROW_HEIGHT_PX }} />
           {results.slice(startIndex, endIndex).map((item, offset) => {
             const index = startIndex + offset;
+            const statChangeLevel = statChangeLevelById?.get(item.id) ?? 0;
             return (
               <button
                 key={item.id}
@@ -149,6 +152,13 @@ export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, h
               >
                 <img src={itemIconUrl(item.id)} alt="" className="item-search__item-img" />
                 <PixelText text={item.name} fontSize={16} color={colors.textMuted} />
+                {statChangeLevel !== 0 && (
+                  <PixelText
+                    text={(statChangeLevel > 0 ? '+' : '-').repeat(Math.abs(statChangeLevel))}
+                    fontSize={16}
+                    color={statChangeLevel > 0 ? colors.successText : colors.dangerText}
+                  />
+                )}
               </button>
             );
           })}

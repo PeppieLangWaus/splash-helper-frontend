@@ -10,6 +10,12 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-10-21
+### Added
+- Make the gear picker's Stats button a toggle that marks each item in the item picker with one to three green + or red - signs, showing how much better or worse its biggest stat change is than the other items in the list; Melee STR, Ranged STR and Magic DMG are each compared only against themselves.
+### Changed
+- Move the Clear all button to the end of the gear picker's toolbar.
+
 ## [0.32.0] - 2026-10-21
 ### Added
 - Navigate the gear picker's item list with the arrow keys and press Enter to equip the highlighted item, with its stat difference previewed as you move.

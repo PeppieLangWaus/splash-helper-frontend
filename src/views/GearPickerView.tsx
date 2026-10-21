@@ -20,6 +20,7 @@ import {
 } from '../api';
 import OSRSSquareButton from '../components/osrs/OSRSSquareButton';
 import { computeTotalBonuses } from '../components/gearpicker/gearBonuses';
+import type { TotalBonuses } from '../components/gearpicker/gearBonuses';
 import {
   CLEAR_EQUIPMENT_ICON,
   CONNECTOR_ASSETS,
@@ -78,6 +79,58 @@ function slotsWithItem(slots: GearLoadoutSlots, slot: EquipmentSlot, item: Equip
   return next;
 }
 
+const MAX_STAT_CHANGE_LEVEL = 3;
+
+/** Strength-like stats have a different scale from the attack, defence and prayer bonuses, so
+ *  each is only compared against itself. Every other stat shares one scale. */
+const SELF_SCALED_STATS: (keyof TotalBonuses)[] = ['strength', 'rangedStrength', 'magicDamage'];
+
+function scaleKeyOf(stat: keyof TotalBonuses): string {
+  return SELF_SCALED_STATS.includes(stat) ? stat : 'general';
+}
+
+/** Rates each item from -MAX_STAT_CHANGE_LEVEL to +MAX_STAT_CHANGE_LEVEL by its single biggest
+ *  stat change when equipped, relative to the largest change any of `items` makes to stats on
+ *  the same scale. Items that change nothing are left out. */
+function statChangeLevels(
+  items: EquipmentItem[],
+  slots: GearLoadoutSlots,
+  itemsById: Map<number, EquipmentItem>,
+): Map<number, number> {
+  const currentTotals = computeTotalBonuses(slots, itemsById);
+  const stats = Object.keys(currentTotals) as (keyof TotalBonuses)[];
+
+  const changesById = new Map<number, Record<keyof TotalBonuses, number>>();
+  const largestChangeByScale = new Map<string, number>();
+  for (const item of items) {
+    const newTotals = computeTotalBonuses(slotsWithItem(slots, item.slot, item), itemsById);
+    const changes = {} as Record<keyof TotalBonuses, number>;
+    for (const stat of stats) {
+      changes[stat] = newTotals[stat] - currentTotals[stat];
+      const scale = scaleKeyOf(stat);
+      largestChangeByScale.set(scale, Math.max(largestChangeByScale.get(scale) ?? 0, Math.abs(changes[stat])));
+    }
+    changesById.set(item.id, changes);
+  }
+
+  const levelById = new Map<number, number>();
+  for (const [id, changes] of changesById) {
+    let strongestShare = 0;
+    let strongestChange = 0;
+    for (const stat of stats) {
+      const share = Math.abs(changes[stat]) / (largestChangeByScale.get(scaleKeyOf(stat)) || 1);
+      if (share > strongestShare) {
+        strongestShare = share;
+        strongestChange = changes[stat];
+      }
+    }
+    if (strongestChange !== 0) {
+      levelById.set(id, Math.sign(strongestChange) * Math.ceil(strongestShare * MAX_STAT_CHANGE_LEVEL));
+    }
+  }
+  return levelById;
+}
+
 const NUMERIC_SUFFIX_PATTERN = /^(.*?)\s*\((\d+)\)\s*$/;
 
 /** Of items differing only by a trailing "(<number>)", e.g. charge counts, keeps the highest. */
@@ -102,6 +155,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   const [loadingData, setLoadingData] = useState(true);
   const [searchAllSlots, setSearchAllSlots] = useState(false);
   const [costAbbreviated, setCostAbbreviated] = useState(false);
+  const [showStatChanges, setShowStatChanges] = useState(false);
   const [dataError, setDataError] = useState<string | null>(null);
 
   // Seeded from the persisted draft on the plain /gear editor; a /gear/:slug view loads its own
@@ -268,7 +322,14 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     setSlots(next);
   }
 
-  const pickerItems = searchAllSlots ? allItemsSorted : selectedSlot ? itemsBySlot.get(selectedSlot) ?? [] : [];
+  const pickerItems = useMemo(
+    () => (searchAllSlots ? allItemsSorted : selectedSlot ? itemsBySlot.get(selectedSlot) ?? [] : []),
+    [searchAllSlots, allItemsSorted, selectedSlot, itemsBySlot],
+  );
+  const statChangeLevelById = useMemo(
+    () => (showStatChanges ? statChangeLevels(pickerItems, slots, itemsById) : undefined),
+    [showStatChanges, pickerItems, slots, itemsById],
+  );
   const headerText = searchAllSlots
     ? 'All Slots'
     : selectedSlot
@@ -323,6 +384,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
                 selectedSlot={selectedSlot}
                 searchAllSlots={searchAllSlots}
                 items={pickerItems}
+                statChangeLevelById={statChangeLevelById}
                 hasCurrentItem={selectedSlot ? slots[selectedSlot] !== undefined : false}
                 onSelect={handleSelectItem}
                 onHoverItem={setHoveredItem}
@@ -362,20 +424,12 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
                     width={TOOLBAR_BUTTON_SIZE}
                     height={TOOLBAR_BUTTON_SIZE}
                     scaleWithSize={false}
-                    title="Stats"
-                    aria-label="Stats"
+                    aria-pressed={showStatChanges}
+                    onClick={() => setShowStatChanges((shown) => !shown)}
+                    title="Show stat changes"
+                    aria-label="Highlight stat changes"
                   >
-                    <ToolbarIcon src={STATS_ICON} nativeWidth={27} />
-                  </OSRSSquareButton>
-                  <OSRSSquareButton
-                    width={TOOLBAR_BUTTON_SIZE}
-                    height={TOOLBAR_BUTTON_SIZE}
-                    scaleWithSize={false}
-                    onClick={handleClearAll}
-                    title="Clear all slots"
-                    aria-label="Clear all slots"
-                  >
-                    <ToolbarIcon src={CLEAR_EQUIPMENT_ICON} nativeWidth={28} />
+                    <ToolbarIcon src={STATS_ICON} nativeWidth={27} glowing={showStatChanges} />
                   </OSRSSquareButton>
                   <OSRSSquareButton
                     width={TOOLBAR_BUTTON_SIZE}
@@ -384,7 +438,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
                     aria-pressed={costAbbreviated}
                     onClick={() => setCostAbbreviated((abbreviated) => !abbreviated)}
                     title="Abbreviate total cost"
-                    aria-label="Abbreviate total cost"
+                    aria-label="Format cost"
                   >
                     <ToolbarIcon src={VALUE_ICON} nativeWidth={25} glowing={costAbbreviated} />
                   </OSRSSquareButton>
@@ -398,6 +452,16 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
                     aria-label="Search all slots"
                   >
                     <ToolbarIcon src={SEARCH_ICON} nativeWidth={20} glowing={searchAllSlots} />
+                  </OSRSSquareButton>
+                  <OSRSSquareButton
+                    width={TOOLBAR_BUTTON_SIZE}
+                    height={TOOLBAR_BUTTON_SIZE}
+                    scaleWithSize={false}
+                    onClick={handleClearAll}
+                    title="Clear all slots"
+                    aria-label="Clear all slots"
+                  >
+                    <ToolbarIcon src={CLEAR_EQUIPMENT_ICON} nativeWidth={28} />
                   </OSRSSquareButton>
                 </div>
               )}
