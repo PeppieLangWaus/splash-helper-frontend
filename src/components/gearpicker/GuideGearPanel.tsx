@@ -12,7 +12,6 @@ type Props =
       mode: 'inventory';
       /** Inventory contents in slot order — see GearInventoryGuideCard. */
       items: ReadonlyArray<GuideInventoryItem | null>;
-      title?: string;
     };
 
 /**
@@ -22,5 +21,5 @@ type Props =
  */
 export default function GuideGearPanel(props: Props) {
   if (props.mode === 'equipment') return <GearLoadoutGuideCard slug={props.slug} />;
-  return <GearInventoryGuideCard items={props.items} title={props.title} />;
+  return <GearInventoryGuideCard items={props.items} />;
 }

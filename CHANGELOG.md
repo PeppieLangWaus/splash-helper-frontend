@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.35.2] - 2026-10-21
+### Removed
+- Remove the optional title from the read-only inventory guide panel, so it shows only the slots and items.
+
 ## [0.35.1] - 2026-10-21
 ### Added
 - Show an item's name in a styled tooltip that follows the cursor when hovering a slot in the read-only equipment and inventory panels.
