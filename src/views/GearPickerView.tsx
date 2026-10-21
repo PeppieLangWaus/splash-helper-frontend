@@ -78,6 +78,23 @@ function slotsWithItem(slots: GearLoadoutSlots, slot: EquipmentSlot, item: Equip
   return next;
 }
 
+const NUMERIC_SUFFIX_PATTERN = /^(.*?)\s*\((\d+)\)\s*$/;
+
+/** Of items differing only by a trailing "(<number>)", e.g. charge counts, keeps the highest. */
+function withoutLowerNumberedVariants(items: EquipmentItem[]): EquipmentItem[] {
+  const highestNumberByBaseName = new Map<string, number>();
+  for (const item of items) {
+    const match = NUMERIC_SUFFIX_PATTERN.exec(item.name);
+    if (!match) continue;
+    const [, baseName, number] = match;
+    highestNumberByBaseName.set(baseName, Math.max(highestNumberByBaseName.get(baseName) ?? 0, Number(number)));
+  }
+  return items.filter((item) => {
+    const match = NUMERIC_SUFFIX_PATTERN.exec(item.name);
+    return !match || Number(match[2]) === highestNumberByBaseName.get(match[1]);
+  });
+}
+
 export default function GearPickerView({ initialSlug, readOnly = false }: Props) {
   const { token, user } = useAuth();
 
@@ -156,7 +173,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
   const itemsBySlot = useMemo(() => {
     const map = new Map<EquipmentSlot, EquipmentItem[]>();
-    for (const item of equipmentData) {
+    for (const item of withoutLowerNumberedVariants(equipmentData)) {
       const list = map.get(item.slot);
       if (list) list.push(item);
       else map.set(item.slot, [item]);
