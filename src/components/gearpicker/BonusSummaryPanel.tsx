@@ -23,7 +23,7 @@ function Stat({ label, value, change }: StatProps) {
     <span className="bonus-summary__stat">
       <PixelText text={`${label}:`} fontSize={16} color={colors.accentText} fixedBaseline />
       <PixelText text={formatSigned(value)} fontSize={16} color={colors.accentText} fixedBaseline />
-      {change !== undefined && (
+      {change !== undefined && change !== 0 && (
         <PixelText text={`(${formatSigned(change)})`} fontSize={16} color={changeColor(change)} fixedBaseline />
       )}
     </span>
