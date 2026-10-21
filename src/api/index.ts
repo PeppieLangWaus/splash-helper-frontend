@@ -13,6 +13,7 @@ import type {
   PayoutTicket,
 } from '../types';
 import type { ChatChannelListing, CommunityChatConfig } from '../types/chatbox';
+import type { EquipmentDataResponse, GearLoadout, GearLoadoutSlots, ItemListResponse } from '../types/gear';
 
 /** Body shape for every webhook PUT endpoint: either field may be omitted to leave it
  *  unchanged, or set to '' to clear it. */
@@ -616,6 +617,106 @@ export async function adminDeleteCommunity(communityId: string, token: string): 
     const data = (await res.json()) as { error?: string };
     throw new Error(data.error ?? 'Failed to delete community');
   }
+}
+
+// ─── Gear picker ───────────────────────────────────────────────────────────────
+
+export async function fetchEquipmentData(): Promise<EquipmentDataResponse> {
+  const res = await fetch(`${BASE}/equipment`);
+  const data = (await res.json()) as Partial<EquipmentDataResponse> & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to load equipment data');
+  return { items: data.items ?? [], sourceVersion: data.sourceVersion ?? '' };
+}
+
+export async function fetchItemList(): Promise<ItemListResponse> {
+  const res = await fetch(`${BASE}/items`);
+  const data = (await res.json()) as Partial<ItemListResponse> & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to load item list');
+  return { items: data.items ?? [], sourceVersion: data.sourceVersion ?? '' };
+}
+
+export async function saveGearLoadout(
+  slots: GearLoadoutSlots,
+  name: string | undefined,
+  token: string,
+): Promise<GearLoadout> {
+  const res = await fetch(`${BASE}/gear-loadouts`, {
+    method: 'POST',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, slots }),
+  });
+  const data = (await res.json()) as { loadout?: GearLoadout; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to save loadout');
+  return data.loadout!;
+}
+
+export async function updateGearLoadout(
+  slug: string,
+  slots: GearLoadoutSlots,
+  name: string | undefined,
+  token: string,
+): Promise<GearLoadout> {
+  const res = await fetch(`${BASE}/gear-loadouts/${encodeURIComponent(slug)}`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, slots }),
+  });
+  const data = (await res.json()) as { loadout?: GearLoadout; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to update loadout');
+  return data.loadout!;
+}
+
+export async function myGearLoadouts(token: string): Promise<GearLoadout[]> {
+  const res = await fetch(`${BASE}/gear-loadouts/mine`, { headers: authHeaders(token) });
+  const data = (await res.json()) as { loadouts?: GearLoadout[]; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to load your loadouts');
+  return data.loadouts ?? [];
+}
+
+export async function deleteGearLoadout(slug: string, token: string): Promise<void> {
+  const res = await fetch(`${BASE}/gear-loadouts/${encodeURIComponent(slug)}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    const data = (await res.json()) as { error?: string };
+    throw new Error(data.error ?? 'Failed to delete loadout');
+  }
+}
+
+/** Creates an anonymous, ownerless share of a loadout — no account required. Returns only the
+ *  slug; there's no way to edit or delete an anonymous share afterward (see the backend's
+ *  POST /gear-loadouts/share). */
+export async function shareGearLoadout(slots: GearLoadoutSlots, name?: string): Promise<string> {
+  const res = await fetch(`${BASE}/gear-loadouts/share`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, slots }),
+  });
+  const data = (await res.json()) as { slug?: string; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to share loadout');
+  return data.slug!;
+}
+
+/** Fetches a loadout by its public share slug — works for both a saved (logged-in) loadout and
+ *  an anonymous share, no auth required either way. */
+export async function fetchGearLoadout(slug: string): Promise<GearLoadout> {
+  const res = await fetch(`${BASE}/gear-loadouts/${encodeURIComponent(slug)}`);
+  const data = (await res.json()) as { loadout?: GearLoadout; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Loadout not found');
+  return data.loadout!;
+}
+
+/** Current Grand Exchange price for each of the given item ids (null for an id the backend has
+ *  no price data for — untradeable, or new enough it hasn't traded yet). Backed by the backend's
+ *  own cached OSRS Wiki snapshot (see splash-helper-backend's services/gePrices.ts), so this is
+ *  cheap to call per-item as items get equipped rather than needing to be batched upfront. */
+export async function fetchItemPrices(ids: number[]): Promise<Record<number, number | null>> {
+  if (ids.length === 0) return {};
+  const res = await fetch(`${BASE}/items/prices?ids=${ids.join(',')}`);
+  const data = (await res.json()) as { prices?: Record<string, number | null>; error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to load item prices');
+  return Object.fromEntries(Object.entries(data.prices ?? {}).map(([id, price]) => [Number(id), price]));
 }
 
 // ─── Dev-only fake sessions (backend rejects these outside NODE_ENV=production check) ─────────

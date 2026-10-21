@@ -4,7 +4,7 @@ import type { ActiveSession, SplasherVotes } from '../types';
 import './SessionPanel.css';
 import Icon from './Icon';
 import Tile from './Tile';
-import PixelText from './chatbox/PixelText';
+import PixelText from './PixelText';
 import worldsData from '../worldsData';
 import { formatRelativeTime, formatDurationMs } from '../utils/formatTime';
 import type * as CSS from 'csstype';

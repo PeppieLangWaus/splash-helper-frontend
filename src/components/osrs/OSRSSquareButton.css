@@ -1,0 +1,110 @@
+/* OSRSSquareButton — see OSRSSquareButton.tsx. --sb-corner / --sb-border are set inline from the
+   button's size (9px / 3px at the reference size) and the sprites are scaled to match, keeping
+   their aspect ratio; borders repeat along the side but stop at the corners, which are layered
+   over the border ends. */
+
+.osrs-square-button {
+    --sb-corner: 9px;
+    --sb-border: 3px;
+    --sb-seam: 1px;
+    --sb-bg: #3e3529;
+
+    position: relative;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    min-width: calc(var(--sb-corner) * 2);
+    min-height: calc(var(--sb-corner) * 2);
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+}
+
+.osrs-square-button:hover:not(:disabled) {
+    --sb-bg: #3a3026;
+}
+
+.osrs-square-button:disabled {
+    cursor: default;
+}
+
+.osrs-square-button__bg {
+    position: absolute;
+    inset: var(--sb-border);
+    background-color: var(--sb-bg);
+}
+
+.osrs-square-button__border,
+.osrs-square-button__corner {
+    position: absolute;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.osrs-square-button__border--top,
+.osrs-square-button__border--bottom {
+    left: calc(var(--sb-corner) - var(--sb-seam));
+    right: calc(var(--sb-corner) - var(--sb-seam));
+    height: var(--sb-border);
+    background-repeat: repeat-x;
+    background-size: auto 100%;
+}
+
+.osrs-square-button__border--left,
+.osrs-square-button__border--right {
+    top: calc(var(--sb-corner) - var(--sb-seam));
+    bottom: calc(var(--sb-corner) - var(--sb-seam));
+    width: var(--sb-border);
+    background-repeat: repeat-y;
+    background-size: 100% auto;
+}
+
+.osrs-square-button__border--top { top: 0; }
+.osrs-square-button__border--bottom { bottom: 0; }
+.osrs-square-button__border--left { left: 0; }
+.osrs-square-button__border--right { right: 0; }
+
+.osrs-square-button__corner {
+    width: var(--sb-corner);
+    height: var(--sb-corner);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.osrs-square-button__corner--tl { top: 0; left: 0; }
+.osrs-square-button__corner--tr { top: 0; right: 0; }
+.osrs-square-button__corner--bl { bottom: 0; left: 0; }
+.osrs-square-button__corner--br { bottom: 0; right: 0; }
+
+.osrs-square-button__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: var(--sb-border);
+    box-sizing: border-box;
+}
+
+/* Normal / hover sprite sets. Declared per state so each url() is a plain static string. */
+.osrs-square-button .osrs-square-button__border--top { background-image: url(/assets/icons/components/buttons/square/normal/border/top.png); }
+.osrs-square-button .osrs-square-button__border--bottom { background-image: url(/assets/icons/components/buttons/square/normal/border/bottom.png); }
+.osrs-square-button .osrs-square-button__border--left { background-image: url(/assets/icons/components/buttons/square/normal/border/left.png); }
+.osrs-square-button .osrs-square-button__border--right { background-image: url(/assets/icons/components/buttons/square/normal/border/right.png); }
+.osrs-square-button .osrs-square-button__corner--tl { background-image: url(/assets/icons/components/buttons/square/normal/corner/topLeft.png); }
+.osrs-square-button .osrs-square-button__corner--tr { background-image: url(/assets/icons/components/buttons/square/normal/corner/topRight.png); }
+.osrs-square-button .osrs-square-button__corner--bl { background-image: url(/assets/icons/components/buttons/square/normal/corner/bottomLeft.png); }
+.osrs-square-button .osrs-square-button__corner--br { background-image: url(/assets/icons/components/buttons/square/normal/corner/bottomRight.png); }
+
+.osrs-square-button:hover:not(:disabled) .osrs-square-button__border--top { background-image: url(/assets/icons/components/buttons/square/hover/border/top.png); }
+.osrs-square-button:hover:not(:disabled) .osrs-square-button__border--bottom { background-image: url(/assets/icons/components/buttons/square/hover/border/bottom.png); }
+.osrs-square-button:hover:not(:disabled) .osrs-square-button__border--left { background-image: url(/assets/icons/components/buttons/square/hover/border/left.png); }
+.osrs-square-button:hover:not(:disabled) .osrs-square-button__border--right { background-image: url(/assets/icons/components/buttons/square/hover/border/right.png); }
+.osrs-square-button:hover:not(:disabled) .osrs-square-button__corner--tl { background-image: url(/assets/icons/components/buttons/square/hover/corner/topLeft.png); }
+.osrs-square-button:hover:not(:disabled) .osrs-square-button__corner--tr { background-image: url(/assets/icons/components/buttons/square/hover/corner/topRight.png); }
+.osrs-square-button:hover:not(:disabled) .osrs-square-button__corner--bl { background-image: url(/assets/icons/components/buttons/square/hover/corner/bottomLeft.png); }
+.osrs-square-button:hover:not(:disabled) .osrs-square-button__corner--br { background-image: url(/assets/icons/components/buttons/square/hover/corner/bottomRight.png); }

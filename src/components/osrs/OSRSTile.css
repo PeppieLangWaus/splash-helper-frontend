@@ -1,0 +1,107 @@
+/* OSRSTile — see OSRSTile.tsx. Numeric dimensions come in as CSS custom properties (--rt-*),
+   expressed as percentages of the tile's own box (not fixed px) so the chrome scales right along
+   with however big a given instance actually renders — see OSRSTile.tsx for why. */
+
+.osrs-tile {
+    position: relative;
+    box-sizing: border-box;
+}
+
+.osrs-tile__bg-container {
+    position: absolute;
+    inset: 0;
+}
+
+.osrs-tile__bg {
+    position: absolute;
+    inset: var(--rt-border-thickness-y) var(--rt-border-thickness-x);
+    background-repeat: repeat;
+    image-rendering: pixelated;
+}
+
+.osrs-tile__border {
+    position: absolute;
+    image-rendering: pixelated;
+}
+
+.osrs-tile__border--top {
+    top: 0;
+    left: var(--rt-border-thickness-x);
+    right: var(--rt-border-thickness-x);
+    height: var(--rt-border-thickness-y);
+    background-repeat: repeat-x;
+    background-size: auto 100%;
+}
+
+.osrs-tile__border--bottom {
+    bottom: 0;
+    left: var(--rt-border-thickness-x);
+    right: var(--rt-border-thickness-x);
+    height: var(--rt-border-thickness-y);
+    background-repeat: repeat-x;
+    background-size: auto 100%;
+}
+
+.osrs-tile__border--left {
+    left: 0;
+    top: var(--rt-border-thickness-y);
+    bottom: var(--rt-border-thickness-y);
+    width: var(--rt-border-thickness-x);
+    background-repeat: repeat-y;
+    background-size: 100% auto;
+}
+
+.osrs-tile__border--right {
+    right: 0;
+    top: var(--rt-border-thickness-y);
+    bottom: var(--rt-border-thickness-y);
+    width: var(--rt-border-thickness-x);
+    background-repeat: repeat-y;
+    background-size: 100% auto;
+}
+
+.osrs-tile__corner {
+    position: absolute;
+    image-rendering: pixelated;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: var(--rt-corner-width);
+    height: var(--rt-corner-height);
+}
+
+.osrs-tile__corner--tl {
+    top: 0;
+    left: 0;
+}
+
+.osrs-tile__corner--tr {
+    top: 0;
+    right: 0;
+}
+
+.osrs-tile__corner--bl {
+    bottom: 0;
+    left: 0;
+}
+
+.osrs-tile__corner--br {
+    bottom: 0;
+    right: 0;
+}
+
+.osrs-tile__equipment-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.osrs-tile__content {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: var(--rt-border-thickness-y) var(--rt-border-thickness-x);
+}

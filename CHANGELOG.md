@@ -10,6 +10,76 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.35.3] - 2026-10-21
+### Changed
+- Make the gear picker's mode button show the icon of the panel it switches to: the inventory icon on the equipment panel and the equipment icon on the inventory panel, instead of glowing while inventory mode is on.
+
+## [0.35.2] - 2026-10-21
+### Removed
+- Remove the optional title from the read-only inventory guide panel, so it shows only the slots and items.
+
+## [0.35.1] - 2026-10-21
+### Added
+- Show an item's name in a styled tooltip that follows the cursor when hovering a slot in the read-only equipment and inventory panels.
+
+## [0.35.0] - 2026-10-21
+### Added
+- Add a read-only `GuideGearPanel` for guide content: `mode="equipment"` shows a shared loadout's equipment panel, and `mode="inventory"` shows a 4×7 inventory panel with its contents configured inline (item ids and names, no quantities).
+### Changed
+- Let the gear picker's inventory grid render read-only, with no hover box or click handling when no click handler is given.
+
+## [0.34.0] - 2026-10-21
+### Added
+- Add an inventory mode to the gear picker: a button under the equipment panel switches it to a 4×7 grid of 28 invisible slots (shown on hover) that you fill with any item from the item picker; the inventory is kept in your local draft, and the Bonuses panel slides out of the way behind the middle panel while it's on.
+- Ctrl+click adds slots to the selection in both modes so one pick fills them all, clicking away from the slot grid and item picker deselects inventory slots, and the item picker's header shows how many slots are selected.
+- Add a right-click menu to the middle panel: Select, Clear, Clear all and Cancel for equipment, and Select/Unselect, Select all, Remove, Remove all and Cancel for the inventory.
+### Fixed
+- Stop the item picker equipping a shield while a two-handed weapon is equipped.
+
+## [0.33.1] - 2026-10-21
+### Changed
+- Shorten the fade at the bottom of the gear picker's item list and stop it running under the scrollbar.
+
+## [0.33.0] - 2026-10-21
+### Added
+- Make the gear picker's Stats button a toggle that marks each item in the item picker with one to three green + or red - signs, showing how much better or worse its biggest stat change is than the other items in the list; Melee STR, Ranged STR and Magic DMG are each compared only against themselves.
+### Changed
+- Move the Clear all button to the end of the gear picker's toolbar.
+
+## [0.32.0] - 2026-10-21
+### Added
+- Navigate the gear picker's item list with the arrow keys and press Enter to equip the highlighted item, with its stat difference previewed as you move.
+
+## [0.31.0] - 2026-10-21
+### Added
+- Make the gear picker's search button a toggle between searching items for the selected slot and searching every slot, equipping a picked item into its own slot.
+
+## [0.30.0] - 2026-10-21
+### Added
+- Let the gear picker's item list scroll through every item for a slot instead of stopping at the first 30, rendering only the rows on screen so long lists stay fast.
+### Changed
+- Scroll the item list back to the top whenever the search text changes.
+
+## [0.29.0] - 2026-10-21
+### Added
+- Add a row of square, pixel-art buttons under the gear picker's equipment grid: Stats, Clear all, Value and Search, with a hover look and an accent-coloured glow on the icons that toggle.
+- Toggle the gear picker's total cost between the full amount (29.300.000) and an abbreviated one (29.3M) with the Value button.
+### Changed
+- Show the gear picker's full total cost with dot-separated thousands instead of commas.
+
+## [0.28.0] - 2026-10-20
+### Added
+- Preview an item's effect on the gear picker's bonuses by hovering it in the item picker, with each stat's change shown in green, red or unchanged.
+- Keep the item picker's search text when switching equipment slots, and select it so the next keystroke replaces it.
+
+## [0.27.0] - 2026-10-20
+### Added
+- Draw the gear picker's panels, bonuses, safety indicator and cost in the game's pixel font, with a remove-item button in the item picker.
+- Keep the item picker open after choosing or removing an item, and remember the in-progress loadout across page refreshes.
+
+## [0.26.7] - 2026-10-20
+### Changed
+- Move the pixel-font text renderer out of the chatbox folder so other pages can share it, and let it draw bold text and keep a consistent baseline across strings.
 ## [0.26.7] - 2026-09-04
 ### Fixed
 - Stop the chat feed from opening a WebSocket for every one of `useChatFeeds`' fixed slots regardless of use — a slot with no linked community now opens no socket at all until one is actually linked, instead of sitting connected-but-idle. Cuts a typical page load (2 linked communities today) from up to 10 sockets down to ~2.

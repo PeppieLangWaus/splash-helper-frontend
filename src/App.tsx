@@ -14,6 +14,7 @@ import DevSessionsPanel from './views/DevSessionsPanel';
 import DiscordBotView from './views/DiscordBotView';
 import TermsOfServiceView from './views/TermsOfServiceView';
 import PrivacyPolicyView from './views/PrivacyPolicyView';
+import GearPickerView from './views/GearPickerView';
 import { colors, fontSerif } from './theme';
 
 type View =
@@ -25,7 +26,9 @@ type View =
   | { name: 'community' }
   | { name: 'settings' }
   | { name: 'bot' }
-  | { name: 'dev' };
+  | { name: 'dev' }
+  | { name: 'gear' }
+  | { name: 'gear-shared'; slug: string };
 
 /** Maps a `View` to the URL path it should be reachable at, and back. Lets browser
  *  Back/Forward and hard refreshes land on the actual page the user was looking at,
@@ -41,12 +44,17 @@ function viewToPath(view: View): string {
     case 'settings': return '/account';
     case 'bot': return '/bot';
     case 'dev': return '/dev';
+    case 'gear': return '/gear';
+    case 'gear-shared': return `/gear/${encodeURIComponent(view.slug)}`;
   }
 }
 
 function pathToView(pathname: string): View {
   const sessionsMatch = pathname.match(/^\/sessions\/([^/]+)\/?$/);
   if (sessionsMatch) return { name: 'user', username: decodeURIComponent(sessionsMatch[1]) };
+
+  const gearSharedMatch = pathname.match(/^\/gear\/([^/]+)\/?$/);
+  if (gearSharedMatch) return { name: 'gear-shared', slug: decodeURIComponent(gearSharedMatch[1]) };
 
   switch (pathname) {
     case '/login': return { name: 'login' };
@@ -56,6 +64,7 @@ function pathToView(pathname: string): View {
     case '/account': return { name: 'settings' };
     case '/bot': return { name: 'bot' };
     case '/dev': return { name: 'dev' };
+    case '/gear': return { name: 'gear' };
     default: return { name: 'active' };
   }
 }
@@ -228,6 +237,13 @@ function AppInner() {
         >
           Active
         </button>
+        <button
+          style={nav.btn(view.name === 'gear' || view.name === 'gear-shared')}
+          onClick={() => navigate({ name: 'gear' })}
+          type="button"
+        >
+          Gear Picker
+        </button>
         {user && (
           <button
             style={nav.btn(view.name === 'user')}
@@ -322,6 +338,8 @@ function AppInner() {
       {view.name === 'settings' && <AccountSettingsView />}
       {view.name === 'bot' && <DiscordBotView />}
       {view.name === 'dev' && <DevSessionsPanel />}
+      {view.name === 'gear' && <GearPickerView />}
+      {view.name === 'gear-shared' && <GearPickerView initialSlug={view.slug} readOnly />}
     </div>
   );
 }

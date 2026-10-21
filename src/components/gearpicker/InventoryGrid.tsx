@@ -1,0 +1,76 @@
+import type { CSSProperties, ReactNode } from 'react';
+import { itemIconUrl } from '../chatbox/itemIcons';
+import { useHoverTooltip } from './useHoverTooltip';
+import { GRID_HEIGHT, GRID_WIDTH } from './gearGridLayout';
+import { INVENTORY_COLUMNS, INVENTORY_ROWS } from '../../types/gear';
+import type { GearInventory } from '../../types/gear';
+
+// Same box as EquipmentDisplay's diamond, so switching the middle panel between the two modes
+// never resizes it.
+const gridTemplateStyle: CSSProperties = {
+  gridTemplateColumns: `repeat(${INVENTORY_COLUMNS}, 1fr)`,
+  gridTemplateRows: `repeat(${INVENTORY_ROWS}, 1fr)`,
+};
+
+function StaticInventorySlot({ itemName, children }: { itemName?: string; children: ReactNode }) {
+  const { hoverProps, tooltip } = useHoverTooltip(itemName);
+  return (
+    <div className="inventory-slot inventory-slot--static" aria-label={itemName} {...hoverProps}>
+      {children}
+      {tooltip}
+    </div>
+  );
+}
+
+interface Props {
+  inventory: GearInventory;
+  itemNamesById: Map<number, string>;
+  selectedIndices?: ReadonlySet<number>;
+  /** CSS length added below the equipment-sized box, for the space the equipment mode's toolbar
+   *  takes up, so the panel keeps its size with the toolbar gone. */
+  extraHeight?: string;
+  /** If provided, each slot becomes a clickable button (the interactive picker case); omit for a
+   *  purely read-only display, whose slots have no hover box. */
+  onSlotClick?: (index: number, additive: boolean) => void;
+}
+
+/**
+ * The 4x7 inventory layout. Visually empty until a slot is hovered, focused or selected, at which
+ * point a translucent box appears over it; a slot holding an item always shows the item's icon.
+ */
+export default function InventoryGrid({ inventory, itemNamesById, selectedIndices, extraHeight = '0px', onSlotClick }: Props) {
+  const wrapStyle: CSSProperties = { aspectRatio: `${GRID_WIDTH} / ${GRID_HEIGHT}`, marginBottom: extraHeight };
+  const gridStyle: CSSProperties = { ...gridTemplateStyle, bottom: `calc(-1 * ${extraHeight})` };
+  return (
+    <div className="inventory-grid-wrap" style={wrapStyle}>
+      <div className="inventory-grid" style={gridStyle}>
+        {inventory.map((itemId, index) => {
+          const itemName = itemId !== null ? itemNamesById.get(itemId) ?? `Item ${itemId}` : undefined;
+          const label = `Inventory slot ${index + 1}`;
+          const title = itemName ?? label;
+          const icon = itemId !== null && <img src={itemIconUrl(itemId)} alt="" className="inventory-slot__icon" />;
+
+          if (!onSlotClick) {
+            return <StaticInventorySlot key={index} itemName={itemName}>{icon}</StaticInventorySlot>;
+          }
+
+          const selected = selectedIndices?.has(index) ?? false;
+          return (
+            <button
+              key={index}
+              type="button"
+              className={'inventory-slot' + (selected ? ' inventory-slot--selected' : '')}
+              data-inventory-index={index}
+              onClick={(event) => onSlotClick(index, event.ctrlKey || event.metaKey)}
+              title={title}
+              aria-label={itemName ? `${label}: ${itemName}` : label}
+              aria-pressed={selected}
+            >
+              {icon}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
