@@ -94,3 +94,10 @@ export function rowTop(row: number): number {
 export function rowCenter(row: number): number {
   return rowTop(row) + SLOT_HEIGHT_PCT / 2;
 }
+
+/** Outer size (px) of each square toolbar button under the equipment grid. */
+export const TOOLBAR_BUTTON_SIZE = 48;
+/** Gap between the equipment grid and the toolbar under it; the inventory grid claims that space
+ *  too (see INVENTORY_EXTRA_HEIGHT), so it keeps its proportions with the toolbar gone. */
+export const EQUIPMENT_COL_GAP = '0.75rem';
+export const INVENTORY_EXTRA_HEIGHT = `calc(${EQUIPMENT_COL_GAP} + ${TOOLBAR_BUTTON_SIZE}px)`;

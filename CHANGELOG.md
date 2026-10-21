@@ -10,6 +10,12 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-10-21
+### Added
+- Add a read-only `GuideGearPanel` for guide content: `mode="equipment"` shows a shared loadout's equipment panel, and `mode="inventory"` shows a 4×7 inventory panel with its contents configured inline (item ids and names, no quantities).
+### Changed
+- Let the gear picker's inventory grid render read-only, with no hover box or click handling when no click handler is given.
+
 ## [0.34.0] - 2026-10-21
 ### Added
 - Add an inventory mode to the gear picker: a button under the equipment panel switches it to a 4×7 grid of 28 invisible slots (shown on hover) that you fill with any item from the item picker; the inventory is kept in your local draft, and the Bonuses panel slides out of the way behind the middle panel while it's on.

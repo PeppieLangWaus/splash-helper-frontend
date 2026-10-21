@@ -5,6 +5,7 @@ import OSRSPanel from '../components/osrs/OSRSPanel';
 import EquipmentDisplay from '../components/gearpicker/EquipmentDisplay';
 import EquipmentSlotGrid from '../components/gearpicker/EquipmentSlotGrid';
 import InventoryGrid from '../components/gearpicker/InventoryGrid';
+import { EQUIPMENT_COL_GAP, INVENTORY_EXTRA_HEIGHT, TOOLBAR_BUTTON_SIZE } from '../components/gearpicker/gearGridLayout';
 import ContextMenu from '../components/gearpicker/ContextMenu';
 import type { ContextMenuOption } from '../components/gearpicker/ContextMenu';
 import ItemPickerPanel from '../components/gearpicker/ItemPickerPanel';
@@ -53,10 +54,6 @@ interface Props {
   readOnly?: boolean;
 }
 
-/** Outer size (px) of each square toolbar button under the equipment grid. */
-const TOOLBAR_BUTTON_SIZE = 48;
-/** Gap between the equipment grid and the toolbar under it; inventory mode's grid claims that space too. */
-const EQUIPMENT_COL_GAP = '0.75rem';
 /** Every toolbar icon is drawn at this multiple of its native pixel size, so they all read as the
  *  same scale despite their different canvases. */
 const TOOLBAR_ICON_SCALE = 1.25;
@@ -601,7 +598,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
                     inventory={inventory}
                     itemNamesById={itemNamesById}
                     selectedIndices={selectedInventorySlots}
-                  extraHeight={`calc(${EQUIPMENT_COL_GAP} + ${TOOLBAR_BUTTON_SIZE}px)`}
+                  extraHeight={INVENTORY_EXTRA_HEIGHT}
                     onSlotClick={handleInventorySlotClick}
                   />
                 ) : (

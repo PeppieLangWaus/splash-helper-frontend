@@ -14,18 +14,20 @@ const gridTemplateStyle: CSSProperties = {
 interface Props {
   inventory: GearInventory;
   itemNamesById: Map<number, string>;
-  selectedIndices: ReadonlySet<number>;
+  selectedIndices?: ReadonlySet<number>;
   /** CSS length added below the equipment-sized box, for the space the equipment mode's toolbar
    *  takes up, so the panel keeps its size with the toolbar gone. */
-  extraHeight: string;
-  onSlotClick: (index: number, additive: boolean) => void;
+  extraHeight?: string;
+  /** If provided, each slot becomes a clickable button (the interactive picker case); omit for a
+   *  purely read-only display, whose slots have no hover box. */
+  onSlotClick?: (index: number, additive: boolean) => void;
 }
 
 /**
  * The 4x7 inventory layout. Visually empty until a slot is hovered, focused or selected, at which
  * point a translucent box appears over it; a slot holding an item always shows the item's icon.
  */
-export default function InventoryGrid({ inventory, itemNamesById, selectedIndices, extraHeight, onSlotClick }: Props) {
+export default function InventoryGrid({ inventory, itemNamesById, selectedIndices, extraHeight = '0px', onSlotClick }: Props) {
   const wrapStyle: CSSProperties = { aspectRatio: `${GRID_WIDTH} / ${GRID_HEIGHT}`, marginBottom: extraHeight };
   const gridStyle: CSSProperties = { ...gridTemplateStyle, bottom: `calc(-1 * ${extraHeight})` };
   return (
@@ -34,18 +36,30 @@ export default function InventoryGrid({ inventory, itemNamesById, selectedIndice
         {inventory.map((itemId, index) => {
           const itemName = itemId !== null ? itemNamesById.get(itemId) ?? `Item ${itemId}` : undefined;
           const label = `Inventory slot ${index + 1}`;
+          const title = itemName ?? label;
+          const icon = itemId !== null && <img src={itemIconUrl(itemId)} alt="" className="inventory-slot__icon" />;
+
+          if (!onSlotClick) {
+            return (
+              <div key={index} className="inventory-slot inventory-slot--static" title={itemName}>
+                {icon}
+              </div>
+            );
+          }
+
+          const selected = selectedIndices?.has(index) ?? false;
           return (
             <button
               key={index}
               type="button"
-              className={'inventory-slot' + (selectedIndices.has(index) ? ' inventory-slot--selected' : '')}
+              className={'inventory-slot' + (selected ? ' inventory-slot--selected' : '')}
               data-inventory-index={index}
               onClick={(event) => onSlotClick(index, event.ctrlKey || event.metaKey)}
-              title={itemName ?? label}
+              title={title}
               aria-label={itemName ? `${label}: ${itemName}` : label}
-              aria-pressed={selectedIndices.has(index)}
+              aria-pressed={selected}
             >
-              {itemId !== null && <img src={itemIconUrl(itemId)} alt="" className="inventory-slot__icon" />}
+              {icon}
             </button>
           );
         })}

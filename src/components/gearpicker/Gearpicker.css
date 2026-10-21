@@ -88,7 +88,11 @@
     color: inherit;
 }
 
-.inventory-slot:hover,
+.inventory-slot--static {
+    cursor: default;
+}
+
+.inventory-slot:not(.inventory-slot--static):hover,
 .inventory-slot:focus-visible,
 .inventory-slot--selected {
     background: rgba(0, 0, 0, 0.4);
@@ -367,4 +371,12 @@
 
 .context-menu__option:disabled {
     cursor: default;
+}
+
+/* ---- GearInventoryGuideCard ------------------------------------------------------------- */
+
+.gear-inventory-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
