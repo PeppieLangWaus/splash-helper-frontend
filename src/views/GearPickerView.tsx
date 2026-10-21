@@ -100,7 +100,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
   const [equipmentData, setEquipmentData] = useState<EquipmentItem[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [searchGlowing, setSearchGlowing] = useState(false);
+  const [searchAllSlots, setSearchAllSlots] = useState(false);
   const [costAbbreviated, setCostAbbreviated] = useState(false);
   const [dataError, setDataError] = useState<string | null>(null);
 
@@ -171,23 +171,27 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
   const itemsById = useMemo(() => new Map(equipmentData.map((item) => [item.id, item])), [equipmentData]);
 
+  const pickableItems = useMemo(() => withoutLowerNumberedVariants(equipmentData), [equipmentData]);
+
+  const allItemsSorted = useMemo(() => [...pickableItems].sort((a, b) => a.name.localeCompare(b.name)), [pickableItems]);
+
   const itemsBySlot = useMemo(() => {
     const map = new Map<EquipmentSlot, EquipmentItem[]>();
-    for (const item of withoutLowerNumberedVariants(equipmentData)) {
+    for (const item of pickableItems) {
       const list = map.get(item.slot);
       if (list) list.push(item);
       else map.set(item.slot, [item]);
     }
     for (const list of map.values()) list.sort((a, b) => a.name.localeCompare(b.name));
     return map;
-  }, [equipmentData]);
+  }, [pickableItems]);
 
   const totals = useMemo(() => computeTotalBonuses(slots, itemsById), [slots, itemsById]);
 
   const previewTotals = useMemo(() => {
-    if (!hoveredItem || !selectedSlot) return null;
-    return computeTotalBonuses(slotsWithItem(slots, selectedSlot, hoveredItem), itemsById);
-  }, [hoveredItem, selectedSlot, slots, itemsById]);
+    if (!hoveredItem) return null;
+    return computeTotalBonuses(slotsWithItem(slots, hoveredItem.slot, hoveredItem), itemsById);
+  }, [hoveredItem, slots, itemsById]);
 
   const effectiveReadOnly = readOnly && !forceEdit;
 
@@ -251,8 +255,10 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   }
 
   function handleSelectItem(item: EquipmentItem) {
-    if (!selectedSlot) return;
-    setSlots(slotsWithItem(slots, selectedSlot, item));
+    const targetSlot = searchAllSlots ? item.slot : selectedSlot;
+    if (!targetSlot) return;
+    setSlots(slotsWithItem(slots, targetSlot, item));
+    setSelectedSlot(targetSlot);
   }
 
   function handleClearSelectedSlot() {
@@ -261,6 +267,13 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     delete next[selectedSlot];
     setSlots(next);
   }
+
+  const pickerItems = searchAllSlots ? allItemsSorted : selectedSlot ? itemsBySlot.get(selectedSlot) ?? [] : [];
+  const headerText = searchAllSlots
+    ? 'All Slots'
+    : selectedSlot
+      ? `${EQUIPMENT_SLOT_LABELS[selectedSlot]} Slot`
+      : 'Item Picker';
 
   if (loadingData || loadingLoadout) {
     return (
@@ -297,7 +310,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
             height={matchedPanelHeight}
             header={
               <PixelText
-                text={selectedSlot ? `${EQUIPMENT_SLOT_LABELS[selectedSlot]} Slot` : 'Item Picker'}
+                text={headerText}
                 fontSize={24}
                 color={colors.accentText}
                 bold
@@ -306,9 +319,10 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
             headerDivider={CONNECTOR_ASSETS.horizontal}
             content={
               <ItemPickerPanel
-                key={selectedSlot ?? 'none'}
+                key={searchAllSlots ? 'all-slots' : selectedSlot ?? 'none'}
                 selectedSlot={selectedSlot}
-                items={selectedSlot ? itemsBySlot.get(selectedSlot) ?? [] : []}
+                searchAllSlots={searchAllSlots}
+                items={pickerItems}
                 hasCurrentItem={selectedSlot ? slots[selectedSlot] !== undefined : false}
                 onSelect={handleSelectItem}
                 onHoverItem={setHoveredItem}
@@ -378,12 +392,12 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
                     width={TOOLBAR_BUTTON_SIZE}
                     height={TOOLBAR_BUTTON_SIZE}
                     scaleWithSize={false}
-                    aria-pressed={searchGlowing}
-                    onClick={() => setSearchGlowing((glowing) => !glowing)}
-                    title="Search"
-                    aria-label="Search"
+                    aria-pressed={searchAllSlots}
+                    onClick={() => setSearchAllSlots((allSlots) => !allSlots)}
+                    title="Search all slots"
+                    aria-label="Search all slots"
                   >
-                    <ToolbarIcon src={SEARCH_ICON} nativeWidth={20} glowing={searchGlowing} />
+                    <ToolbarIcon src={SEARCH_ICON} nativeWidth={20} glowing={searchAllSlots} />
                   </OSRSSquareButton>
                 </div>
               )}

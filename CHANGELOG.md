@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-10-21
+### Added
+- Make the gear picker's search button a toggle between searching items for the selected slot and searching every slot, equipping a picked item into its own slot.
+
 ## [0.30.0] - 2026-10-21
 ### Added
 - Let the gear picker's item list scroll through every item for a slot instead of stopping at the first 30, rendering only the rows on screen so long lists stay fast.

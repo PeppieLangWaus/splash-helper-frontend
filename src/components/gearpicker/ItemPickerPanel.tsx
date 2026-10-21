@@ -14,6 +14,8 @@ const OVERSCAN_ROWS = 6;
 
 interface Props {
   selectedSlot: EquipmentSlot | null;
+  /** Lists items for every slot rather than just `selectedSlot`; selecting one equips it in its own slot. */
+  searchAllSlots: boolean;
   items: EquipmentItem[];
   hasCurrentItem: boolean;
   onSelect: (item: EquipmentItem) => void;
@@ -23,10 +25,10 @@ interface Props {
   onClear: () => void;
 }
 
-/** The parent remounts this (via a `key` on selectedSlot) whenever the selected slot changes, so
+/** The parent remounts this (via a `key` on selectedSlot or the all-slots mode) whenever either changes, so
  *  the list scroll resets and the search input is re-focused, with its text selected, for each
  *  newly opened slot. The query itself lives in the parent so it survives that remount. */
-export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, onSelect, onHoverItem, query, onQueryChange, onClear }: Props) {
+export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, hasCurrentItem, onSelect, onHoverItem, query, onQueryChange, onClear }: Props) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const {
@@ -73,7 +75,7 @@ export default function ItemPickerPanel({ selectedSlot, items, hasCurrentItem, o
   // another slot, which would otherwise leave a stale preview showing.
   useEffect(() => () => onHoverItem(null), [onHoverItem]);
 
-  if (!selectedSlot) {
+  if (!selectedSlot && !searchAllSlots) {
     return (
       <p className="item-picker__hint">
         <PixelText text="Click an equipment slot to choose an item for it." fontSize={13.6} color={colors.textFaint} />
