@@ -130,7 +130,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    height: 14px;
+    height: 10px;
+    margin-right: 1rem;
     background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.55));
     pointer-events: none;
 }

@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.33.1] - 2026-10-21
+### Changed
+- Shorten the fade at the bottom of the gear picker's item list and stop it running under the scrollbar.
+
 ## [0.33.0] - 2026-10-21
 ### Added
 - Make the gear picker's Stats button a toggle that marks each item in the item picker with one to three green + or red - signs, showing how much better or worse its biggest stat change is than the other items in the list; Melee STR, Ranged STR and Magic DMG are each compared only against themselves.
