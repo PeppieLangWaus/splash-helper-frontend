@@ -44,6 +44,30 @@ export interface EquipmentDataResponse {
   sourceVersion: string;
 }
 
+/** One entry of the all-items list (GET /items, see the backend's scripts/sync-equipment-data.ts) —
+ *  unlike EquipmentItem, any item at all, so it carries no slot or bonuses. */
+export interface ListedItem {
+  id: number;
+  name: string;
+}
+
+export interface ItemListResponse {
+  items: ListedItem[];
+  sourceVersion: string;
+}
+
+export const INVENTORY_COLUMNS = 4;
+export const INVENTORY_ROWS = 7;
+export const INVENTORY_SLOT_COUNT = INVENTORY_COLUMNS * INVENTORY_ROWS;
+
+/** Item id per inventory slot, left to right then top to bottom, `null` for an empty slot. Always
+ *  INVENTORY_SLOT_COUNT long. */
+export type GearInventory = (number | null)[];
+
+export function emptyInventory(): GearInventory {
+  return Array.from({ length: INVENTORY_SLOT_COUNT }, () => null);
+}
+
 /** Item id per equipment slot, all optional (an empty slot is simply absent). */
 export type GearLoadoutSlots = Partial<Record<EquipmentSlot, number>>;
 

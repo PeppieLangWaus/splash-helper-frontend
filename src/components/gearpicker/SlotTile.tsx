@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, MouseEvent } from 'react';
 import OSRSTile from '../osrs/OSRSTile';
 import { itemIconUrl } from '../chatbox/itemIcons';
 import { BLOCKED_ICON, SLOT_ICON_SCALE, SLOT_PLACEHOLDER_ICON, TILE_ASSETS } from './gearpickerAssets';
@@ -11,7 +11,7 @@ interface Props {
   /** True when this slot can't be used right now (shield blocked by a two-handed weapon) — shows
    *  the red tile + a blocked badge instead of the normal grey tile + slot outline icon. */
   blocked?: boolean;
-  onClick?: () => void;
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
 /** One equipment slot tile: an OSRSTile (gray normally, red when blocked) showing the equipped
@@ -51,7 +51,14 @@ export default function SlotTile({ slot, item, blocked, onClick }: Props) {
   }
 
   return (
-    <button type="button" className="slot-tile__frame slot-tile__button" onClick={onClick} disabled={blocked} title={title}>
+    <button
+      type="button"
+      className="slot-tile__frame slot-tile__button"
+      data-equipment-slot={slot}
+      onClick={onClick}
+      disabled={blocked}
+      title={title}
+    >
       {tile}
     </button>
   );

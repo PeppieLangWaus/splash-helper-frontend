@@ -118,6 +118,7 @@ export const SEARCH_ICON = `${ICON_BASE}/search.png`;
 export const STATS_ICON = `${ICON_BASE}/stats.png`;
 export const VALUE_ICON = `${ICON_BASE}/value.png`;
 export const CLEAR_EQUIPMENT_ICON = `${ICON_BASE}/clearEquipment.png`;
+export const INVENTORY_ICON = `${ICON_BASE}/inventory.png`;
 export const REMOVE_BUTTON_ICON = {
   normal: '/assets/icons/components/buttons/remove/normal.png',
   pressed: '/assets/icons/components/buttons/remove/pressed.png',

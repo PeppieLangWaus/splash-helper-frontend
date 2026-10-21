@@ -13,7 +13,7 @@ import type {
   PayoutTicket,
 } from '../types';
 import type { ChatChannelListing, CommunityChatConfig } from '../types/chatbox';
-import type { EquipmentDataResponse, GearLoadout, GearLoadoutSlots } from '../types/gear';
+import type { EquipmentDataResponse, GearLoadout, GearLoadoutSlots, ItemListResponse } from '../types/gear';
 
 /** Body shape for every webhook PUT endpoint: either field may be omitted to leave it
  *  unchanged, or set to '' to clear it. */
@@ -625,6 +625,13 @@ export async function fetchEquipmentData(): Promise<EquipmentDataResponse> {
   const res = await fetch(`${BASE}/equipment`);
   const data = (await res.json()) as Partial<EquipmentDataResponse> & { error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to load equipment data');
+  return { items: data.items ?? [], sourceVersion: data.sourceVersion ?? '' };
+}
+
+export async function fetchItemList(): Promise<ItemListResponse> {
+  const res = await fetch(`${BASE}/items`);
+  const data = (await res.json()) as Partial<ItemListResponse> & { error?: string };
+  if (!res.ok) throw new Error(data.error ?? 'Failed to load item list');
   return { items: data.items ?? [], sourceVersion: data.sourceVersion ?? '' };
 }
 

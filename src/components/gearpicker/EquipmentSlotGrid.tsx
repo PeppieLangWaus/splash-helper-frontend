@@ -5,7 +5,7 @@ import type { EquipmentItem, EquipmentSlot, GearLoadoutSlots } from '../../types
 interface Props {
   slots: GearLoadoutSlots;
   itemsById: Map<number, EquipmentItem>;
-  onSlotClick: (slot: EquipmentSlot) => void;
+  onSlotClick: (slot: EquipmentSlot, additive: boolean) => void;
 }
 
 /** A two-handed weapon and a shield can never actually be worn together in-game, so the shield

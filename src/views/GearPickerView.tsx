@@ -1,8 +1,12 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, MouseEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import OSRSPanel from '../components/osrs/OSRSPanel';
 import EquipmentDisplay from '../components/gearpicker/EquipmentDisplay';
 import EquipmentSlotGrid from '../components/gearpicker/EquipmentSlotGrid';
+import InventoryGrid from '../components/gearpicker/InventoryGrid';
+import ContextMenu from '../components/gearpicker/ContextMenu';
+import type { ContextMenuOption } from '../components/gearpicker/ContextMenu';
 import ItemPickerPanel from '../components/gearpicker/ItemPickerPanel';
 import GearLoadoutCost from '../components/gearpicker/GearLoadoutCost';
 import BonusSummaryPanel from '../components/gearpicker/BonusSummaryPanel';
@@ -14,6 +18,7 @@ import {
   deleteGearLoadout,
   fetchEquipmentData,
   fetchGearLoadout,
+  fetchItemList,
   saveGearLoadout,
   shareGearLoadout,
   updateGearLoadout,
@@ -25,6 +30,7 @@ import {
   CLEAR_EQUIPMENT_ICON,
   CONNECTOR_ASSETS,
   DELETE_ICON,
+  INVENTORY_ICON,
   PANEL_ASSETS_STEEL,
   PANEL_ASSETS_STONE,
   SEARCH_ICON,
@@ -32,8 +38,8 @@ import {
   VALUE_ICON,
 } from '../components/gearpicker/gearpickerAssets';
 import { loadGearPickerDraft, saveGearPickerDraft } from '../utils/gearPickerStorage';
-import type { EquipmentItem, EquipmentSlot, GearLoadout, GearLoadoutSlots } from '../types/gear';
-import { EQUIPMENT_SLOT_LABELS } from '../types/gear';
+import type { EquipmentItem, EquipmentSlot, GearInventory, GearLoadout, GearLoadoutSlots, ListedItem } from '../types/gear';
+import { EQUIPMENT_SLOT_LABELS, emptyInventory } from '../types/gear';
 import '../components/gearpicker/Gearpicker.css';
 import './GearPickerView.css';
 
@@ -49,6 +55,8 @@ interface Props {
 
 /** Outer size (px) of each square toolbar button under the equipment grid. */
 const TOOLBAR_BUTTON_SIZE = 48;
+/** Gap between the equipment grid and the toolbar under it; inventory mode's grid claims that space too. */
+const EQUIPMENT_COL_GAP = '0.75rem';
 /** Every toolbar icon is drawn at this multiple of its native pixel size, so they all read as the
  *  same scale despite their different canvases. */
 const TOOLBAR_ICON_SCALE = 1.25;
@@ -78,6 +86,34 @@ function slotsWithItem(slots: GearLoadoutSlots, slot: EquipmentSlot, item: Equip
   if (slot === 'weapon' && item.isTwoHanded) delete next.shield;
   return next;
 }
+
+type PanelMode = 'equipment' | 'inventory';
+
+/** An open right-click menu: where it is, and which slot (if any) was under the cursor. */
+interface ContextMenuState {
+  x: number;
+  y: number;
+  equipmentSlot: EquipmentSlot | null;
+  inventoryIndex: number | null;
+}
+
+function withToggled<T>(selection: ReadonlySet<T>, value: T): ReadonlySet<T> {
+  const next = new Set(selection);
+  if (!next.delete(value)) next.add(value);
+  return next;
+}
+
+function withAdded<T>(selection: ReadonlySet<T>, value: T): ReadonlySet<T> {
+  return new Set(selection).add(value);
+}
+
+/** A plain click selects just `value`; an additive (ctrl/cmd) click toggles it within `selection`. */
+function selectionAfterClick<T>(selection: ReadonlySet<T>, value: T, additive: boolean): ReadonlySet<T> {
+  return additive ? withToggled(selection, value) : new Set([value]);
+}
+
+/** Stable no-op for the picker's hover preview, which only means something for equipment. */
+const ignoreHover = () => {};
 
 const MAX_STAT_CHANGE_LEVEL = 3;
 
@@ -134,7 +170,7 @@ function statChangeLevels(
 const NUMERIC_SUFFIX_PATTERN = /^(.*?)\s*\((\d+)\)\s*$/;
 
 /** Of items differing only by a trailing "(<number>)", e.g. charge counts, keeps the highest. */
-function withoutLowerNumberedVariants(items: EquipmentItem[]): EquipmentItem[] {
+function withoutLowerNumberedVariants<T extends { name: string }>(items: T[]): T[] {
   const highestNumberByBaseName = new Map<string, number>();
   for (const item of items) {
     const match = NUMERIC_SUFFIX_PATTERN.exec(item.name);
@@ -161,7 +197,21 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   // Seeded from the persisted draft on the plain /gear editor; a /gear/:slug view loads its own
   // loadout below instead, so it starts blank here.
   const [slots, setSlots] = useState<GearLoadoutSlots>(() => (initialSlug ? {} : loadGearPickerDraft().slots));
-  const [selectedSlot, setSelectedSlot] = useState<EquipmentSlot | null>(null);
+  const [selectedSlots, setSelectedSlots] = useState<ReadonlySet<EquipmentSlot>>(() => new Set());
+  const [panelMode, setPanelMode] = useState<PanelMode>('equipment');
+  // Inventory mode slides the bonuses panel behind the middle one, shrinking it so it ends up fully
+  // inside the middle panel's footprint; measured when entering it, from the panels' sizes and
+  // positions at that moment.
+  const middleColRef = useRef<HTMLDivElement>(null);
+  const bonusesWrapRef = useRef<HTMLDivElement>(null);
+  const [bonusesTuck, setBonusesTuck] = useState({ offsetX: 0, scale: 1 });
+  const [inventory, setInventory] = useState<GearInventory>(() => (initialSlug ? emptyInventory() : loadGearPickerDraft().inventory));
+  const [selectedInventorySlots, setSelectedInventorySlots] = useState<ReadonlySet<number>>(() => new Set());
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const closeContextMenu = useCallback(() => setContextMenu(null), []);
+  // Loaded the first time inventory mode opens, since it's far bigger than the equipment dataset.
+  const [itemList, setItemList] = useState<ListedItem[] | null>(null);
+  const [itemListError, setItemListError] = useState<string | null>(null);
   const [itemSearchQuery, setItemSearchQuery] = useState('');
   const [hoveredItem, setHoveredItem] = useState<EquipmentItem | null>(null);
   const [loadoutName, setLoadoutName] = useState(() => (initialSlug ? '' : loadGearPickerDraft().loadoutName));
@@ -186,6 +236,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   // (not useRef) is needed since this panel only mounts once equipment data finishes loading.
   const [equipmentPanelEl, setEquipmentPanelEl] = useState<HTMLDivElement | null>(null);
   const [matchedPanelHeight, setMatchedPanelHeight] = useState<number>();
+  const [itemPickerPanelEl, setItemPickerPanelEl] = useState<HTMLDivElement | null>(null);
 
   // useLayoutEffect for an immediate first measurement (synchronous with the commit, so there's
   // no flash of mismatched heights); ResizeObserver then keeps it in sync as content changes.
@@ -206,6 +257,14 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
       .catch((err) => setDataError(err instanceof Error ? err.message : 'Failed to load equipment data'))
       .finally(() => setLoadingData(false));
   }, []);
+
+  useEffect(() => {
+    if (panelMode !== 'inventory' || itemList !== null) return;
+    setItemListError(null);
+    fetchItemList()
+      .then((data) => setItemList(data.items))
+      .catch((err) => setItemListError(err instanceof Error ? err.message : 'Failed to load item list'));
+  }, [panelMode, itemList]);
 
   useEffect(() => {
     if (!initialSlug) return;
@@ -229,16 +288,17 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
   const allItemsSorted = useMemo(() => [...pickableItems].sort((a, b) => a.name.localeCompare(b.name)), [pickableItems]);
 
-  const itemsBySlot = useMemo(() => {
-    const map = new Map<EquipmentSlot, EquipmentItem[]>();
-    for (const item of pickableItems) {
-      const list = map.get(item.slot);
-      if (list) list.push(item);
-      else map.set(item.slot, [item]);
-    }
-    for (const list of map.values()) list.sort((a, b) => a.name.localeCompare(b.name));
-    return map;
-  }, [pickableItems]);
+  const inventoryPickerItems = useMemo(
+    () => (itemList ? withoutLowerNumberedVariants(itemList).sort((a, b) => a.name.localeCompare(b.name)) : []),
+    [itemList],
+  );
+
+  const itemNamesById = useMemo(() => {
+    const names = new Map<number, string>();
+    for (const item of equipmentData) names.set(item.id, item.name);
+    for (const item of itemList ?? []) names.set(item.id, item.name);
+    return names;
+  }, [equipmentData, itemList]);
 
   const totals = useMemo(() => computeTotalBonuses(slots, itemsById), [slots, itemsById]);
 
@@ -248,13 +308,27 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   }, [hoveredItem, slots, itemsById]);
 
   const effectiveReadOnly = readOnly && !forceEdit;
+  const inventoryMode = panelMode === 'inventory' && !effectiveReadOnly;
+
+  // A press anywhere but the slot grid, the item picker (which needs the selection to act on) or
+  // the context menu clears the inventory selection.
+  useEffect(() => {
+    if (!inventoryMode || selectedInventorySlots.size === 0) return;
+    function deselectOnOutsidePress(event: globalThis.MouseEvent) {
+      const target = event.target as Element;
+      if (equipmentPanelEl?.contains(target) || itemPickerPanelEl?.contains(target) || target.closest('.context-menu')) return;
+      setSelectedInventorySlots(new Set());
+    }
+    document.addEventListener('mousedown', deselectOnOutsidePress);
+    return () => document.removeEventListener('mousedown', deselectOnOutsidePress);
+  }, [inventoryMode, selectedInventorySlots, equipmentPanelEl, itemPickerPanelEl]);
 
   // Only persist while the loadout is actually editable — a plain read-only shared view (no
   // forceEdit yet) shouldn't overwrite the user's own in-progress draft.
   useEffect(() => {
     if (effectiveReadOnly) return;
-    saveGearPickerDraft({ slots, loadoutName, savedSlug });
-  }, [slots, loadoutName, savedSlug, effectiveReadOnly]);
+    saveGearPickerDraft({ slots, inventory, loadoutName, savedSlug });
+  }, [slots, inventory, loadoutName, savedSlug, effectiveReadOnly]);
 
   async function handleSave() {
     if (!token) return;
@@ -303,38 +377,135 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
   function handleClearAll() {
     setSlots({});
-    setSelectedSlot(null);
+    setSelectedSlots(new Set());
     setShareUrl(null);
     setFeedback(null);
   }
 
-  function handleSelectItem(item: EquipmentItem) {
-    const targetSlot = searchAllSlots ? item.slot : selectedSlot;
-    if (!targetSlot) return;
-    setSlots(slotsWithItem(slots, targetSlot, item));
-    setSelectedSlot(targetSlot);
+  function setInventorySlots(indices: ReadonlySet<number>, itemId: number | null) {
+    setInventory((current) => current.map((existing, index) => (indices.has(index) ? itemId : existing)));
   }
 
-  function handleClearSelectedSlot() {
-    if (!selectedSlot) return;
+  function togglePanelMode() {
+    if (!inventoryMode) {
+      const middle = middleColRef.current?.getBoundingClientRect();
+      const bonuses = bonusesWrapRef.current?.getBoundingClientRect();
+      if (middle && bonuses) {
+        setBonusesTuck({
+          offsetX: middle.left + middle.width / 2 - (bonuses.left + bonuses.width / 2),
+          scale: Math.min(1, middle.width / bonuses.width, middle.height / bonuses.height),
+        });
+      }
+    }
+    setContextMenu(null);
+    setPanelMode(inventoryMode ? 'equipment' : 'inventory');
+  }
+
+  function handleSelectInventoryItem(item: ListedItem) {
+    setInventorySlots(selectedInventorySlots, item.id);
+  }
+
+  function handleClearSelectedInventorySlots() {
+    setInventorySlots(selectedInventorySlots, null);
+  }
+
+  function handleClearInventory() {
+    setInventory(emptyInventory());
+  }
+
+  function handleEquipmentSlotClick(slot: EquipmentSlot, additive: boolean) {
+    setSelectedSlots((current) => selectionAfterClick(current, slot, additive));
+  }
+
+  function handleInventorySlotClick(index: number, additive: boolean) {
+    setSelectedInventorySlots((current) => selectionAfterClick(current, index, additive));
+  }
+
+  // Every item the picker offers fits only its own slot, so this equips into `item.slot` however
+  // many slots are selected.
+  function handleSelectItem(item: EquipmentItem) {
+    if (item.slot === 'shield' && itemsById.get(slots.weapon ?? -1)?.isTwoHanded) return;
+    setSlots(slotsWithItem(slots, item.slot, item));
+    if (searchAllSlots) setSelectedSlots(new Set([item.slot]));
+  }
+
+  function handleClearSelectedSlots() {
     const next = { ...slots };
-    delete next[selectedSlot];
+    for (const slot of selectedSlots) delete next[slot];
     setSlots(next);
   }
 
+  function handleMiddlePanelContextMenu(event: MouseEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement;
+    if (effectiveReadOnly || !equipmentPanelEl?.contains(target)) return;
+    event.preventDefault();
+    const equipmentButton = target.closest<HTMLButtonElement>('[data-equipment-slot]');
+    const inventoryButton = target.closest<HTMLElement>('[data-inventory-index]');
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      equipmentSlot: equipmentButton && !equipmentButton.disabled ? (equipmentButton.dataset.equipmentSlot as EquipmentSlot) : null,
+      inventoryIndex: inventoryButton ? Number(inventoryButton.dataset.inventoryIndex) : null,
+    });
+  }
+
+  function equipmentContextMenuOptions(menu: ContextMenuState): ContextMenuOption[] {
+    const { equipmentSlot } = menu;
+    return [
+      {
+        label: 'Select',
+        disabled: equipmentSlot === null,
+        onSelect: () => {
+          if (equipmentSlot !== null) setSelectedSlots((current) => withAdded(current, equipmentSlot));
+        },
+      },
+      { label: 'Clear', disabled: selectedSlots.size === 0, onSelect: handleClearSelectedSlots },
+      { label: 'Clear all', onSelect: handleClearAll },
+      { label: 'Cancel', onSelect: closeContextMenu },
+    ];
+  }
+
+  function inventoryContextMenuOptions(menu: ContextMenuState): ContextMenuOption[] {
+    const { inventoryIndex } = menu;
+    return [
+      {
+        label: inventoryIndex !== null && selectedInventorySlots.has(inventoryIndex) ? 'Unselect' : 'Select',
+        disabled: inventoryIndex === null,
+        onSelect: () => {
+          if (inventoryIndex !== null) setSelectedInventorySlots((current) => withToggled(current, inventoryIndex));
+        },
+      },
+      { label: 'Select all', onSelect: () => setSelectedInventorySlots(new Set(inventory.map((_, index) => index))) },
+      { label: 'Remove', disabled: selectedInventorySlots.size === 0, onSelect: handleClearSelectedInventorySlots },
+      { label: 'Remove all', onSelect: handleClearInventory },
+      { label: 'Cancel', onSelect: closeContextMenu },
+    ];
+  }
+
   const pickerItems = useMemo(
-    () => (searchAllSlots ? allItemsSorted : selectedSlot ? itemsBySlot.get(selectedSlot) ?? [] : []),
-    [searchAllSlots, allItemsSorted, selectedSlot, itemsBySlot],
+    () => (searchAllSlots ? allItemsSorted : allItemsSorted.filter((item) => selectedSlots.has(item.slot))),
+    [searchAllSlots, allItemsSorted, selectedSlots],
   );
   const statChangeLevelById = useMemo(
     () => (showStatChanges ? statChangeLevels(pickerItems, slots, itemsById) : undefined),
     [showStatChanges, pickerItems, slots, itemsById],
   );
-  const headerText = searchAllSlots
-    ? 'All Slots'
-    : selectedSlot
-      ? `${EQUIPMENT_SLOT_LABELS[selectedSlot]} Slot`
-      : 'Item Picker';
+  const inventoryHintText = itemListError
+    ? 'Could not load the item list.'
+    : itemList === null
+      ? 'Loading items…'
+      : 'Click an inventory slot to choose an item for it.';
+  const headerText = (() => {
+    if (inventoryMode) {
+      if (selectedInventorySlots.size === 0) return 'Inventory';
+      if (selectedInventorySlots.size > 1) return `${selectedInventorySlots.size} Inventory Slots`;
+      return `Inventory Slot ${[...selectedInventorySlots][0] + 1}`;
+    }
+    if (searchAllSlots) return 'All Slots';
+    if (selectedSlots.size === 0) return 'Item Picker';
+    if (selectedSlots.size > 1) return `${selectedSlots.size} Slots`;
+    return `${EQUIPMENT_SLOT_LABELS[[...selectedSlots][0]]} Slot`;
+  })();
 
   if (loadingData || loadingLoadout) {
     return (
@@ -363,6 +534,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
       <div className="gear-picker-layout">
         {!effectiveReadOnly && (
           <OSRSPanel
+            ref={setItemPickerPanelEl}
             assets={PANEL_ASSETS_STEEL}
             className='itempicker'
             borderType="steel"
@@ -379,112 +551,158 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
             }
             headerDivider={CONNECTOR_ASSETS.horizontal}
             content={
-              <ItemPickerPanel
-                key={searchAllSlots ? 'all-slots' : selectedSlot ?? 'none'}
-                selectedSlot={selectedSlot}
-                searchAllSlots={searchAllSlots}
-                items={pickerItems}
-                statChangeLevelById={statChangeLevelById}
-                hasCurrentItem={selectedSlot ? slots[selectedSlot] !== undefined : false}
-                onSelect={handleSelectItem}
-                onHoverItem={setHoveredItem}
-                query={itemSearchQuery}
-                onQueryChange={setItemSearchQuery}
-                onClear={handleClearSelectedSlot}
-              />
+              inventoryMode ? (
+                <ItemPickerPanel
+                  key={`inventory-${[...selectedInventorySlots].join(',')}-${itemList ? 'loaded' : 'loading'}`}
+                  hasTarget={selectedInventorySlots.size > 0 && itemList !== null}
+                  hintText={inventoryHintText}
+                  removeLabel="Remove item from slot"
+                  items={inventoryPickerItems}
+                  hasCurrentItem={[...selectedInventorySlots].some((index) => inventory[index] !== null)}
+                  onSelect={handleSelectInventoryItem}
+                  onHoverItem={ignoreHover}
+                  query={itemSearchQuery}
+                  onQueryChange={setItemSearchQuery}
+                  onClear={handleClearSelectedInventorySlots}
+                />
+              ) : (
+                <ItemPickerPanel
+                  key={searchAllSlots ? 'all-slots' : [...selectedSlots].join(',')}
+                  hasTarget={selectedSlots.size > 0 || searchAllSlots}
+                  hintText="Click an equipment slot to choose an item for it."
+                  removeLabel="Remove equipped item"
+                  items={pickerItems}
+                  statChangeLevelById={statChangeLevelById}
+                  hasCurrentItem={[...selectedSlots].some((slot) => slots[slot] !== undefined)}
+                  onSelect={handleSelectItem}
+                  onHoverItem={setHoveredItem}
+                  query={itemSearchQuery}
+                  onQueryChange={setItemSearchQuery}
+                  onClear={handleClearSelectedSlots}
+                />
+              )
             }
           />
         )}
 
-        <OSRSPanel
-          ref={setEquipmentPanelEl}
-          assets={PANEL_ASSETS_STONE}
-          borderType="stone"
-          type="side"
-          width={250}
-          content={
-            <div className="gear-picker-equipment-col">
-              {effectiveReadOnly ? (
-                <EquipmentDisplay slots={slots} itemsById={itemsById} />
-              ) : (
-                <EquipmentSlotGrid slots={slots} itemsById={itemsById} onSlotClick={setSelectedSlot} />
-              )}
+        <div className="gear-picker-middle-col" ref={middleColRef} onContextMenu={handleMiddlePanelContextMenu}>
+          <OSRSPanel
+            ref={setEquipmentPanelEl}
+            assets={PANEL_ASSETS_STONE}
+            borderType="stone"
+            type="side"
+            width={250}
+            content={
+              <div className="gear-picker-equipment-col" style={{ gap: EQUIPMENT_COL_GAP }}>
+                {effectiveReadOnly ? (
+                  <EquipmentDisplay slots={slots} itemsById={itemsById} />
+                ) : inventoryMode ? (
+                  <InventoryGrid
+                    inventory={inventory}
+                    itemNamesById={itemNamesById}
+                    selectedIndices={selectedInventorySlots}
+                  extraHeight={`calc(${EQUIPMENT_COL_GAP} + ${TOOLBAR_BUTTON_SIZE}px)`}
+                    onSlotClick={handleInventorySlotClick}
+                  />
+                ) : (
+                  <EquipmentSlotGrid slots={slots} itemsById={itemsById} onSlotClick={handleEquipmentSlotClick} />
+                )}
 
-              {effectiveReadOnly ? (
-                <button
-                  type="button"
-                  className="gear-picker-btn gear-picker-btn--secondary"
-                  onClick={() => setForceEdit(true)}
-                >
-                  Load into editor
-                </button>
-              ) : (
-                <div className="gear-picker-toolbar">
-                  <OSRSSquareButton
-                    width={TOOLBAR_BUTTON_SIZE}
-                    height={TOOLBAR_BUTTON_SIZE}
-                    scaleWithSize={false}
-                    aria-pressed={showStatChanges}
-                    onClick={() => setShowStatChanges((shown) => !shown)}
-                    title="Show stat changes"
-                    aria-label="Highlight stat changes"
+                {effectiveReadOnly ? (
+                  <button
+                    type="button"
+                    className="gear-picker-btn gear-picker-btn--secondary"
+                    onClick={() => setForceEdit(true)}
                   >
-                    <ToolbarIcon src={STATS_ICON} nativeWidth={27} glowing={showStatChanges} />
-                  </OSRSSquareButton>
-                  <OSRSSquareButton
-                    width={TOOLBAR_BUTTON_SIZE}
-                    height={TOOLBAR_BUTTON_SIZE}
-                    scaleWithSize={false}
-                    aria-pressed={costAbbreviated}
-                    onClick={() => setCostAbbreviated((abbreviated) => !abbreviated)}
-                    title="Abbreviate total cost"
-                    aria-label="Format cost"
-                  >
-                    <ToolbarIcon src={VALUE_ICON} nativeWidth={25} glowing={costAbbreviated} />
-                  </OSRSSquareButton>
-                  <OSRSSquareButton
-                    width={TOOLBAR_BUTTON_SIZE}
-                    height={TOOLBAR_BUTTON_SIZE}
-                    scaleWithSize={false}
-                    aria-pressed={searchAllSlots}
-                    onClick={() => setSearchAllSlots((allSlots) => !allSlots)}
-                    title="Search all slots"
-                    aria-label="Search all slots"
-                  >
-                    <ToolbarIcon src={SEARCH_ICON} nativeWidth={20} glowing={searchAllSlots} />
-                  </OSRSSquareButton>
-                  <OSRSSquareButton
-                    width={TOOLBAR_BUTTON_SIZE}
-                    height={TOOLBAR_BUTTON_SIZE}
-                    scaleWithSize={false}
-                    onClick={handleClearAll}
-                    title="Clear all slots"
-                    aria-label="Clear all slots"
-                  >
-                    <ToolbarIcon src={CLEAR_EQUIPMENT_ICON} nativeWidth={28} />
-                  </OSRSSquareButton>
-                </div>
-              )}
-            </div>
-          }
-        />
+                    Load into editor
+                  </button>
+                ) : inventoryMode ? null : (
+                  <div className="gear-picker-toolbar">
+                    <OSRSSquareButton
+                      width={TOOLBAR_BUTTON_SIZE}
+                      height={TOOLBAR_BUTTON_SIZE}
+                      scaleWithSize={false}
+                      aria-pressed={showStatChanges}
+                      onClick={() => setShowStatChanges((shown) => !shown)}
+                      title="Show stat changes"
+                      aria-label="Highlight stat changes"
+                    >
+                      <ToolbarIcon src={STATS_ICON} nativeWidth={27} glowing={showStatChanges} />
+                    </OSRSSquareButton>
+                    <OSRSSquareButton
+                      width={TOOLBAR_BUTTON_SIZE}
+                      height={TOOLBAR_BUTTON_SIZE}
+                      scaleWithSize={false}
+                      aria-pressed={costAbbreviated}
+                      onClick={() => setCostAbbreviated((abbreviated) => !abbreviated)}
+                      title="Abbreviate total cost"
+                      aria-label="Format cost"
+                    >
+                      <ToolbarIcon src={VALUE_ICON} nativeWidth={25} glowing={costAbbreviated} />
+                    </OSRSSquareButton>
+                    <OSRSSquareButton
+                      width={TOOLBAR_BUTTON_SIZE}
+                      height={TOOLBAR_BUTTON_SIZE}
+                      scaleWithSize={false}
+                      aria-pressed={searchAllSlots}
+                      onClick={() => setSearchAllSlots((allSlots) => !allSlots)}
+                      title="Search all slots"
+                      aria-label="Search all slots"
+                    >
+                      <ToolbarIcon src={SEARCH_ICON} nativeWidth={20} glowing={searchAllSlots} />
+                    </OSRSSquareButton>
+                    <OSRSSquareButton
+                      width={TOOLBAR_BUTTON_SIZE}
+                      height={TOOLBAR_BUTTON_SIZE}
+                      scaleWithSize={false}
+                      onClick={handleClearAll}
+                      title="Clear all slots"
+                      aria-label="Clear all slots"
+                    >
+                      <ToolbarIcon src={CLEAR_EQUIPMENT_ICON} nativeWidth={28} />
+                    </OSRSSquareButton>
+                  </div>
+                )}
+              </div>
+            }
+          />
+          {!effectiveReadOnly && (
+            <OSRSSquareButton
+              width={TOOLBAR_BUTTON_SIZE}
+              height={TOOLBAR_BUTTON_SIZE}
+              scaleWithSize={false}
+              aria-pressed={inventoryMode}
+              onClick={togglePanelMode}
+              title="Inventory mode"
+              aria-label="Inventory mode"
+            >
+              <ToolbarIcon src={INVENTORY_ICON} nativeWidth={21} glowing={inventoryMode} />
+            </OSRSSquareButton>
+          )}
+        </div>
 
-        <OSRSPanel
-          assets={PANEL_ASSETS_STEEL}
-          borderType="steel"
-          type="bank"
-          width={280}
-          height={matchedPanelHeight}
-          header={<PixelText text="Bonuses" fontSize={24} color={colors.accentText} bold />}
-          headerDivider={CONNECTOR_ASSETS.horizontal}
-          content={
-            <div className="gear-picker-side-col">
-              <SplashSafetyIndicator totalMagicAttack={totals.magicAttack} />
-              <BonusSummaryPanel totals={totals} previewTotals={previewTotals} />
-              <GearLoadoutCost slots={slots} abbreviated={costAbbreviated} />
-            </div>
-          }
-        />
+        <div
+          ref={bonusesWrapRef}
+          className={'gear-picker-bonuses' + (inventoryMode ? ' gear-picker-bonuses--tucked' : '')}
+          style={{ '--tuck-offset-x': `${bonusesTuck.offsetX}px`, '--tuck-scale': bonusesTuck.scale } as CSSProperties}
+        >
+          <OSRSPanel
+            assets={PANEL_ASSETS_STEEL}
+            borderType="steel"
+            type="bank"
+            width={280}
+            height={matchedPanelHeight}
+            header={<PixelText text="Bonuses" fontSize={24} color={colors.accentText} bold />}
+            headerDivider={CONNECTOR_ASSETS.horizontal}
+            content={
+              <div className="gear-picker-side-col">
+                <SplashSafetyIndicator totalMagicAttack={totals.magicAttack} />
+                <BonusSummaryPanel totals={totals} previewTotals={previewTotals} />
+                <GearLoadoutCost slots={slots} abbreviated={costAbbreviated} />
+              </div>
+            }
+          />
+        </div>
       </div>
 
       {!effectiveReadOnly && (
@@ -548,6 +766,15 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
             <p className={`gear-picker-feedback gear-picker-feedback--${feedback.type}`}>{feedback.message}</p>
           )}
         </div>
+      )}
+
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          options={inventoryMode ? inventoryContextMenuOptions(contextMenu) : equipmentContextMenuOptions(contextMenu)}
+          onClose={closeContextMenu}
+        />
       )}
     </div>
   );

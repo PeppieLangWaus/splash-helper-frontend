@@ -59,6 +59,52 @@
     image-rendering: pixelated;
 }
 
+/* ---- InventoryGrid ---------------------------------------------------------------------- */
+
+/* The wrap reserves the equipment diamond's box plus `extraHeight` (margin); the grid is then
+   stretched over all of it. Columns/rows come inline from InventoryGrid.tsx; the tracks are 1fr
+   so the 28 slots divide the box equally. */
+.inventory-grid-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.inventory-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.inventory-slot {
+    position: relative;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+
+.inventory-slot:hover,
+.inventory-slot:focus-visible,
+.inventory-slot--selected {
+    background: rgba(0, 0, 0, 0.4);
+    outline: none;
+}
+
+.inventory-slot__icon {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    height: 85%;
+    width: auto;
+    max-width: 100%;
+    pointer-events: none;
+}
+
 /* ---- ItemPickerPanel -------------------------------------------------------------------- */
 
 .item-picker__hint {
@@ -288,3 +334,37 @@
     gap: 0.1rem;
 }
 
+
+/* ---- ContextMenu ------------------------------------------------------------------------ */
+
+.context-menu {
+    position: fixed;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    min-width: 8rem;
+    padding: 2px;
+    background: var(--panel);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.context-menu__option {
+    display: flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.context-menu__option:hover:not(:disabled),
+.context-menu__option:focus-visible {
+    background: var(--panel-hover);
+    outline: none;
+}
+
+.context-menu__option:disabled {
+    cursor: default;
+}

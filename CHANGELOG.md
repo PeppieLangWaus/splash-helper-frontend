@@ -10,6 +10,14 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-10-21
+### Added
+- Add an inventory mode to the gear picker: a button under the equipment panel switches it to a 4×7 grid of 28 invisible slots (shown on hover) that you fill with any item from the item picker; the inventory is kept in your local draft, and the Bonuses panel slides out of the way behind the middle panel while it's on.
+- Ctrl+click adds slots to the selection in both modes so one pick fills them all, clicking away from the slot grid and item picker deselects inventory slots, and the item picker's header shows how many slots are selected.
+- Add a right-click menu to the middle panel: Select, Clear, Clear all and Cancel for equipment, and Select/Unselect, Select all, Remove, Remove all and Cancel for the inventory.
+### Fixed
+- Stop the item picker equipping a shield while a two-handed weapon is equipped.
+
 ## [0.33.1] - 2026-10-21
 ### Changed
 - Shorten the fade at the bottom of the gear picker's item list and stop it running under the scrollbar.

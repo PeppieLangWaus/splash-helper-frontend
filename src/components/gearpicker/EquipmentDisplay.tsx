@@ -15,7 +15,7 @@ interface Props {
   itemsById: Map<number, EquipmentItem>;
   /** If provided, each slot becomes a clickable button (the interactive picker case); omit for
    *  a purely read-only display. */
-  onSlotClick?: (slot: EquipmentSlot) => void;
+  onSlotClick?: (slot: EquipmentSlot, additive: boolean) => void;
   /** Slots that can't be interacted with right now (e.g. shield while a two-handed weapon is
    *  equipped) — shown with the red tile + blocked badge, not clickable. */
   disabledSlots?: ReadonlySet<EquipmentSlot>;
@@ -51,7 +51,7 @@ export default function EquipmentDisplay({ slots, itemsById, onSlotClick, disabl
               slot={slot}
               item={item}
               blocked={blocked}
-              onClick={onSlotClick ? () => onSlotClick(slot) : undefined}
+              onClick={onSlotClick ? (event) => onSlotClick(slot, event.ctrlKey || event.metaKey) : undefined}
             />
           </div>
         );

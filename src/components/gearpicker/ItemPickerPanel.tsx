@@ -7,30 +7,35 @@ import PixelText from '../PixelText';
 import { SCROLLBAR_STEP_PX, useScrollbarThumb } from '../useScrollbarThumb';
 import { useVirtualWindow } from '../useVirtualWindow';
 import { colors } from '../../theme';
-import type { EquipmentItem, EquipmentSlot } from '../../types/gear';
 
 const ITEM_ROW_HEIGHT_PX = 40;
 const OVERSCAN_ROWS = 6;
 
-interface Props {
-  selectedSlot: EquipmentSlot | null;
-  /** Lists items for every slot rather than just `selectedSlot`; selecting one equips it in its own slot. */
-  searchAllSlots: boolean;
-  items: EquipmentItem[];
+export interface PickerItem {
+  id: number;
+  name: string;
+}
+
+interface Props<T extends PickerItem> {
+  /** False until the user has chosen something to pick an item for; `hintText` is shown instead of the list. */
+  hasTarget: boolean;
+  hintText: string;
+  removeLabel: string;
+  items: T[];
   /** When set, items found in it get 1 to 3 green "+" (positive level) or red "-" (negative level) signs after their name. */
   statChangeLevelById?: Map<number, number>;
   hasCurrentItem: boolean;
-  onSelect: (item: EquipmentItem) => void;
-  onHoverItem: (item: EquipmentItem | null) => void;
+  onSelect: (item: T) => void;
+  onHoverItem: (item: T | null) => void;
   query: string;
   onQueryChange: (query: string) => void;
   onClear: () => void;
 }
 
-/** The parent remounts this (via a `key` on selectedSlot or the all-slots mode) whenever either changes, so
+/** The parent remounts this (via a `key` on whatever it is picking for) whenever that changes, so
  *  the list scroll resets and the search input is re-focused, with its text selected, for each
  *  newly opened slot. The query itself lives in the parent so it survives that remount. */
-export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, statChangeLevelById, hasCurrentItem, onSelect, onHoverItem, query, onQueryChange, onClear }: Props) {
+export default function ItemPickerPanel<T extends PickerItem>({ hasTarget, hintText, removeLabel, items, statChangeLevelById, hasCurrentItem, onSelect, onHoverItem, query, onQueryChange, onClear }: Props<T>) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const {
@@ -110,10 +115,10 @@ export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, s
   // another slot, which would otherwise leave a stale preview showing.
   useEffect(() => () => onHoverItem(null), [onHoverItem]);
 
-  if (!selectedSlot && !searchAllSlots) {
+  if (!hasTarget) {
     return (
       <p className="item-picker__hint">
-        <PixelText text="Click an equipment slot to choose an item for it." fontSize={13.6} color={colors.textFaint} />
+        <PixelText text={hintText} fontSize={13.6} color={colors.textFaint} />
       </p>
     );
   }
@@ -189,8 +194,8 @@ export default function ItemPickerPanel({ selectedSlot, searchAllSlots, items, s
         <button
           type="button"
           className="item-search__remove-btn"
-          title="Remove equipped item"
-          aria-label="Remove equipped item"
+          title={removeLabel}
+          aria-label={removeLabel}
           disabled={!hasCurrentItem}
           onClick={onClear}
         >

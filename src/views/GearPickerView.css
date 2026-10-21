@@ -41,11 +41,43 @@
     justify-content: center;
 }
 
-.gear-picker-equipment-col {
+.gear-picker-middle-col {
+    /* Above the bonuses panel while that slides behind it. */
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.75rem;
+}
+
+/* In inventory mode the bonuses panel slides behind the middle panel, then is hidden once it gets
+   there. It stays in the layout (transform and visibility don't affect it), so the other two
+   panels don't recenter. The transition used is the destination state's: showing is immediate,
+   hiding waits out the slide. */
+.gear-picker-bonuses {
+    position: relative;
+    z-index: 0;
+    transition: transform 0.35s ease, visibility 0s;
+}
+
+.gear-picker-bonuses--tucked {
+    transform: translateX(var(--tuck-offset-x)) scale(var(--tuck-scale));
+    visibility: hidden;
+    transition: transform 0.35s ease, visibility 0s linear 0.35s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gear-picker-bonuses,
+    .gear-picker-bonuses--tucked {
+        transition: none;
+    }
+}
+
+.gear-picker-equipment-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .gear-picker-side-col {
