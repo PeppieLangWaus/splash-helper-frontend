@@ -92,11 +92,6 @@ interface Props {
   onSaveHistory: (value: string) => Promise<void>;
 }
 
-/**
- * A pair of independent webhook fields — one for the active-sessions embed, one for
- * archived-session history — each saved/cleared on its own. Reused for community-level,
- * per-member, and self-service webhook settings.
- */
 export default function WebhookFieldsEditor({ activeUrl, historyUrl, onSaveActive, onSaveHistory }: Props) {
   return (
     <div style={s.wrap}>

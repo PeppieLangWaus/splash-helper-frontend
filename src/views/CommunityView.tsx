@@ -400,22 +400,10 @@ function toChatConfigForm(config: CommunityChatConfig): ChatConfigForm {
   };
 }
 
-/**
- * Lets the owner register this community's Friends Chat (by its owner's RSN — see
- * splash-helper-backend's ChatChannelName for why an FC's in-game *name* isn't trusted or
- * settable here, since its owner can rename it at any time) and Clan Chat (still by name) — what
- * the live chatbox on the site matches incoming relay messages against, see splash-helper-
- * backend's services/chatRelay.ts — and, optionally, a Discord webhook to also post each to.
- * Below that, the two relay URLs to paste into the RuneLite Discord Chat Logger plugin's webhook
- * fields — the same URL works for both Friends Chat and Clan Chat.
- */
 function ChatConfigPanel({ communityId }: { communityId: string }) {
   const { token } = useAuth();
   const [form, setForm] = useState<ChatConfigForm | null>(null);
-  // The FC's current in-game name — read-only, kept in sync from live chat traffic by the
-  // backend once a message has actually been relayed (see chatRelay.ts's
-  // syncFriendsChatIdentity). Tracked separately from `form` since (unlike every other field
-  // here) the owner never sets this directly.
+
   const [liveFriendsChatName, setLiveFriendsChatName] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
@@ -655,9 +643,7 @@ function RanksPanel({ communityId, onRanksChanged }: { communityId: string; onRa
           <span style={s.fieldHint}>gp/hr</span>
           <Menu
             items={[
-              // Hidden for the already-default rank (nothing to promote it to); disabled
-              // for every other rank until the backend gains a way to change the default —
-              // see Notes/Splash Helper/Backend/Features/Rank set-default endpoint.md.
+
               ...(!rank.isDefault
                 ? [{
                   label: 'Set as default',
@@ -789,7 +775,7 @@ function CommunitySplashersPanel({ communityId }: { communityId: string }) {
       .then(setSplashers)
       .finally(() => setLoading(false));
     loadRanks();
-  }, [communityId, token]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [communityId, token]);
 
   function handleSaved(updated: CommunitySplasher) {
     setSplashers((prev) => prev.map((s2) => (s2._id === updated._id ? updated : s2)));
@@ -813,9 +799,6 @@ function CommunitySplashersPanel({ communityId }: { communityId: string }) {
   );
 }
 
-/** Shown to users without community-owner rights: joins them as a splasher for an
- *  existing community. Moved here from Account Settings so it lives alongside everything
- *  else community-related. */
 function ApplyToCommunityCard() {
   const { token } = useAuth();
   const [allCommunities, setAllCommunities] = useState<CommunitySummary[]>([]);
@@ -922,7 +905,7 @@ export default function CommunityView() {
     }
   }
 
-  useEffect(() => { void loadCommunities(); }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { void loadCommunities(); }, [token]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();

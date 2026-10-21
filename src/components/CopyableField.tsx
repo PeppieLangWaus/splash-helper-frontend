@@ -25,13 +25,10 @@ interface Props {
   label: string;
   value: string;
   hint?: string;
-  /** If provided, shows a "Regenerate" control (with a confirm step, since it invalidates
-   *  the old value) alongside the copy button. */
+
   onRegenerate?: () => Promise<void>;
 }
 
-/** A read-only, copyable secret field — used for the plugin token and community API tokens.
- *  Not a show-once secret: both values are re-displayed here on every visit. */
 export default function CopyableField({ label, value, hint, onRegenerate }: Props) {
   const [copied, setCopied] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -43,8 +40,7 @@ export default function CopyableField({ label, value, hint, onRegenerate }: Prop
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // Clipboard access can fail (permissions, insecure context) — the value is still
-      // selectable in the input, so this isn't fatal.
+
     }
   }
 

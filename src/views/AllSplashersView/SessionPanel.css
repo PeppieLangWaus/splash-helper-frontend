@@ -116,7 +116,7 @@
 .session-panel-tile-wide
 > .session-panel-tile-content
 > .session-panel-tile-value {
-    /* padding-top: .2em; */
+    
     margin-bottom: .15em;
 }
 
@@ -194,21 +194,7 @@
     justify-content: center;
 }
 
-/* Ratio bar, pixel-matched against a per-pixel SVG reference (bar.svg, 146x13, one <rect>
-   per pixel): a sunken groove (border -> highlight -> shadow) around a slightly embossed
-   fill. Every ring is genuinely directional in the source - top/bottom differ from each
-   other, left/right are close but not identical - so each ring is built from four per-side
-   border colors rather than one flat tone. Nested rings (not the bitmap itself) so the fill
-   stays a resizable live like/dislike split.
 
-   Resize the whole thing by editing these three variables on .session-panel-vote-ratio-outer
-   - everything else (including the outer's total width/height) derives from them via the box
-   model, no other edits needed:
-     --vote-bar-width       overall bar width (any CSS length, e.g. 100%, 300px)
-     --vote-bar-fill-height height of just the fill strip, excluding the frame
-     --vote-bar-pixel       thickness of one "source pixel" (border/highlight/shadow/fill-edge
-                             rings). Source is 1px per ring at native size; bump this to scale
-                             the whole frame up like a nearest-neighbor pixel-art zoom. */
 .session-panel-vote-ratio-outer {
     --vote-bar-width: 100%;
     --vote-bar-fill-height: .5em;
@@ -317,10 +303,10 @@
 
 .like-btn img {
     position: relative;
-    /* top: -.4em; */
+    
 }
 
 .dislike-btn img {
     position: relative;
-    /* top: .4em; */
+    
 }

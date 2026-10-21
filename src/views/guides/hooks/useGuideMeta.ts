@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 
 type GuideMetaOptions = {
-  /** Document title, also used for og:title / twitter:title. */
+
   title: string;
-  /** Meta description, also used for og:description / twitter:description. */
+
   description: string;
-  /** Path only, e.g. '/guides/sticky-knight-setup' — combined with the site origin for canonical/og:url. */
+
   path: string;
 };
 
@@ -43,17 +43,6 @@ function upsertCanonical(href: string): () => void {
   };
 }
 
-/**
- * Sets document title + meta description + canonical + OG/Twitter tags for a standalone
- * content page, restoring whatever was there before on unmount.
- *
- * This is a client-side patch only — index.html ships one hardcoded set of tags (the
- * homepage's), and there's no SSR/prerendering in this app. It fixes what a JS-executing
- * crawler (Googlebot) and in-app navigation see; it does NOT fix raw-HTML scrapers or most
- * link-preview/social-share bots, which read index.html directly and will still show the
- * homepage's title/description for every guide URL. See the SEO notes for options here
- * (prerendering per route is the real fix).
- */
 export function useGuideMeta({ title, description, path }: GuideMetaOptions) {
   useEffect(() => {
     const prevTitle = document.title;

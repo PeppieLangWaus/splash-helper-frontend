@@ -1,5 +1,4 @@
-/* OSRS-style chatbox built from public/assets/chatbox. Every background image below is used
-   at its native pixel size and tiled (never stretched) so it keeps its original aspect ratio. */
+
 
 .chatbox {
   width: 519px;
@@ -7,9 +6,7 @@
   user-select: none;
 }
 
-/* Briefly pulses the whole chatbox yellow/orange to draw attention to a just-posted reminder
-   (e.g. the missing/unverified-email nudge — see useEmailReminder + Chatbox.tsx). Purely
-   decorative, cleared automatically ~1.5s after it starts. */
+
 @keyframes chatbox-alert-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
   25%, 75% { box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.55); }
@@ -34,7 +31,7 @@
   color: var(--warning-text);
 }
 
-/* ---- Chat window -------------------------------------------------------------------- */
+
 
 .chat-window {
   position: relative;
@@ -50,7 +47,7 @@
 }
 
 .chat-window-body {
-  position: relative; /* anchors the drop-shadow overlay below */
+  position: relative; 
   flex: 1 1 auto;
   min-height: 0;
   box-sizing: border-box;
@@ -60,12 +57,7 @@
   margin-bottom: 0px;
 }
 
-/* background/main.png has a soft inner shadow hugging its top/left edge (the frame's light
-   source reads as coming from the bottom-right). This overlay recreates that same shadow on top
-   of the log/scrollbar content (see the `z-index`, and that it's declared after — i.e. painted
-   over — its siblings) so icons/text visually run underneath it near the top-left corner,
-   instead of the shadow looking like it stops at the log's edge. Purely decorative — never
-   intercepts clicks/scroll. */
+
 .chat-window-body::after {
   content: '';
   position: absolute;
@@ -88,7 +80,7 @@
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: none; /* Firefox: hide native scrollbar, we render our own from sprites */
+  scrollbar-width: none; 
 }
 
 .chat-log-viewport::-webkit-scrollbar {
@@ -114,31 +106,24 @@
 
 .chat-line {
   display: flex;
-  /* Aligns the header's text baseline with the body's, so the message's first line sits level
-     with the timestamp/prefix/username exactly as it did before the header/body split below. */
+  
   align-items: baseline;
   flex-wrap: nowrap;
   font-family: 'RuneScape', sans-serif;
   font-weight: 400;
   font-size: 16px;
-  /* Was 0px, which collapsed each line's box down to just its 2px padding while the actual
-     16px-tall glyphs still rendered at full height — every line after the first spilled up
-     into the one above it. Matching line-height to font-size gives each line room for its own
-     glyphs, leaving the same tight ~2px gap between rows the 0px value was presumably going for. */
+  
   line-height: 15px;
   padding: 0 1px 0 1px;
 }
 
-/* Timestamp/icons/prefix/username, as one non-wrapping unit — see .chat-line-body below for why
-   the line is split into these two flex items. */
+
 .chat-line-header {
   flex: 0 0 auto;
   white-space: nowrap;
 }
 
-/* The actual message text. As a flex item, its own box starts right after the header and spans
-   the rest of the line's width — so when its content wraps, the wrapped line begins at the
-   body's own left edge (i.e. where the message started), not back at the far left of the log. */
+
 .chat-line-body {
   flex: 1 1 auto;
   min-width: 0;
@@ -156,8 +141,7 @@
   padding-right: 1px;
 }
 
-/* Base/fallback message-body color — still used by Trade, which has no color of its own. Every
-   other kind that reaches this fallback path (fc/cc/private) overrides it below. */
+
 .chat-line-message {
   color: #7a1f1f;
 }
@@ -174,10 +158,7 @@
   color: #2c2c2c;
 }
 
-/* RuneLite's own chat commands (`!pb`, `!log`, etc.) mark up their reply text with
-   `<colHIGHLIGHT>`/`<colNORMAL>` tags rather than real colors — see chatColorTags.ts. HIGHLIGHT is
-   always plain black; NORMAL reuses whichever .chat-line-message--fc/--cc color the line already
-   renders in, since that's the color clan/friends chat text normally uses. */
+
 .chat-line-message--tag-black {
   color: #000000;
 }
@@ -186,9 +167,7 @@
   font-weight: 400;
 }
 
-/* Fixed prefix format for every `[...]` tag (info/System/Worlds/fc/cc) — black brackets around
-   a blue label, so the brackets read as structural punctuation (matching the black
-   timestamp/username) while the label itself keeps the tag's own accent color. */
+
 .chat-line-prefix-bracket {
   color: #000000;
 }
@@ -197,7 +176,7 @@
   color: #0000FF;
 }
 
-/* ---- Empty-state feature tips (point 9) ----------------------------------------------- */
+
 
 .chat-log-empty {
   display: flex;
@@ -211,7 +190,7 @@
   font-style: italic;
 }
 
-/* ---- Input row (the `::command` console — see Chatbox.tsx's ChatInputRow) ------------ */
+
 
 .chat-input-row {
   flex: 0 0 auto;
@@ -243,13 +222,11 @@
   font-weight: 400;
   font-size: 16px;
   color: #0000FF;
-  /* The real text caret is a thin blinking "|" that doesn't match the box's pixel-art look —
-     hidden in favor of the static "*" marker next to the field (.chat-input-cursor). */
+  
   caret-color: transparent;
 }
 
-/* Static cursor marker — deliberately not animated (see .chat-input-field's caret-color above
-   for why this replaces the native caret instead of just sitting alongside it). */
+
 .chat-input-cursor {
   font-family: 'RuneScape', sans-serif;
   font-weight: 400;
@@ -260,55 +237,47 @@
 .chat-icon {
   width: 13px;
   height: 13px;
-  /* `text-bottom` anchored to the font's full descent line, which sits ~2-3px below where the
-     text actually visually centers for this font (most glyphs here have no descenders) — icons
-     read as hanging low. `baseline` (the default) puts icons much closer to the glyphs' own
-     vertical center instead. */
+  
   vertical-align: baseline;
   margin: 0 2px 0 0;
   image-rendering: auto;
 }
 
-/* Only rank icons get the outline — mod/ironman icons stay as-is. */
+
 .chat-icon-rank {
   --top-offset: -.01em;
   --right-offset: .01em;
   --bottom-offset: .1em;
   --left-offset: -.01em;
-  /* -webkit-filter: drop-shadow(2px 1px 0 black)
-                  drop-shadow(-1px -1px 0 black); */
+  
   filter: drop-shadow(0 var(--top-offset) 0 black)
           drop-shadow(var(--right-offset) 0 0 black)
           drop-shadow(0 var(--bottom-offset) 0 black)
           drop-shadow(var(--left-offset) 0 0 black);
 }
 
-/* One <icon> x<amount> pair from a resolved !log/!pets line (ChatLog.tsx's MessageBody) — kept
-   as an inline-flex unit so the icon and its label never wrap apart from each other. */
+
 .chat-item {
   display: inline-flex;
   align-items: center;
-  /* vertical-align: middle; */
+  
   margin: 0 3px 0 1px;
 }
 
-/* Real item icons (routes/items.ts, 36x32 source) are much larger/more detailed than the 13x13
-   status icons .chat-icon is sized for — kept a bit bigger and width-driven (auto height) so
-   they don't get squished to a 13x13 square. */
+
 .chat-item-icon {
   width: 18px;
   height: auto;
   margin: 0 1px 0 0;
 }
 
-/* Matches whatever color the surrounding message text is already rendered in — this is a plain
-   continuation of that text (` x<amount>`), not its own accent color. */
+
 .chat-item-quantity {
   font-size: 13px;
   color: inherit;
 }
 
-/* ---- Controls (chatbox/background/controls.png + buttons) ---------------------------- */
+
 
 .chat-controls {
   height: 23px;
@@ -316,8 +285,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* gap: 2px;
-  padding: 0 4px; */
+  
   background-image: url(/assets/chatbox/background/controls.png);
   background-repeat: repeat-x;
   background-size: 519px 23px;
@@ -325,7 +293,7 @@
 }
 
 .chat-tab-btn {
-  position: relative; /* anchors the right-click ChatChannelMenu popup (see ChatControls) */
+  position: relative; 
   flex: 0 0 56px;
   width: 56px;
   height: 22px;
@@ -333,12 +301,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* flex-start (not center) + a fixed top pad, so the label sits at the same height on every
-     tab whether or not it has a status line below it — "All" has no status line, and with
-     `center` it would otherwise drop to the middle of the button instead of lining up. */
+  
   justify-content: flex-start;
   padding-top: 1px;
-  gap: 1px; /* 1px vertical gap between the label and its On/Filtered status line */
+  gap: 1px; 
   border: none;
   cursor: pointer;
   background-repeat: no-repeat;
@@ -361,18 +327,13 @@
   background-image: url(/assets/chatbox/buttons/normal/selected_hover.png);
 }
 
-/* "All" has no status line beneath it, so it centers vertically instead of sitting at the
-   fixed top offset the other (two-line) tabs use. */
+
 .chat-tab-btn.chat-tab-btn--no-status {
   justify-content: center;
   padding-top: 0;
 }
 
-/* Label/status text is now rendered onto a <canvas> by PixelText (see PixelText.tsx) instead
-   of as DOM text — font-family/size/color/shadow all live there now, since drawing to canvas
-   and hard-thresholding the alpha channel is what actually gets rid of the anti-aliasing blur
-   that no combination of CSS font-size/weight/text-shadow could fix. These wrappers just
-   handle layout. */
+
 .chat-tab-label {
   display: flex;
 }
@@ -390,7 +351,7 @@
   flex: 0 0 79px;
   width: 79px;
   height: 22px;
-  /* margin-left: auto; */
+  
   box-sizing: border-box;
   display: flex;
   align-items: center;

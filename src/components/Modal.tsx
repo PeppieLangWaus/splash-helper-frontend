@@ -30,7 +30,6 @@ interface Props {
   children: ReactNode;
 }
 
-/** A simple centered overlay dialog. Closes on backdrop click or Escape. */
 export default function Modal({ title, onClose, children }: Props) {
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {

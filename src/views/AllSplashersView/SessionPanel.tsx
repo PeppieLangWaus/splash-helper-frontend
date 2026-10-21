@@ -112,10 +112,6 @@ function StatTile({
   );
 }
 
-/** Anonymous like/dislike buttons for a splasher. Voter identity is tracked server-side (e.g.
- *  by IP), so clicking a button always just sends that value — the backend decides whether it's
- *  a new vote, a retraction (clicking the same value again), or a switch (clicking the other
- *  value), and returns the up-to-date tally + the caller's resulting vote. */
 function VoteButtons({ username }: { username: string }) {
   const [votes, setVotes] = useState<SplasherVotes | null>(null);
   const [pending, setPending] = useState(false);
@@ -124,7 +120,7 @@ function VoteButtons({ username }: { username: string }) {
     let cancelled = false;
     getSplasherVotes(username)
       .then((v) => { if (!cancelled) setVotes(v); })
-      .catch(() => { /* vote counts are non-critical; leave buttons in their default state */ });
+      .catch(() => {  });
     return () => { cancelled = true; };
   }, [username]);
 
@@ -133,24 +129,18 @@ function VoteButtons({ username }: { username: string }) {
     setPending(true);
     voteSplasher(username, value)
       .then(setVotes)
-      .catch(() => { /* leave prior tally on failure, e.g. rate-limited */ })
+      .catch(() => {  })
       .finally(() => setPending(false));
   }, [username, pending]);
 
   const liked = votes?.myVote === 1;
   const disliked = votes?.myVote === -1;
 
-  // No votes yet reads as a full green bar (nothing dragging it down), same as a splasher
-  // with only likes.
   const likes = votes?.likes ?? 0;
   const dislikes = votes?.dislikes ?? 0;
   const totalVotes = likes + dislikes;
   const likePct = totalVotes === 0 ? 100 : (likes / totalVotes) * 100;
 
-  // Like always renders left, dislike always renders right, so each one only picks up the
-  // outward-facing edge highlight (matching the reference asset) when it's the sole visible
-  // segment on that side — the boundary between two nonzero segments has no reference pixels
-  // to match, so it's left plain rather than guessed.
   const likeIsRightmost = dislikes === 0;
   const dislikeIsLeftmost = likes === 0;
 
@@ -215,8 +205,6 @@ interface Props {
   onSelectUser?: (username: string) => void;
 }
 
-/** A single splasher's card: username, optional community links, their live stat tiles, and
- *  the anonymous like/dislike bar — everything AllSplashersView's grid repeats per session. */
 export default function SessionPanel({ session, onSelectUser }: Props) {
   const d = session.sessionData;
   const location = worldsData.find((w) => w.world === d?.world)?.location;

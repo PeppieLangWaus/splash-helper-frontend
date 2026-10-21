@@ -4,12 +4,6 @@ import { useAuth } from '../../../context/AuthContext';
 import { getArchivedSessions } from '../../../api';
 import { logSystemEvent } from '../../../utils/systemLog';
 
-/** Checks once per mount whether the logged-in user has a verified email on file, and if not,
- *  posts a one-shot reminder into the Private tab (see logSystemEvent) — either "add an email"
- *  or "verify the one you added", depending on state. Returns the message that fired (once, the
- *  first time it fires this mount) so Chatbox can react to it — switch to Private, spotlight it,
- *  flash the window (see Chatbox.tsx). A no-op while logged out, already verified, or if the
- *  check itself fails (a failed fetch just skips the reminder for this visit). */
 export function useEmailReminder(): ChatMessage | null {
   const { user, token } = useAuth();
   const [reminder, setReminder] = useState<ChatMessage | null>(null);
@@ -29,7 +23,7 @@ export function useEmailReminder(): ChatMessage | null {
         setReminder(logSystemEvent(text));
       })
       .catch(() => {
-        // Transient fetch failure — just skip the reminder for this visit.
+
       });
 
     return () => {

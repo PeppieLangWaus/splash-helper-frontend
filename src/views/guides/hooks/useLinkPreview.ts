@@ -7,24 +7,15 @@ export type LinkPreviewStatus = 'idle' | 'loading' | 'ready' | 'error';
 export interface LinkPreviewState {
   status: LinkPreviewStatus;
   result?: LinkPreviewResult;
-  /** Wire to the anchor's onMouseEnter/onFocus — debounced, so a quick mouse pass-through never
-   *  triggers a request. Cheap to call repeatedly; it no-ops once already loading/loaded. */
+
   request: () => void;
-  /** Wire to the anchor's onMouseLeave/onBlur — cancels a debounce that hasn't fired yet. Does
-   *  nothing once a request is already in flight or resolved (no point aborting a fetch that's
-   *  this close to done, and the result gets cached for next time regardless). */
+
   cancel: () => void;
 }
 
-// Shared across every <LinkPreview> instance on the page, so hovering the same link twice — even
-// from two different components — only ever fetches once per page load. The backend already
-// caches per-TTL (splash-helper-backend's LinkPreviewCache), this just saves the round trip
-// entirely for a link already resolved this session.
 const cache = new Map<string, LinkPreviewResult>();
 const inFlight = new Map<string, Promise<LinkPreviewResult>>();
 
-// Roughly matches "hover to actually read it" intent rather than a cursor merely passing over the
-// link on its way somewhere else.
 const DEBOUNCE_MS = 200;
 
 async function resolve(url: string): Promise<LinkPreviewResult> {
@@ -44,18 +35,12 @@ async function resolve(url: string): Promise<LinkPreviewResult> {
   return result;
 }
 
-/** Lazily resolves a URL to Discord-style preview data. Nothing is fetched until `request()`
- *  fires — see LinkPreview.tsx for the anchor + tooltip this backs. */
 export function useLinkPreview(url: string): LinkPreviewState {
   const [status, setStatus] = useState<LinkPreviewStatus>(() => (cache.has(url) ? 'ready' : 'idle'));
   const [result, setResult] = useState<LinkPreviewResult | undefined>(() => cache.get(url));
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestedRef = useRef(false);
 
-  // Cleanup only — this hook assumes `url` stays fixed for its instance's lifetime, which holds
-  // for every current caller (a <LinkPreview href> is always a static literal). If a future caller
-  // ever needs to swap the href on a live instance, mount a fresh one instead via `key={href}`
-  // rather than teaching this hook to reset itself mid-life.
   useEffect(() => () => {
     if (timerRef.current) clearTimeout(timerRef.current);
   }, []);
@@ -74,8 +59,7 @@ export function useLinkPreview(url: string): LinkPreviewState {
       setStatus('ready');
       return;
     }
-    // A fetch is already scheduled or in flight for this instance — let it run rather than
-    // stacking another timer/request on top.
+
     if (requestedRef.current || timerRef.current) return;
 
     timerRef.current = setTimeout(() => {

@@ -25,15 +25,6 @@ export const RANK_ICONS: Record<ChatRank, string> = {
   smiley: '/assets/chatbox/icons/rank/smiley.png',
 };
 
-/** Every OSRS Clan rank title with a dedicated icon (public/assets/chatbox/icons/clan) — the 4
- *  fixed non-Guest sentinel ranks (Jmod/Owner/Deputy Owner/Administrator) plus the 264
- *  clan-customisable titles, per
- *  https://oldschool.runescape.wiki/w/Clan_Settings#Rank_Titles. Keyed lowercase; look up via
- *  getClanTitleIcon rather than indexing this directly. Two notes on the source dump this was
- *  built from: Guest has no icon in it (the in-game Guest icon is a different size than every
- *  other rank icon and wasn't captured), and `oak` / `lumberjack` share pixel-identical artwork
- *  upstream, so which of the pair got which filename was an arbitrary tie-break — swap them if
- *  that turns out backwards. */
 export const CLAN_TITLE_ICONS: Record<string, string> = {
   'achiever': '/assets/chatbox/icons/clan/achiever.png',
   'adamant': '/assets/chatbox/icons/clan/adamant.png',
@@ -306,16 +297,6 @@ export const CLAN_TITLE_ICONS: Record<string, string> = {
   'zenyte': '/assets/chatbox/icons/clan/zenyte.png',
 };
 
-// ── Numeric rank attribute → icon ──────────────────────────────────────────────
-//
-// The relay's chat events carry a Friends/Clan Chat rank as the raw numeric value RuneLite
-// assigns it (see FriendsChatRank / ClanRank in the RuneLite API), not a ChatRank string. These
-// tables translate that number to an icon path for each channel type.
-
-/** RuneLite's `FriendsChatRank` (runelite-api/.../FriendsChatRank.java), by numeric value:
- *  -1 UNRANKED, 0 FRIEND, 1 RECRUIT, 2 CORPORAL, 3 SERGEANT, 4 LIEUTENANT, 5 CAPTAIN,
- *  6 GENERAL, 7 OWNER, 127 JMOD. UNRANKED has no icon — same as an unset `rank`. JMOD has no
- *  dedicated Friends Chat rank icon, so it reuses the existing Jmod crown from MOD_STATUS_ICONS. */
 export const FC_RANK_ICONS: Record<number, string> = {
   0: RANK_ICONS.smiley,
   1: RANK_ICONS.recruit,
@@ -328,12 +309,6 @@ export const FC_RANK_ICONS: Record<number, string> = {
   127: MOD_STATUS_ICONS.jmod,
 };
 
-/** RuneLite's `ClanRank` (runelite-api/.../clan/ClanRank.java) only fixes 5 sentinel ranks by
- *  number: -1 GUEST, 100 ADMINISTRATOR, 125 DEPUTY_OWNER, 126 OWNER, 127 JMOD. The other ~94 clan
- *  ranks (1-99) are per-clan configurable titles — the relay only sends the numeric value, not
- *  the title text a clan actually assigned it, so those can't be resolved to one of the
- *  CLAN_TITLE_ICONS below yet and render no icon. GUEST has no icon in the dump either (see
- *  CLAN_TITLE_ICONS' doc comment), so of the 5 sentinels only the remaining four are mapped. */
 export const CC_RANK_ICONS: Record<number, string> = {
   100: CLAN_TITLE_ICONS.administrator,
   125: CLAN_TITLE_ICONS['deputy owner'],
@@ -341,31 +316,14 @@ export const CC_RANK_ICONS: Record<number, string> = {
   127: CLAN_TITLE_ICONS.jmod,
 };
 
-/** Resolves a channel's raw numeric rank attribute to an icon path, or undefined if that value
- *  has no mapped icon (see FC_RANK_ICONS / CC_RANK_ICONS for why). */
 export function getRankIcon(channelType: LiveChatChannelType, rank: number): string | undefined {
   return channelType === 'fc' ? FC_RANK_ICONS[rank] : CC_RANK_ICONS[rank];
 }
 
-/** Looks up a Clan rank's icon by its title text (case-insensitive) — e.g. `getClanTitleIcon('Deputy
- *  Owner')`. Use this once an actual title string is available for a rank, rather than just the
- *  numeric value CC_RANK_ICONS keys off of. Returns undefined for titles with no icon (e.g. a
- *  clan hasn't actually got 264 titles memorized — this covers every title OSRS offers). */
 export function getClanTitleIcon(title: string): string | undefined {
   return CLAN_TITLE_ICONS[title.trim().toLowerCase()];
 }
 
-// ── Name-embedded status icons (mod/ironman) ────────────────────────────────────────────
-//
-// The game itself (not the relay) embeds a sender's mod/ironman status directly into the chat
-// name as one or more leading `<img=N>` tags — e.g. `<img=2>SomeUsername` for a regular Ironman,
-// `<img=41>AnotherUsername` for a Group Ironman. `N` is Jagex's fixed `IconID` enum value (see
-// RuneLite's runelite-api/.../IconID.java, the canonical list of every icon index the game uses
-// in chat): PLAYER_MODERATOR=0, JAGEX_MODERATOR=1, IRONMAN=2, ULTIMATE_IRONMAN=3,
-// HARDCORE_IRONMAN=10, GROUP_IRONMAN=41, HARDCORE_GROUP_IRONMAN=42, UNRANKED_GROUP_IRONMAN=43
-// (the other indices in that enum are DMM/bounty-hunter/league icons OSRS's live FC/CC chat never
-// sends, so they're not mapped here). A name carries at most one of each kind — Jagex doesn't
-// stack e.g. a mod crown and an ironman helm — but nothing stops parsing both if it ever did.
 const ICON_ID_MOD_STATUS: Record<number, ModStatus> = {
   0: 'pmod',
   1: 'jmod',
@@ -383,15 +341,12 @@ const ICON_ID_IRONMAN_STATUS: Record<number, IronmanStatus> = {
 const LEADING_ICON_TAG = /^<img=(\d+)>/;
 
 export interface ParsedPlayerName {
-  /** The name with every leading `<img=N>` tag stripped off. */
+
   username: string;
   modStatus?: ModStatus;
   ironmanStatus?: IronmanStatus;
 }
 
-/** Strips the leading `<img=N>` icon tag(s) the game embeds in a chat sender's name and resolves
- *  each one to a mod/ironman status via IconID above. Unrecognized indices (icons OSRS's live
- *  chat doesn't send, e.g. DMM skulls) are stripped but otherwise ignored. */
 export function parsePlayerName(rawName: string): ParsedPlayerName {
   let username = rawName;
   let modStatus: ModStatus | undefined;

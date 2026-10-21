@@ -27,8 +27,7 @@ const s = {
     color: active ? colors.accentText : colors.textFaint,
   }),
   table: { width: '100%', borderCollapse: 'collapse' as const, background: colors.panel, borderRadius: 8, overflow: 'hidden', border: `1px solid ${colors.border}`, fontSize: '0.875rem' },
-  // Same as `table` but without its own rounded corners — used when the table is already
-  // nested inside a container (e.g. `userGroup`) that handles the rounding/clipping itself.
+
   tableFlat: { width: '100%', borderCollapse: 'collapse' as const, background: colors.panel, borderTop: `1px solid ${colors.border}`, fontSize: '0.875rem' },
   th: { background: colors.panelAlt, padding: '0.6rem 0.85rem', textAlign: 'left' as const, fontSize: '0.75rem', fontWeight: 700, color: colors.textMuted, borderBottom: `1px solid ${colors.border}`, textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const },
   td: { padding: '0.6rem 0.85rem', color: colors.textMuted, borderBottom: `1px solid ${colors.border}`, verticalAlign: 'middle' as const },
@@ -228,12 +227,7 @@ function CommunityCard({
     }
   }
 
-  // loadMembers only calls setSplashers after an `await`, so it's a genuine async fetch-on-
-  // dependency-change effect (React's own recommended pattern for this without a data-fetching
-  // library), not the synchronous "derive state from props" case set-state-in-effect actually
-  // targets — the rule can't see across the await to tell the difference.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { void loadMembers(); }, [community._id, token]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { void loadMembers(); }, [community._id, token]);
 
   async function handleAssign() {
     if (!token || !newUsername.trim()) return;
@@ -351,7 +345,6 @@ export default function AdminView({ onSelectUser }: Props) {
     void loadUsers();
     void loadSessions();
     void loadCommunities();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   function handlePromote(username: string) {
@@ -527,7 +520,7 @@ export default function AdminView({ onSelectUser }: Props) {
         <div style={feedback.type === 'error' ? s.errorBox : s.successBox}>{feedback.message}</div>
       )}
 
-      {/* Tab bar */}
+      {}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
         <button style={tabStyle(activeTab === 'users')} onClick={() => setActiveTab('users')} type="button">
           Users ({users.length})
@@ -540,7 +533,7 @@ export default function AdminView({ onSelectUser }: Props) {
         </button>
       </div>
 
-      {/* Users tab */}
+      {}
       {activeTab === 'users' && (
         <>
           {users.length === 0 ? (
@@ -610,7 +603,7 @@ export default function AdminView({ onSelectUser }: Props) {
         </>
       )}
 
-      {/* Sessions tab */}
+      {}
       {activeTab === 'sessions' && (
         <>
           {sessions.length === 0 ? (
@@ -703,7 +696,7 @@ export default function AdminView({ onSelectUser }: Props) {
         </>
       )}
 
-      {/* Communities tab */}
+      {}
       {activeTab === 'communities' && (
         <>
           {communities.length === 0 ? (

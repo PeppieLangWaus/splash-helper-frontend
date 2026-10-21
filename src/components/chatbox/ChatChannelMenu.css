@@ -3,8 +3,7 @@
   z-index: 20;
   min-width: 220px;
   max-width: min(320px, calc(100vw - 16px));
-  /* Safety net for the rare case a menu is taller than the viewport even after flipping —
-     it scrolls internally instead of running off-screen either way. */
+  
   max-height: min(320px, calc(100vh - 16px));
   overflow-y: auto;
   background: var(--panel);
@@ -16,13 +15,11 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  /* Buttons above it are pixel-art at their own scale; the menu's text should read normally. */
+  
   text-align: left;
 }
 
-/* Placement — see ChatChannelMenu.tsx's post-render viewport measurement. Defaults to
-   down/left (dropping below and flush with the left edge of the tab button); flips to
-   up/right when that would run off the bottom/right edge of the viewport. */
+
 .chat-channel-menu--down {
   top: 100%;
   bottom: auto;

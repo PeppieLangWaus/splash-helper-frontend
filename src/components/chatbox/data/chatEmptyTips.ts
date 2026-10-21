@@ -1,6 +1,3 @@
-/** Shown (a few at random) in place of the chat log whenever the currently-filtered view has no
- *  messages yet — see ChatLog.tsx. Purely decorative: never persisted, never counted toward any
- *  feed's message limit. Kept under 200 characters each to match OSRS's own chat message cap. */
 const chatEmptyTips: string[] = [
   'Nothing here yet. Try All to see every feed at once, or pick another tab.',
   'Right-click Channel or Clan to watch a community\'s live Friends Chat or Clan Chat.',

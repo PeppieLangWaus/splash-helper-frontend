@@ -6,7 +6,6 @@ export interface ReportReason {
   severity: ReportSeverity;
 }
 
-/** Options shown in the "Report player" modal's reason list. */
 const reportReasons: ReportReason[] = [
   {
     name: 'Offensive language',

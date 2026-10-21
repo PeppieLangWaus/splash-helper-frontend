@@ -5,7 +5,7 @@ import PixelText from '../PixelText';
 import { colors } from '../../theme';
 
 const CURSOR_OFFSET = 14;
-/** Rough width reserved for the tooltip when deciding whether it fits right of the cursor. */
+
 const FLIP_MARGIN = 220;
 
 interface HoverTooltip {
@@ -17,12 +17,6 @@ interface HoverTooltip {
   tooltip: ReactNode;
 }
 
-/**
- * A tooltip that follows the cursor while it's over the element `hoverProps` is spread onto — used
- * for read-only slots, where the native `title` tooltip is slow to appear and unstyled. Renders
- * nothing when `text` is empty, so empty slots can share the same code path. The tooltip is
- * portaled to the body so a panel's overflow or stacking never clips it.
- */
 export function useHoverTooltip(text: string | undefined): HoverTooltip {
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 

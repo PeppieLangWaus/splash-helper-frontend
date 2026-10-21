@@ -9,7 +9,6 @@ import {
   subscribeToStoredMessages,
 } from '../../../utils/chatStorage';
 
-/** How often the Game tab gets a new info tip — "by default every 10 minutes" (point 1). */
 export const INFO_MESSAGE_INTERVAL_MS = 10 * 60 * 1000;
 
 let seq = 0;
@@ -35,8 +34,6 @@ function buildMessage(text: string): ChatMessage {
   };
 }
 
-/** Owns the Game tab's periodic info tips: loads whatever's already stored, then appends a new
- *  random one (never repeating the last one shown) every INFO_MESSAGE_INTERVAL_MS. */
 export function useInfoMessages(intervalMs: number = INFO_MESSAGE_INTERVAL_MS) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadStoredMessages(INFO_KEY));
   const lastTextRef = useRef<string | null>(messages.length ? messages[messages.length - 1].message : null);

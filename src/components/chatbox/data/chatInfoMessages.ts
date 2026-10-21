@@ -1,6 +1,3 @@
-/** Pool the Game tab's periodic info messages are drawn from (see useInfoMessages.ts) —
- *  one is shown roughly every 10 minutes, never repeating the one shown right before it. Kept
- *  under 200 characters each to match OSRS's own chat message length cap. */
 const chatInfoMessages: string[] = [
   'Click a tab along the bottom to filter the chat log down to just that source.',
   "The All tab shows everything whose status line is set to On - toggle a tab's status to leave it out.",

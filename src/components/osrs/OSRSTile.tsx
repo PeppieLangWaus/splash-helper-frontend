@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import './OSRSTile.css';
 
-/** A 9-slice tile asset bundle: 4 corners + 4 repeating borders + 1 tiled background. */
 export interface RSTileAssets {
   cornerWidth: number;
   cornerHeight: number;
@@ -22,12 +21,11 @@ export type OSRSTileSize = 'square' | 'normal' | 'wide';
 export type OSRSTileContentType = 'equipment' | 'text';
 
 const SIZE_PRESETS: Record<OSRSTileSize, { width: number; height: number }> = {
-  // Matches EquipmentDisplay's current slot size.
+
   square: { width: 36, height: 36 },
-  // Matches an item icon's own native render size (splash-helper-backend's
-  // render-item-icons.ts renders every icon at 36x32).
+
   normal: { width: 36, height: 32 },
-  // Roughly two square tiles' width, e.g. for a paired stat row.
+
   wide: { width: 78, height: 36 },
 };
 
@@ -42,33 +40,17 @@ interface Props {
   type: OSRSTileType;
   width?: string | number;
   height?: string | number;
-  /** Reference size the chrome assets were designed at — used to scale border-thickness and
-   *  corner size proportionally to whatever `width`/`height` actually render at (see `cssVars`
-   *  below), and as the literal default size when `width`/`height` are omitted. Always pass this
-   *  when giving a responsive `width`/`height` (e.g. a percentage) so the chrome scales along with
-   *  it instead of staying pinned to the assets' native pixel size. Defaults to "normal". */
+
   sizeType?: OSRSTileSize;
-  /** "equipment" centers `content` (typically an item icon) over the tile background;
-   *  "text" renders it in a padded content area instead. */
+
   contentType: OSRSTileContentType;
 }
 
-/**
- * A reusable OSRS-chrome tile — the generic replacement for the gear-picker-only SlotTile, so it
- * can front other tile-shaped OSRS UI later too (e.g. AllSplashersView's per-stat Tile.tsx,
- * currently its own bespoke implementation against public/assets/icons/components/tile/).
- *
- * `type="black"` has no asset set yet (see gearpickerAssets.ts) — pass whatever placeholder
- * `assets` you want until real black-tile art is supplied.
- */
 export default function OSRSTile({ assets, content, type, width, height, sizeType, contentType }: Props) {
   const preset = SIZE_PRESETS[sizeType ?? 'normal'];
   const cssWidth = toCssSize(width) ?? `${preset.width}px`;
   const cssHeight = toCssSize(height) ?? `${preset.height}px`;
 
-  // Expressed as percentages of `preset`'s reference dimensions (not cssWidth/cssHeight, which
-  // may be an unresolved value like "100%") so borders/corners scale proportionally with however
-  // big the tile actually renders, instead of staying pinned to a fixed native-asset pixel size.
   const cssVars = {
     '--rt-border-thickness-x': `${(assets.borderThickness / preset.width) * 100}%`,
     '--rt-border-thickness-y': `${(assets.borderThickness / preset.height) * 100}%`,

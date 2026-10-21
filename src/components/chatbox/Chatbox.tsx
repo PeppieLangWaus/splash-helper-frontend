@@ -22,17 +22,10 @@ import './Chatbox.css';
 interface ChatInputRowProps {
   tabStates: ChatTabStates;
   onToggleTabState: (tab: ChatChannel) => void;
-  /** Owned by Chatbox (not this component) so a click anywhere in `.chat-window` — not just on
-   *  the input itself — can focus it; see Chatbox's own onClick below. */
+
   inputRef: React.RefObject<HTMLInputElement | null>;
 }
 
-/** The chat-input row pinned under the divider — a `::command` console (see chatCommands.ts),
- *  not a real chat: nothing typed here is ever broadcast. Enter parses and runs the line, always
- *  replying on the Game tab, then clears the field. The `*` next to it is a static cursor marker
- *  (not the real caret, which is hidden via `caret-color` in Chatbox.css) — it doesn't blink and
- *  is always shown, matching the box's original decorative look but without the distracting
- *  blinking native caret once there's actually something to type into. */
 function ChatInputRow({ tabStates, onToggleTabState, inputRef }: ChatInputRowProps) {
   const { user } = useAuth();
   const name = user?.username ?? 'Ardy Hosts';
@@ -74,16 +67,11 @@ function ChatInputRow({ tabStates, onToggleTabState, inputRef }: ChatInputRowPro
 }
 
 interface Props {
-  /** Explicit static messages, mainly for local/demo use. Omit this to let Chatbox manage its
-   *  own community picker and live feeds off the backend's chat relay plus the local Game/
-   *  Public/Private/Trade logs (the normal case). Bypasses tab filtering entirely — it's just
-   *  rendered as-is. */
+
   messages?: ChatMessage[];
   className?: string;
 }
 
-/** One `Channel — N linked ● live` (or `Clan — …`) summary line for the header — omitted
- *  entirely by the caller when nothing of that type is linked. */
 function LiveStatusLine({ label, connected }: { label: string; connected: Record<string, boolean> }) {
   const total = Object.keys(connected).length;
   const up = Object.values(connected).filter(Boolean).length;
@@ -107,12 +95,9 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
   const [tabStates, setTabStates] = useState(DEFAULT_TAB_STATES);
   const chatInputRef = useRef<HTMLInputElement>(null);
 
-  // Only needed in live mode — an explicit `messages` override skips the picker and every local
-  // feed entirely, so all of this stays idle when unused.
   const live = messagesOverride === undefined;
   const { channels } = useChatChannels();
-  // Every *linked* community's fc/cc feed is watched continuously, regardless of the Channel/Clan
-  // tab's own state — see useChatFeeds. Only display filtering (chatFilter.ts) is state-aware.
+
   const { messages: fcMessages, connected: fcConnected } = useChatFeeds(live ? channels : [], 'fc');
   const { messages: ccMessages, connected: ccConnected } = useChatFeeds(live ? channels : [], 'cc');
   const infoMessages = useInfoMessages();
@@ -120,8 +105,7 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
   const publicMessages = usePublicSessionEvents();
   const { messages: privateMessages, loggedIn: privateLoggedIn } = usePrivateLog();
   const { messages: tradeMessages, loggedIn: tradeLoggedIn } = useTradeLog();
-  // Generates the real archived-session/payout entries the two hooks above read back — see its
-  // doc comment for why this has to poll rather than push.
+
   useAccountActivityEvents();
   const { timestamps: showTimestamps } = useChatSettings();
 
@@ -129,12 +113,6 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
   const [spotlightMessageId, setSpotlightMessageId] = useState<string | null>(null);
   const [alertFlash, setAlertFlash] = useState(false);
 
-  // A missing/unverified email fires this once per visit — jump to Private, show only the
-  // reminder (not the whole log), and briefly flash the window to draw the eye. Picking any tab
-  // manually (handleSelect) clears the spotlight, so All -> Private afterward shows everything.
-  // Reacting to a new reminder is a plain "adjust state when a value changes" case, so it happens
-  // directly during render rather than in an effect; only the flash's timed reset is a genuine
-  // side effect (needs setTimeout), so that's the only part left in one.
   const [spotlightedReminderId, setSpotlightedReminderId] = useState<string | null>(null);
   if (emailReminder && emailReminder.id !== spotlightedReminderId) {
     setSpotlightedReminderId(emailReminder.id);
@@ -180,8 +158,6 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
       ? mergedMessages.filter((m) => m.id === spotlightMessageId)
       : visibleMessages(mergedMessages, channel, tabStates, { channel: fcSelected, clan: ccSelected }));
 
-  // Picking a new tab switches channel and (re)opens the window; clicking the tab that's
-  // already selected toggles the window closed/open instead, matching OSRS's own chatbox.
   function handleSelect(tab: ChatChannel) {
     setSpotlightMessageId(null);
     if (tab === channel) {
@@ -196,10 +172,6 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
     setTabStates((prev) => ({ ...prev, [tab]: nextTabState(tab, prev[tab]) }));
   }
 
-  // Checking/unchecking a community in the right-click menu only edits the viewer's own local
-  // Filtered selection — every linked community is already being watched regardless (see
-  // useChatFeeds), and this doesn't touch the tab's own On/Filtered/Off status, which stays a
-  // separate, independently-toggled concern (the tab's status line).
   function handleToggleChatSelection(channelType: LiveChatChannelType, communityId: string) {
     const [selected, setSelected, key] =
       channelType === 'fc' ? ([fcSelected, setFcSelected, FC_SELECTED_KEY] as const) : ([ccSelected, setCcSelected, CC_SELECTED_KEY] as const);
@@ -227,8 +199,7 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
       )}
 
       {windowOpen && (
-        // Clicking anywhere in the window — the log, its scrollbar, the input row itself —
-        // focuses the command input, same as clicking directly into it.
+
         <div className="chat-window" onClick={() => chatInputRef.current?.focus()}>
           <div className="chat-window-body">
             {needsLogin ? (

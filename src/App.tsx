@@ -41,9 +41,6 @@ type View =
   | { name: 'gear' }
   | { name: 'gear-shared'; slug: string };
 
-/** Maps a `View` to the URL path it should be reachable at, and back. Lets browser
- *  Back/Forward and hard refreshes land on the actual page the user was looking at,
- *  since the app otherwise has no router — `view` is just local state. */
 function viewToPath(view: View): string {
   switch (view.name) {
     case 'active': return '/';
@@ -80,8 +77,6 @@ function pathToView(pathname: string): View {
   }
 }
 
-/** The "What is this?" corner blurb's content, per view — `null` skips rendering it
- *  (login/forgot-password/dev, where it wouldn't have anything useful to say). */
 function introForView(view: View) {
   switch (view.name) {
     case 'active':
@@ -183,11 +178,9 @@ const nav = {
 
 function AppInner() {
   const { user, logout } = useAuth();
-  // Initialize from the current URL (not always 'active') so a hard refresh stays put.
+
   const [view, setView] = useState<View>(() => pathToView(window.location.pathname));
 
-  // Navigating within the app pushes a new history entry so Back/Forward retrace the
-  // actual pages visited (not just re-toggling nav tab styling).
   const navigate = useCallback((next: View) => {
     setView(next);
     const path = viewToPath(next);
@@ -196,7 +189,6 @@ function AppInner() {
     }
   }, []);
 
-  // Handle Back/Forward: sync `view` from the URL without pushing another entry.
   useEffect(() => {
     function handlePopState() {
       if (window.location.pathname === '/setup' || window.location.pathname === '/reset-password' || window.location.pathname === '/verify-email') return;
@@ -206,26 +198,21 @@ function AppInner() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Handle setup link: /setup?token=...
   const [setupToken, setSetupToken] = useState<string | null>(() => {
     if (window.location.pathname !== '/setup') return null;
     return new URLSearchParams(window.location.search).get('token');
   });
 
-  // Handle password-reset link: /reset-password?token=...
   const [resetToken, setResetToken] = useState<string | null>(() => {
     if (window.location.pathname !== '/reset-password') return null;
     return new URLSearchParams(window.location.search).get('token');
   });
 
-  // Handle email-verification link: /verify-email?token=...
   const [verifyEmailTokenValue, setVerifyEmailTokenValue] = useState<string | null>(() => {
     if (window.location.pathname !== '/verify-email') return null;
     return new URLSearchParams(window.location.search).get('token');
   });
 
-  // Standalone legal pages, e.g. linked from the Discord bot's settings —
-  // always reachable at their own URL, outside the nav/login-gated shell.
   if (window.location.pathname === '/terms') return <TermsOfServiceView />;
   if (window.location.pathname === '/privacy') return <PrivacyPolicyView />;
   if (window.location.pathname === '/guides') return <GuidesView />;
@@ -237,14 +224,12 @@ function AppInner() {
   if (window.location.pathname === '/guides/mobile-setup') return <MobileSetupGuide />;
   if (window.location.pathname === '/guides/solo-setup') return <SoloSetupGuide />;
   if (window.location.pathname === '/guides/chat-commands') return <ChatCommandsGuide />;
-  // Legacy URL from before the guides hub existed — keep it working and consolidate to the
-  // new canonical path so it doesn't linger as a second indexed URL for the same content.
+
   if (window.location.pathname === '/guide') {
     history.replaceState(null, '', '/guides/pickpocketing');
     return <PickpocketGuide />;
   }
 
-  // If a setup token is present, show the setup view
   if (setupToken) {
     return (
       <SetupAccountView
@@ -372,7 +357,7 @@ function AppInner() {
               Dev
             </button>
           )}
-        </div> 
+        </div>
 
         <div style={nav.right}>
           {user ? (

@@ -30,7 +30,7 @@ export default function AllSplashersView({ onSelectUser }: Props) {
 
   useEffect(() => {
     void load();
-    // Poll every 15 seconds
+
     const id = setInterval(() => { void load(); }, 15000);
     return () => clearInterval(id);
   }, [load]);

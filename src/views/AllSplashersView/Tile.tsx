@@ -7,7 +7,7 @@ const EDGE_SIZE = 4;
 type TileProps = {
   width?: number | string;
   height?: number | string;
-  /** Integer pixel scale for the corner/edge sprites (border stays crisp, doesn't stretch). */
+
   scale?: number;
   className?: string;
   contentClassName?: string;

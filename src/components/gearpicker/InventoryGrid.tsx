@@ -5,8 +5,6 @@ import { GRID_HEIGHT, GRID_WIDTH } from './gearGridLayout';
 import { INVENTORY_COLUMNS, INVENTORY_ROWS } from '../../types/gear';
 import type { GearInventory } from '../../types/gear';
 
-// Same box as EquipmentDisplay's diamond, so switching the middle panel between the two modes
-// never resizes it.
 const gridTemplateStyle: CSSProperties = {
   gridTemplateColumns: `repeat(${INVENTORY_COLUMNS}, 1fr)`,
   gridTemplateRows: `repeat(${INVENTORY_ROWS}, 1fr)`,
@@ -26,18 +24,12 @@ interface Props {
   inventory: GearInventory;
   itemNamesById: Map<number, string>;
   selectedIndices?: ReadonlySet<number>;
-  /** CSS length added below the equipment-sized box, for the space the equipment mode's toolbar
-   *  takes up, so the panel keeps its size with the toolbar gone. */
+
   extraHeight?: string;
-  /** If provided, each slot becomes a clickable button (the interactive picker case); omit for a
-   *  purely read-only display, whose slots have no hover box. */
+
   onSlotClick?: (index: number, additive: boolean) => void;
 }
 
-/**
- * The 4x7 inventory layout. Visually empty until a slot is hovered, focused or selected, at which
- * point a translucent box appears over it; a slot holding an item always shows the item's icon.
- */
 export default function InventoryGrid({ inventory, itemNamesById, selectedIndices, extraHeight = '0px', onSlotClick }: Props) {
   const wrapStyle: CSSProperties = { aspectRatio: `${GRID_WIDTH} / ${GRID_HEIGHT}`, marginBottom: extraHeight };
   const gridStyle: CSSProperties = { ...gridTemplateStyle, bottom: `calc(-1 * ${extraHeight})` };

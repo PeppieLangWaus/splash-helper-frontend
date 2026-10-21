@@ -8,8 +8,6 @@ interface Props {
   onSlotClick: (slot: EquipmentSlot, additive: boolean) => void;
 }
 
-/** A two-handed weapon and a shield can never actually be worn together in-game, so the shield
- *  slot is disabled while one is equipped — needed for the bonus totals to stay trustworthy. */
 export default function EquipmentSlotGrid({ slots, itemsById, onSlotClick }: Props) {
   const equippedWeapon = slots.weapon ? itemsById.get(slots.weapon) : undefined;
   const disabledSlots = useMemo(() => {

@@ -29,8 +29,6 @@ interface Props {
   onResendVerification: () => Promise<void>;
 }
 
-/** Add/change the account's recovery email (requires the current password as a second factor),
- *  and while unverified, resend the verification link. */
 export default function EmailField({ email, emailVerifiedAt, onSave, onResendVerification }: Props) {
   const [value, setValue] = useState(email ?? '');
   const [currentPassword, setCurrentPassword] = useState('');

@@ -9,19 +9,11 @@ import { EQUIPMENT_SLOT_LABELS } from '../../types/gear';
 interface Props {
   slot: EquipmentSlot;
   item?: EquipmentItem;
-  /** True when this slot can't be used right now (shield blocked by a two-handed weapon) — shows
-   *  the red tile + a blocked badge instead of the normal grey tile + slot outline icon. */
+
   blocked?: boolean;
   onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
-/** One equipment slot tile: an OSRSTile (gray normally, red when blocked) showing the equipped
- *  item's icon, the slot's outline placeholder, or a blocked badge. Thin gear-picker-specific
- *  wrapper — OSRSTile itself knows nothing about equipment slots or "blocked" states.
- *
- *  Sized at 100%/100%; the wrapping `.equipment-diamond-tile` div (see EquipmentDisplay.tsx) sets
- *  the real size. `sizeType="square"` only tells OSRSTile what reference size its chrome was
- *  designed at, so borders/corners scale proportionally instead of staying pixel-fixed. */
 export default function SlotTile({ slot, item, blocked, onClick }: Props) {
   const title = item?.name ?? (blocked ? `${EQUIPMENT_SLOT_LABELS[slot]} (blocked by two-handed weapon)` : EQUIPMENT_SLOT_LABELS[slot]);
 

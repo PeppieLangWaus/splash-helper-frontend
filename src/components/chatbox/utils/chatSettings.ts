@@ -1,12 +1,7 @@
-/** Chatbox-wide settings the `::settings` chat command reads/writes (see utils/chatCommands.ts).
- *  Kept as its own small store, separate from chatStorage.ts's message feeds and per-feed
- *  message-limit setting — this is viewer preference, not chat history. */
-
 const SETTINGS_KEY = 'chat:settings';
 
 export interface ChatSettings {
-  /** Whether ChatLog renders each line's leading `[HH:MM]` timestamp — toggled via
-   *  `::settings timestamp on|off` (default on, matching the chatbox's original behavior). */
+
   timestamps: boolean;
 }
 
@@ -27,7 +22,7 @@ function saveChatSettings(settings: ChatSettings): void {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   } catch {
-    // Storage unavailable — the setting just won't survive a reload.
+
   }
 }
 
@@ -37,9 +32,6 @@ export function setTimestampsEnabled(enabled: boolean): void {
   saveChatSettings({ ...settings, timestamps: enabled });
   publishChatSettingsChange();
 }
-
-// ── Same-tab pub/sub, mirroring chatStorage.ts's message event — lets useChatSettings pick up a
-// change made via ::settings immediately, without waiting on an unrelated re-render. ──────────
 
 const CHAT_SETTINGS_EVENT = 'chat:settings-changed';
 

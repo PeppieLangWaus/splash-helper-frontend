@@ -10,19 +10,10 @@ import type { EquipmentItem, GearLoadoutSlots } from '../../types/gear';
 import './Gearpicker.css';
 
 interface Props {
-  /** Share slug of a saved or anonymously-shared loadout — the same slug GearPickerView's
-   *  /gear/:slug route reads (see api/index.ts's fetchGearLoadout). Create one for a guide's
-   *  setup the same way a user would: build it in the gear picker and hit Share (or Save, if it
-   *  should stay editable afterward). */
+
   slug: string;
 }
 
-/**
- * A read-only "here's the gear" card for embedding a specific loadout in written guide content —
- * just the equipment diamond from the interactive gear picker, with no name, cost or controls.
- * Fully self-contained: given a slug, it fetches the loadout and equipment dataset itself, so it
- * drops into any page without assuming GearPickerView is mounted nearby.
- */
 export default function GearLoadoutGuideCard({ slug }: Props) {
   const [slots, setSlots] = useState<GearLoadoutSlots | null>(null);
   const [items, setItems] = useState<EquipmentItem[]>([]);

@@ -16,11 +16,6 @@ import {
   publishStoredMessage,
 } from '../../../utils/chatStorage';
 
-/** The chatbox's input row (see Chatbox.tsx) is a command console, not a real chat — nothing
- *  typed there is ever broadcast anywhere. Every line is parsed as a `::command` and answered
- *  with a "System"-prefixed reply on the Game tab (kind 'system' — see types/chatbox.ts); text
- *  that isn't a recognized command just gets told so. */
-
 let seq = 0;
 
 function emitSystemMessage(text: string): void {
@@ -39,8 +34,6 @@ function emitSystemMessage(text: string): void {
 const NOT_RECOGNIZED = (label: string) =>
   `"${label}" is not a recognized command. Type ::commands for a list of commands.`;
 
-// ── ::open — pages reachable via the chat console. Paths must match App.tsx's own
-// viewToPath/pathToView routing table. ─────────────────────────────────────────────────────────
 const MENU_PATHS: Record<string, string> = {
   active: '/',
   home: '/',
@@ -69,8 +62,6 @@ function handleOpen(args: string[]): void {
   emitSystemMessage(`Opening ${args[0]}...`);
 }
 
-// ── ::settings — currently just the one viewer preference (chat line timestamps). Designed to
-// grow: add another branch to `describeSetting`/`applySetting` for a new setting name. ─────────
 const SETTING_ALIASES = ['timestamp', 'timestamps'];
 
 function describeSetting(name: string): string | null {
@@ -109,9 +100,6 @@ function handleSettings(args: string[]): void {
   emitSystemMessage(applySetting(name, args[1])!);
 }
 
-// ── ::clear — chat tab -> which stored feed(s) it maps to. "info"/"system" split the Game tab's
-// two separate feeds (periodic tips vs. this console's own replies — see chatFilter.ts's
-// KIND_TO_TAB); "friends"/"fc" and "clan"/"cc" are the in-game names for the Channel/Clan tabs. */
 const CLEAR_TARGETS: Record<string, () => void> = {
   game: () => { clearStoredMessages(INFO_KEY); clearStoredMessages(SYSTEM_KEY); },
   info: () => clearStoredMessages(INFO_KEY),
@@ -134,7 +122,7 @@ function handleClear(args: string[]): void {
     clearStoredMessages(TRADE_KEY);
     clearStoredMessagesByPrefix(FC_KEY_PREFIX);
     clearStoredMessagesByPrefix(CC_KEY_PREFIX);
-    clearStoredMessages(SYSTEM_KEY); // last: this reply itself lands back in the feed just wiped
+    clearStoredMessages(SYSTEM_KEY);
     emitSystemMessage('Cleared all chat history.');
     return;
   }
@@ -149,9 +137,6 @@ function handleClear(args: string[]): void {
   emitSystemMessage(`Cleared ${args[0]} chat history.`);
 }
 
-// ── ::toggle — cycles a tab's own On/Filtered/Off status line, same as clicking it directly
-// (see ChatControls.tsx / chatFilter.ts's nextTabState). "friends"/"fc"/"cc" alias the tabs'
-// in-game names, same as ::clear above. "all" is excluded — it has no status line of its own. */
 const TAB_ALIASES: Record<string, ChatChannel> = {
   game: 'game',
   public: 'public',
@@ -180,7 +165,6 @@ function handleToggle(args: string[], tabStates: ChatTabStates, toggleTabState: 
   emitSystemMessage(`${args[0]} set to ${TAB_STATE_LABEL[next]}.`);
 }
 
-// ── ::commands ───────────────────────────────────────────────────────────────────────────────
 const COMMAND_HELP = [
   'Available commands:',
   '::settings [setting] [value] - view/change a setting, or open Account Settings with no args (e.g. ::settings timestamp off)',
@@ -194,9 +178,6 @@ export interface ChatCommandContext {
   toggleTabState: (tab: ChatChannel) => void;
 }
 
-/** Parses and executes one line typed into the chatbox's input row — see Chatbox.tsx. Every
- *  outcome (success, usage error, or "not a command" fallback) is answered with its own System
- *  reply; this never throws and never returns anything for the caller to handle. */
 export function runChatCommand(rawInput: string, ctx: ChatCommandContext): void {
   const trimmed = rawInput.trim();
   if (!trimmed) return;

@@ -6,7 +6,7 @@ const s = {
   figure: { margin: '0 0 1.25rem' },
   frame: {
     width: 'fit-content',
-    // border: `1px solid ${colors.border}`,
+
     borderRadius: 8,
     overflow: 'hidden',
     background: colors.panel,
@@ -20,17 +20,12 @@ interface Props {
   src: string;
   alt: string;
   caption?: string;
-  /** Lets the reader click the image to view an enlarged version in a modal overlay — reuses
-   *  the shared `Modal` (bordered panel capped at 90vw/centered, not a true fullscreen takeover).
-   *  Off by default; turn on per-image for screenshots worth zooming into. */
+
   zoomable?: boolean;
   width?: number | string;
   height?: number | string;
 }
 
-/** Standard image block for guide pages: bordered frame matching the guide theme, optional
- *  caption, and optional click-to-enlarge. Always set `width`/`height` when known so the layout
- *  doesn't jump as the image loads. */
 export default function GuideFigure({ src, alt, caption, zoomable = false, width, height }: Props) {
   const [open, setOpen] = useState(false);
 

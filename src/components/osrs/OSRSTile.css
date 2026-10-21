@@ -1,6 +1,4 @@
-/* OSRSTile — see OSRSTile.tsx. Numeric dimensions come in as CSS custom properties (--rt-*),
-   expressed as percentages of the tile's own box (not fixed px) so the chrome scales right along
-   with however big a given instance actually renders — see OSRSTile.tsx for why. */
+
 
 .osrs-tile {
     position: relative;

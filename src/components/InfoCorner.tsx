@@ -5,9 +5,6 @@ interface Props {
   children: ReactNode;
 }
 
-/** Collapsible "what is this page" blurb pinned to the top-left corner of the viewport,
- *  just under the nav bar. Mounted once in App.tsx — the text shown is whatever the
- *  current view passes in, so it reads as page-specific context rather than a fixed panel. */
 export default function InfoCorner({ children }: Props) {
   const [open, setOpen] = useState(false);
 

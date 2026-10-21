@@ -22,10 +22,6 @@ function runeLabel(id: string) {
   return id.replace(/[_-]/g, ' ');
 }
 
-/** Icon+count grid of rune usage for a session, sorted by count descending. Icon lookups
- *  use `runes.<id>` — these aren't in the icon registry yet (real icon files are coming
- *  later), so `Icon` silently renders nothing for them in the meantime; the name/count
- *  text still carries the information. */
 export default function RuneUsagePanel({ runeUsageMap }: { runeUsageMap: RuneUsageMap }) {
   const entries = Object.entries(runeUsageMap).sort((a, b) => b[1] - a[1]);
 

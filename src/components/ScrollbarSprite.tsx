@@ -13,8 +13,6 @@ interface Props {
   onThumbPointerUp: (e: PointerEvent) => void;
 }
 
-/** The OSRS chatbox's own scrollbar sprite (public/assets/chatbox/scroll), as a standalone 16px-
- *  wide column — pair it with useScrollbarThumb for the geometry/drag logic. */
 export default function ScrollbarSprite({
   trackRef,
   thumb,

@@ -10,21 +10,17 @@ export interface ContextMenuOption {
 }
 
 interface Props {
-  /** Where the menu opens, in viewport coordinates (the right-click position). */
+
   x: number;
   y: number;
   options: ContextMenuOption[];
   onClose: () => void;
 }
 
-/** A right-click menu, closed by choosing an option, pressing Escape, clicking elsewhere, or
- *  scrolling/resizing the page. Rendered in a portal so no ancestor's stacking context or
- *  transform affects where it lands. */
 export default function ContextMenu({ x, y, options, onClose }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ left: x, top: y });
 
-  // Keeps the menu inside the viewport when opened near its right or bottom edge.
   useLayoutEffect(() => {
     const menu = menuRef.current;
     if (!menu) return;

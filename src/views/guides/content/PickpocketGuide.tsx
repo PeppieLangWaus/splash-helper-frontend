@@ -147,10 +147,10 @@ export default function PickpocketGuide() {
         <p style={gs.updated}>A guide to OSRS splash worlds, Knight of Ardougne pickpocketing, and how the two fit together.</p>
 
         <p style={gs.intro}>
-          If you've seen people talk about "{tooltip.wiki.ardyKnight}" or have come across a 
+          If you've seen people talk about "{tooltip.wiki.ardyKnight}" or have come across a
           reddit post asking; "What is the current splash world?" and weren't sure what it meant,
           this covers most of it: what splashing is, what makes pickpocketing Ardy knights a great method for
-          getting thieving XP, how to find a world and last but not least, how to get the best XP rates. 
+          getting thieving XP, how to find a world and last but not least, how to get the best XP rates.
         </p>
 
         <h2 style={gs.h2}>Getting started with pickpocketing Ardy knights</h2>
@@ -194,9 +194,9 @@ export default function PickpocketGuide() {
         <p style={gs.subtext}>Once teleported to Ardougne, follow the map below</p>
 
         <br />
-        
+
         <ExplvMap
-          centre={{ x: 2655, y: 3297, plane: 0 }}  // or regionId={...}
+          centre={{ x: 2655, y: 3297, plane: 0 }}
           zoom={8}
           showControls={false}
           showLabels={false}
@@ -213,22 +213,22 @@ export default function PickpocketGuide() {
           Having the knights walk about, makes pickpocketing them a more tedious training method than it's worth.
           <br />
           That's where a splasher comes in, they keep the knight aggroed on them by
-          having a low enough {tooltip.atkBonus} that they never hit the knight. 
+          having a low enough {tooltip.atkBonus} that they never hit the knight.
           This method is used to trap the knight in the corner of the south-east Ardougne bank.
           Once a knight is splashed, it won't despawn. Normally, when an NPC has been stuck on the same tile for more
-          than 5 minutes, it despawns, but since the splasher keeps it in combat, it doesn't. Aside from this, it also makes the knight move much, much less, 
+          than 5 minutes, it despawns, but since the splasher keeps it in combat, it doesn't. Aside from this, it also makes the knight move much, much less,
           allowing you to pickpocket the knight to your hearts content.
         </p>
 
         <h3 style={gs.h3}>How to find a world</h3>
-        
+
         <p style={gs.p}>
           Splash worlds change regularly — a splasher logs off, maybe they disconnect, or move worlds.
           <br />
-          This makes having to find new worlds a somewhat regular occurence. Ardy Host's home page lists who's currently splashing, 
+          This makes having to find new worlds a somewhat regular occurence. Ardy Host's home page lists who's currently splashing,
           on which world, refreshed live, so you're not world-hopping blind looking for one.
         </p>
-        
+
         <a href="/" className="guide-cta" style={gs.cta}>See live splash worlds</a>
 
         <p style={gs.p}>
@@ -283,7 +283,6 @@ export default function PickpocketGuide() {
             Check it out over at: <a style={gs.a} href="https://runelite.net/plugin-hub/show/pickpocket-helper" target="_blank" rel="noopener noreferrer">Runelite plugin hub</a>
           </p>
         </div>
-
 
         <h2 style={gs.h2}>Frequently Asked Questions</h2>
         <hr style={gs.hr}/>

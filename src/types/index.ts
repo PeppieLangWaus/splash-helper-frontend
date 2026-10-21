@@ -17,12 +17,11 @@ export interface SessionData {
   endTime?: string;
   highestPlayerCount: number;
   averagePlayerCount: number;
-  /** Live nearby-player count at the moment of this update (as opposed to highest/average). */
+
   currentPlayerCount?: number;
   pickpocketerCount: number;
   playerDeaths?: number;
-  /** Usernames of nearby players observed reaching level 99, in the order observed — see
-   *  hooks/usePublicSessionEvents.ts, which turns new entries into chatbox announcements. */
+
   level99Players?: string[];
   startingRuneCount: number;
   currentRuneCount: number;
@@ -43,34 +42,27 @@ export interface Splasher {
   sessions: SplashEntry[];
 }
 
-/** A community a splasher belongs to that has a public Discord invite configured. */
 export interface ActiveSessionCommunity {
   communityId: string;
   communityName: string;
   discordInviteUrl: string;
 }
 
-/** Active session currently in-memory on the server */
 export interface ActiveSession {
   username: string;
   sessionData: SessionData | null;
   lastUpdate: number;
   communities?: ActiveSessionCommunity[];
-  /** True when the inactivity sweeper is not allowed to auto-clear this session.
-   *  Only ever set on fake sessions injected via the dev view. */
+
   pinned?: boolean;
 }
 
-/** Anonymous like/dislike tally for a splasher, plus the caller's own vote (identified
- *  server-side, e.g. by IP) — GET /splashers/:username/votes. `myVote` is null when the
- *  caller hasn't voted. */
 export interface SplasherVotes {
   likes: number;
   dislikes: number;
   myVote: 1 | -1 | null;
 }
 
-/** Archived session stored in MongoDB */
 export interface ArchivedSession {
   _id: string;
   sessionId: string;
@@ -80,15 +72,10 @@ export interface ArchivedSession {
   finalizedTimestamp: number;
   syncedToServer: boolean;
   session: SessionData;
-  /** The splasher's rank/rate in each community they belonged to, frozen at finalization —
-   *  keyed by communityId. Only present on sessions fetched via GET /splashers/:username; used
-   *  client-side to compute per-session earnings for the chatbox's Trade tab (see
-   *  chatbox/useAccountActivityEvents.ts) the same way GET /communities/:id/sessions does
-   *  server-side. */
+
   earningsSnapshot?: Record<string, { rankId: string; rankName: string; hourlyRate: number }>;
 }
 
-/** One of the caller's own payout tickets in a community — GET /communities/:id/my-payouts. */
 export interface PayoutTicket {
   id: string;
   amountGp: number;
@@ -97,16 +84,12 @@ export interface PayoutTicket {
   resolvedAt: number | null;
 }
 
-/** Authenticated user info decoded from JWT */
 export interface AuthUser {
   username: string;
   isAdmin: boolean;
   communityEligible: boolean;
 }
 
-/** User record returned from admin endpoints. Unlike GET /splashers/:username (which only
- *  ever includes `token` for the splasher viewing their own data), admin endpoints trust the
- *  requester's isAdmin flag and always include it — admins can look up any user's token. */
 export interface AdminUser {
   _id: string;
   username: string;
@@ -119,7 +102,6 @@ export interface AdminUser {
   emailVerifiedAt?: string;
 }
 
-/** Community record returned from the communities endpoints */
 export interface Community {
   _id: string;
   name: string;
@@ -132,13 +114,11 @@ export interface Community {
   createdAt: string;
 }
 
-/** Lightweight community entry from GET /communities (id + name only). */
 export interface CommunitySummary {
   _id: string;
   name: string;
 }
 
-/** A community's hourly-rate tier. Every community always has exactly one isDefault rank. */
 export interface Rank {
   _id: string;
   communityId: string;
@@ -147,7 +127,6 @@ export interface Rank {
   isDefault: boolean;
 }
 
-/** Splasher (User) record returned from GET /communities/:id/splashers */
 export interface CommunitySplasher {
   _id: string;
   username: string;
@@ -156,14 +135,11 @@ export interface CommunitySplasher {
   rank: { id: string; name: string; hourlyRate: number } | null;
 }
 
-/** A splasher's own personal webhook overrides, additive with any community webhook. */
 export interface SplasherWebhooks {
   discordActiveWebhookUrl?: string;
   discordHistoryWebhookUrl?: string;
 }
 
-/** A community's `/setup` configuration — the same document the Discord bot's setup wizard
- *  writes. null (via GET /communities/:id/discord-config) until /setup has been run once. */
 export interface DiscordServerConfig {
   _id: string;
   communityId: string;

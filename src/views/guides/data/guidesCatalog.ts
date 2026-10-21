@@ -1,7 +1,3 @@
-/** Single source of truth for every `/guides/*` page's title/description/meta line, so the
- *  guides hub (GuidesView) and any inline `<GuideButtons>` (see GuideButton.tsx) render the
- *  exact same guide info instead of hand-duplicating copy in two places. */
-
 export type Guide = {
   href: string;
   title: string;
@@ -76,7 +72,6 @@ export const other: Guide[] = [
   },
 ];
 
-/** Every guide, grouped the same way the guides hub groups them. */
 export const guides: Guides = {
   pickpocket: [...pickpocket],
   pickpocketSetup: [...pickpocketSetup],

@@ -85,14 +85,12 @@ const s = {
 } as const;
 
 interface Props {
-  /** Pre-fills the username field, e.g. when opened from a specific chat line. */
+
   defaultUsername?: string;
   onClose: () => void;
   onSubmit?: (report: { username: string; reason: string }) => void;
 }
 
-/** Opened by the chatbox's report button: asks for a username and a reason picked from
- *  `reportReasons`. */
 export default function ReportModal({ defaultUsername = '', onClose, onSubmit }: Props) {
   const [username, setUsername] = useState(defaultUsername);
   const [reasonName, setReasonName] = useState<string | null>(null);

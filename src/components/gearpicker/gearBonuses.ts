@@ -19,7 +19,6 @@ const ZERO_BONUSES: TotalBonuses = {
   magicDamage: 0,
 };
 
-/** Sums combat bonuses across every filled slot in a loadout. */
 export function computeTotalBonuses(slots: GearLoadoutSlots, itemsById: Map<number, EquipmentItem>): TotalBonuses {
   const total = { ...ZERO_BONUSES };
   for (const itemId of Object.values(slots)) {

@@ -30,9 +30,6 @@ function buildMessage(username: string, world: number): ChatMessage {
   };
 }
 
-/** Owns the Public tab's site-wide "started splashing" announcements: polls the public active-
- *  sessions list and turns each newly-appeared username into a message. Loads whatever's already
- *  stored on mount so history survives a reload. */
 export function usePublicSessionEvents(pollIntervalMs: number = POLL_INTERVAL_MS) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadStoredMessages(PUBLIC_KEY));
   const knownUsernames = useRef<Set<string> | null>(null);
@@ -47,8 +44,6 @@ export function usePublicSessionEvents(pollIntervalMs: number = POLL_INTERVAL_MS
         const current = new Set(sessions.map((s) => s.username));
 
         if (knownUsernames.current === null) {
-          // First poll just establishes the baseline — otherwise every session already active
-          // when the chatbox mounts would announce itself as "just started".
           knownUsernames.current = current;
           return;
         }
@@ -59,7 +54,7 @@ export function usePublicSessionEvents(pollIntervalMs: number = POLL_INTERVAL_MS
         }
         knownUsernames.current = current;
       } catch {
-        // Transient fetch failure — try again on the next tick.
+
       }
     }
 

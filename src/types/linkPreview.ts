@@ -1,8 +1,3 @@
-// Mirrors splash-helper-backend's services/linkPreview.ts `LinkPreviewResult` — kept as a plain
-// duplicate rather than a shared package since these are two independent repos/deployments (see
-// the root CLAUDE.md's "workspace of independent git repositories" note). Update both sides
-// together if this shape ever changes.
-
 export interface WikiPreviewData {
   title: string;
   extract?: string;

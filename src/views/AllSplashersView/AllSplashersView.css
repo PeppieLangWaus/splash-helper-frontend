@@ -63,12 +63,7 @@
 }
 
 .all-splashers-grid {
-    /* Flexbox rather than CSS grid: the panels already have a fixed intrinsic size
-       (aspect-ratio + explicit height below), so with `grid-template-columns:
-       repeat(auto-fill, ...)` the track count is computed from the container width alone
-       — with few cards the tracks still span the full container and `justify-content`
-       has no slack to center within. Flex items keep their natural width and wrap, so
-       centering actually centers the cards themselves regardless of how many there are. */
+    
     display: flex;
     flex-wrap: wrap;
     justify-content: center;

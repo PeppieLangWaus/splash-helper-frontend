@@ -1,9 +1,7 @@
-/* Pinned to the top-left corner of the viewport, flush against the nav bar above
-   and the left edge of the screen — only the outer two edges get a border/radius,
-   so it reads as a tab hanging off that corner rather than a floating card. */
+
 .info-corner {
     position: fixed;
-    top: 56px; /* nav height (60px) + its 4px bottom border */
+    top: 56px; 
     left: 0;
     z-index: 40;
     width: 13rem;
@@ -47,11 +45,7 @@
     border-bottom: 1px solid var(--border);
 }
 
-/* Grid-rows trick: animating a track from 0fr to 1fr animates the *content's* rendered
-   height smoothly, which a plain `height: auto <-> 0` transition can't do. The clipping
-   wrapper carries `overflow: hidden` + `min-height: 0` and no padding of its own — padding
-   lives one level further in, on the <p>, so at 0fr the whole thing (padding included)
-   clips away to a true 0px instead of a track that can only shrink to the padding's height. */
+
 .info-corner-collapse {
     display: grid;
     grid-template-rows: 0fr;

@@ -239,7 +239,6 @@ function activityLevel(value: number, max: number) {
   return 1;
 }
 
-/** Builds Sun-Sat weeks fully covering [rangeStart, rangeEnd]. */
 function buildWeeksInRange(rangeStart: Date, rangeEnd: Date): Date[][] {
   const start = new Date(rangeStart);
   start.setHours(0, 0, 0, 0);
@@ -263,8 +262,6 @@ function buildWeeksInRange(rangeStart: Date, rangeEnd: Date): Date[][] {
 }
 
 function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: ArchivedSession[]; year: number; years: number[]; onYearChange: (year: number) => void }) {
-  // Keyed by day, summing play duration (ms) rather than counting sessions — hours
-  // splashed is the metric that matters, not how many separate sessions produced it.
   const durations = new Map<string, number>();
   for (const entry of sessions) {
     const key = dayKey(entry.createdTimestamp);
@@ -277,7 +274,6 @@ function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: Archi
   const weeks = buildWeeksInRange(new Date(year, 0, 1), new Date(year, 11, 31));
   const inRange = (date: Date) => date.getFullYear() === year;
 
-  // Scale color intensity relative to the visible year only, not all-time history.
   let max = 0;
   for (const week of weeks) {
     for (const date of week) {
@@ -286,13 +282,9 @@ function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: Archi
     }
   }
 
-  // Plain for-loop (not .map()) so `lastMonth` is mutated directly in sequential render code,
-  // not captured and reassigned from inside a callback — matches the durations/max loops above.
   let lastMonth = -1;
   const monthLabels: string[] = [];
   for (const week of weeks) {
-    // Skip the leading padding week(s) that belong to the previous year — labeling them
-    // would put "Dec" right next to "Jan" with barely a column between them.
     if (week[0].getFullYear() !== year) {
       monthLabels.push('');
       continue;
@@ -365,7 +357,6 @@ function ActivityGrid({ sessions, year, years, onYearChange }: { sessions: Archi
   );
 }
 
-/** Daily-resolution bar chart of hours splashed within a single month, with prev/next navigation. */
 function MonthlyHoursChart({ sessions, month, onMonthChange }: { sessions: ArchivedSession[]; month: Date; onMonthChange: (month: Date) => void }) {
   const year = month.getFullYear();
   const mo = month.getMonth();
@@ -455,8 +446,6 @@ function ChevronIcon({ open }: { open: boolean }) {
   );
 }
 
-/** A session's play duration in ms — `logoutTime` is when the session ended normally;
- *  fall back to `endTime` for sessions that don't have it populated. */
 function sessionDurationMs(d: ArchivedSession): number {
   const start = new Date(d.session.startTime).getTime();
   const end = new Date(d.session.endTime || d.finalizedTimestamp || "").getTime();
@@ -488,8 +477,6 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // Computed once per mount rather than at module load, so a long-lived tab doesn't
-  // carry a stale "current year" across a real-world rollover.
   const [CURRENT_YEAR] = useState(() => new Date().getFullYear());
 
   const [activityYear, setActivityYear] = useState(CURRENT_YEAR);
@@ -509,25 +496,20 @@ export default function UserView({ username, onBack, onLoginRequired }: Props) {
 
   const stats = calcStats(sessions);
 
-  // Years that actually have recorded sessions, most recent first — populates the year menu.
   const sessionYears = useMemo(() => {
     const set = new Set<number>();
     for (const entry of sessions) set.add(new Date(entry.createdTimestamp).getFullYear());
     return [...set].sort((a, b) => b - a);
   }, [sessions]);
 
-  // Default to the most recent year with recorded activity once sessions load, rather than
-  // always the current calendar year (which may have no data yet).
   useEffect(() => {
     if (sessionYears.length > 0 && !sessionYears.includes(activityYear)) {
       setActivityYear(sessionYears[0]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionYears]);
 
   const [selectedMonth, setSelectedMonth] = useState<Date>(() => new Date());
 
-  // Default the monthly chart to the most recent month with recorded activity, once sessions load.
   const latestSessionTs = useMemo(() => sessions.reduce((max, e) => Math.max(max, e.createdTimestamp), 0), [sessions]);
   useEffect(() => {
     if (latestSessionTs > 0) {

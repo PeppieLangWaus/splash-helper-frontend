@@ -17,12 +17,12 @@ export interface PickerItem {
 }
 
 interface Props<T extends PickerItem> {
-  /** False until the user has chosen something to pick an item for; `hintText` is shown instead of the list. */
+
   hasTarget: boolean;
   hintText: string;
   removeLabel: string;
   items: T[];
-  /** When set, items found in it get 1 to 3 green "+" (positive level) or red "-" (negative level) signs after their name. */
+
   statChangeLevelById?: Map<number, number>;
   hasCurrentItem: boolean;
   onSelect: (item: T) => void;
@@ -32,9 +32,6 @@ interface Props<T extends PickerItem> {
   onClear: () => void;
 }
 
-/** The parent remounts this (via a `key` on whatever it is picking for) whenever that changes, so
- *  the list scroll resets and the search input is re-focused, with its text selected, for each
- *  newly opened slot. The query itself lives in the parent so it survives that remount. */
 export default function ItemPickerPanel<T extends PickerItem>({ hasTarget, hintText, removeLabel, items, statChangeLevelById, hasCurrentItem, onSelect, onHoverItem, query, onQueryChange, onClear }: Props<T>) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -64,14 +61,11 @@ export default function ItemPickerPanel<T extends PickerItem>({ hasTarget, hintT
     OVERSCAN_ROWS,
   );
 
-  // The viewport element itself doesn't resize as the filtered list gets longer/shorter, so the
-  // thumb needs an explicit nudge whenever the result count changes.
   useEffect(() => updateThumb(), [results.length, updateThumb]);
 
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const activeIndex = Math.min(highlightedIndex, results.length - 1);
 
-  // Previews the highlighted item, including the one highlighted by default when the list first appears.
   useEffect(() => onHoverItem(results[activeIndex] ?? null), [results, activeIndex, onHoverItem]);
 
   function handleQueryChange(nextQuery: string) {
@@ -111,8 +105,6 @@ export default function ItemPickerPanel<T extends PickerItem>({ hasTarget, hintT
     handleWindowScroll();
   }
 
-  // Rows unmount without a mouseleave when the list is filtered or the panel is remounted for
-  // another slot, which would otherwise leave a stale preview showing.
   useEffect(() => () => onHoverItem(null), [onHoverItem]);
 
   if (!hasTarget) {

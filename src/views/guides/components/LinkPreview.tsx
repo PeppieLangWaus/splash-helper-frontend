@@ -13,24 +13,10 @@ interface LinkPreviewProps {
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 
-/**
- * A link that grows a Discord-style hover preview once the backend resolves it — see
- * useLinkPreview.ts and splash-helper-backend's routes/linkPreview.ts. Only OSRS Wiki
- * articles, Discord invite links, and RuneLite Plugin Hub links actually resolve to anything
- * (the backend's own domain allowlist decides that, not this component); any other href still
- * renders as a plain working link, just with a minimal "Open link" tooltip instead of a real
- * preview.
- *
- * Replaces the old hand-paired `<Tooltip id="x-wiki" content="...">` + `<a data-tooltip-id="x-wiki">`
- * boilerplate every wiki-linked guide used to write out by hand (see views/guides/PickpocketGuide.tsx's
- * `tooltip` object) — the id is generated internally and the content is fetched, not hand-written.
- */
 export function LinkPreview({ href, children, className, style, onClick }: LinkPreviewProps) {
   const tooltipId = useId();
   const { status, result, request, cancel } = useLinkPreview(href);
-  // Set once the thumbnail's natural dimensions are known (see handleThumbLoad below) — landscape
-  // images lay out as image-on-top/text-below instead of the default text-left/image-right, so a
-  // wide screenshot doesn't get squeezed into a tall, narrow strip alongside the text.
+
   const [wideThumb, setWideThumb] = useState(false);
 
   const handleThumbLoad = (e: SyntheticEvent<HTMLImageElement>) => {
@@ -65,14 +51,7 @@ export function LinkPreview({ href, children, className, style, onClick }: LinkP
         clickable
         className={wideThumb ? 'link-preview-tooltip link-preview-tooltip-wide' : 'link-preview-tooltip'}
         border="1px solid var(--border-strong)"
-        // `render` (rather than children) is what wires up react-tooltip's internal
-        // ResizeObserver-based reposition — see contentWrapperRef in react-tooltip's source: it's
-        // only ever attached to a DOM node along the `render`/`content` prop path, never for plain
-        // children. Without it, the tooltip's position is computed once against whatever content
-        // is in it at that instant (typically the "Loading preview…" placeholder) and never
-        // recomputed as the real preview loads in and grows the box — which is why the first
-        // hover on a link lands the tooltip in the wrong place while a second (cached, so already
-        // full-size by the time it's positioned) hover lands correctly.
+
         render={() => (
           <LinkPreviewContent href={href} status={status} result={result} wideThumb={wideThumb} onThumbLoad={handleThumbLoad} />
         )}
@@ -163,8 +142,5 @@ function LinkPreviewContent({
     );
   }
 
-  // "not found" (missing wiki page, invalid/revoked invite, unknown or disabled plugin) or an
-  // unsupported domain — no real preview data, so fall back to a minimal cue rather than an
-  // empty-looking box.
   return <div className="link-preview link-preview-fallback">Open link ↗</div>;
 }

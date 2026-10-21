@@ -2,10 +2,6 @@ import { colors, fontSerif } from '../../../theme';
 import { type Guide } from '../data/guidesCatalog';
 import '../style/GuideShell.css';
 
-/** Compact link-button for pointing at another guide inline — title + meta only, no
- *  description. For the fuller card treatment (with description) see the guides hub,
- *  GuidesView.tsx. Looks up guides from the shared catalog by href. Hover treatment lives in
- *  GuideShell.css (`.guide-link-btn`) since inline styles can't express `:hover`. */
 const s = {
   row: { display: 'flex', flexWrap: 'wrap' as const, gap: '0.6rem' },
   button: {
@@ -31,8 +27,6 @@ export function GuideButton({ guide }: { guide: Guide }) {
   );
 }
 
-/** Row of `GuideButton`s, resolved from the shared catalog by href. Unknown hrefs are
- *  silently skipped; renders nothing if none resolve. */
 export function GuideButtons({ guides }: { guides: Guide[] }) {
   if (guides.length === 0) return null;
 

@@ -50,7 +50,7 @@ const ICON_FILE_PATHS = [
 
 function stripAssetPrefixAndExtension(assetPath: string): string[] {
   return assetPath
-    .replace(/^\/assets\/icons\//, '')
+    .replace(/^\/assets\/icons\
     .replace(/\.[^/.]+$/, '')
     .split('/');
 }
@@ -108,11 +108,11 @@ export const icons = buildIcons(ICON_FILE_PATHS);
 export const spellIcons = buildSpellIcons(ICON_FILE_PATHS);
 
 export function getSpellIcon(spellName: string): string | undefined {
-  // Real session data comes from the RuneLite plugin's SplashSpell enum, whose display name is
-  // "Fire Strike" (space-separated, title case) - not the "FIRE_STRIKE" shape this map's keys
-  // are built in. Dev/fake session data happens to already use the enum's own SCREAMING_SNAKE_CASE
-  // name, which is why this only ever showed up against real production data: normalize
-  // whitespace (and any other separator) to underscores before keying in, so both shapes match.
+  
+  
+  
+  
+  
   const key = spellName.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
   return spellIcons[key];
 }

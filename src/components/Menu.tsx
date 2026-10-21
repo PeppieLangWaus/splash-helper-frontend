@@ -6,7 +6,7 @@ export interface MenuItem {
   onClick: () => void;
   danger?: boolean;
   disabled?: boolean;
-  /** Tooltip shown on hover — handy for explaining why a disabled item is disabled. */
+
   title?: string;
 }
 
@@ -36,8 +36,6 @@ function itemStyle(danger?: boolean, disabled?: boolean): CSSProperties {
   };
 }
 
-/** The rendered list of items — shared by the button-anchored `Menu` and the
- *  cursor-anchored context menu (`useContextMenu`). Positioning is left to the caller. */
 export function MenuList({
   items,
   onRequestClose,
@@ -91,8 +89,6 @@ const s = {
   },
 } as const;
 
-/** A small kebab-button that opens a floating dropdown of actions. Closes on outside
- *  click or Escape. */
 export default function Menu({ items, label = '⋮' }: { items: MenuItem[]; label?: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);

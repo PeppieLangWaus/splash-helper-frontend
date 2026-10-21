@@ -21,7 +21,7 @@ const s = {
     fontWeight: active ? 700 : 400,
     transition: 'color 0.15s, border-color 0.15s',
   }),
-  branch: (active: boolean): CSSProperties | undefined => ({ 
+  branch: (active: boolean): CSSProperties | undefined => ({
     display: 'inline-block',
     position: 'relative',
     top: '-.05em',
@@ -42,18 +42,11 @@ function slugify(text: string): string {
     .replace(/(^-+|-+$)/g, '') || 'section';
 }
 
-/**
- * Wraps a guide page's content with a sticky, scroll-spied table of contents to its left,
- * auto-built from the `h2`/`h3` elements rendered inside `children`. Falls back to no sidebar
- * (content alone, unchanged width) when there aren't enough headings to bother with, and hides
- * itself below the `GuideShell.css` breakpoint where there isn't room for both columns.
- */
 export default function GuideShell({ children }: { children: ReactNode }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  // Discover headings after the guide content renders, and stamp ids onto them for anchoring.
   useEffect(() => {
     const root = contentRef.current;
     if (!root) return;
@@ -67,23 +60,17 @@ export default function GuideShell({ children }: { children: ReactNode }) {
       while (used.has(id)) id = `${base}-${n++}`;
       used.add(id);
       node.id = id;
-      
+
       return { id, text: node.textContent || '', level: levels[i], branch: levels[i] == 3 ? true : false };
     });
     setHeadings(list);
 
-    // The browser's native #hash jump (on initial load, or Back/Forward) fires before these
-    // ids exist, so it lands at the top of the page. Redo it now that anchors are in place.
     if (location.hash) {
       const target = document.getElementById(location.hash.slice(1));
       if (target) target.scrollIntoView();
     }
   }, [children]);
 
-  // Highlight whichever heading is currently in the "reading zone" near the top of the viewport.
-  // Computed directly off scroll position (rather than IntersectionObserver) so it's correct
-  // after both incremental scrolling and instant jumps — e.g. clicking a TOC link, or landing
-  // on a #hash directly.
   useEffect(() => {
     if (headings.length === 0) return;
     const update = () => {

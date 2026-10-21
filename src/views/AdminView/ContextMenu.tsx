@@ -7,9 +7,6 @@ interface ContextMenuState {
   items: MenuItem[];
 }
 
-/** Tracks a cursor-anchored menu opened via right-click. Spread `menu` into your JSX where
- *  the menu should render (it's positioned `fixed`, so anywhere in the tree works), and call
- *  `open(e, items)` from an `onContextMenu` handler. */
 export function useContextMenu() {
   const [state, setState] = useState<ContextMenuState | null>(null);
 

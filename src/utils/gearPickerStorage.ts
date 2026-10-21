@@ -1,6 +1,3 @@
-/** Persists the gear picker's in-progress loadout (the `/gear` editor, not a shared/read-only
- *  view) so it survives a page refresh. */
-
 import { INVENTORY_SLOT_COUNT, emptyInventory } from '../types/gear';
 import type { GearInventory, GearLoadoutSlots } from '../types/gear';
 
@@ -8,11 +5,10 @@ const DRAFT_KEY = 'gear:draft';
 
 export interface GearPickerDraft {
   slots: GearLoadoutSlots;
-  /** Local to this draft — not part of what Save/Share sends to the backend. */
+
   inventory: GearInventory;
   loadoutName: string;
-  /** The slug of a saved loadout this draft matches, if any — kept so "Update saved loadout"
-   *  still shows after a refresh instead of reverting to "Save loadout". */
+
   savedSlug: string | null;
 }
 
@@ -43,6 +39,6 @@ export function saveGearPickerDraft(draft: GearPickerDraft): void {
   try {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
   } catch {
-    // Storage unavailable — the draft just won't survive a reload.
+
   }
 }

@@ -1,5 +1,4 @@
-/* react-tooltip renders its own wrapper (.react-tooltip); this overrides its default bubble
-   styling to match the app's panel look instead of react-tooltip's default dark-gray. */
+
 .link-preview-tooltip {
   background-color: var(--panel-alt) !important;
   color: var(--text) !important;
@@ -11,9 +10,7 @@
   z-index: 50;
 }
 
-/* Wide thumbnails go image-on-top instead of image-on-the-side (see .link-preview-wide below),
-   so the left inset that makes room for a side-by-side image would just leave a blank strip
-   above a full-width image — drop it and let .link-preview-wide's own elements handle padding. */
+
 .link-preview-tooltip-wide {
   padding: 0 !important;
 }
@@ -25,8 +22,7 @@
   text-align: left;
 }
 
-/* A landscape thumbnail (wider than it is tall — see LinkPreview.tsx's handleThumbLoad) reads
-   better as a banner across the top than squeezed into a narrow side column. */
+
 .link-preview-wide {
   flex-direction: column;
   gap: 0;
@@ -34,7 +30,7 @@
 
 .link-preview-wide .link-preview-thumb {
   order: -1;
-  /* border-radius: 8px 8px 0 0; */
+  
 }
 
 .link-preview-wide .link-preview-thumb img {
@@ -84,7 +80,7 @@
 }
 
 .link-preview-thumb-round {
-  /* border-radius: 50%; */
+  
   object-fit: cover;
   image-rendering: auto;
 }

@@ -1,7 +1,5 @@
 import { colors, fontSerif } from '../../../theme';
 
-/** Shared inline-style tokens for the standalone `/guides/*` content pages. Kept as one
- *  module so every guide reads/scans the same way instead of re-deriving these per file. */
 export const gs = {
   container: { maxWidth: 760, margin: '0 auto', padding: '2.5rem 1.25rem 4rem' },
   back: { color: colors.link, fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 },
@@ -53,7 +51,6 @@ export const gs = {
   },
   faqQ: { fontFamily: fontSerif, fontSize: '0.95rem', fontWeight: 700, color: colors.text, marginTop: '1.1rem', marginBottom: '0.3rem' },
 
-  // Collapsible FAQ entries (native <details>/<summary>, see Faq.tsx).
   faqItem: {
     border: `1px solid ${colors.border}`,
     borderRadius: 8,
@@ -73,7 +70,6 @@ export const gs = {
   },
   faqAnswer: { color: colors.textMuted, fontSize: '0.9rem', lineHeight: 1.7, padding: '0 1rem 0.85rem' },
 
-  // Callout boxes used by the setup/plugin guides.
   note: {
     background: colors.panel,
     border: `1px solid ${colors.border}`,
@@ -104,7 +100,6 @@ export const gs = {
     marginBottom: '1.25rem',
   },
 
-  // Numbered "phase" steps (setup guides walk through a sequence).
   stepList: { display: 'flex', flexDirection: 'column' as const, gap: '0.9rem', marginBottom: '1.25rem' },
   step: {
     display: 'flex',
@@ -149,7 +144,6 @@ export const gs = {
   td: { color: colors.textMuted, borderBottom: `1px solid ${colors.border}`, padding: '0.5rem 0.6rem', verticalAlign: 'top' as const },
 } as const;
 
-/** Renders a `HowTo`/`Article`-style JSON-LD `<script>` tag. Pass any schema.org object. */
 export function guideJsonLd(schema: object): string {
   return JSON.stringify(schema);
 }

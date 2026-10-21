@@ -3,9 +3,6 @@ import { gs } from '../style/guideTheme';
 
 export type FaqEntry = { q: string; a: string };
 
-/** Renders a list of FAQ entries as collapsible native `<details>`/`<summary>` items
- *  (no JS needed to expand, works with in-page find), plus the matching FAQPage
- *  JSON-LD `<script>` tag for SEO. */
 export function Faq({ faqs }: { faqs: FaqEntry[] }) {
   return (
     <div className="guide-faq">

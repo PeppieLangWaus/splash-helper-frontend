@@ -46,23 +46,18 @@ import '../components/gearpicker/Gearpicker.css';
 import './GearPickerView.css';
 
 interface Props {
-  /** Set when reached via /gear/:slug — the slug of a saved or anonymously-shared loadout to
-   *  load on mount. */
+
   initialSlug?: string;
-  /** Renders the equipment grid read-only with a "Load into editor" button, instead of the
-   *  interactive picker. Used for viewing a loadout via its share link without accidentally
-   *  changing it. */
+
   readOnly?: boolean;
 }
 
-/** Every toolbar icon is drawn at this multiple of its native pixel size, so they all read as the
- *  same scale despite their different canvases. */
 const TOOLBAR_ICON_SCALE = 1.25;
 
 interface ToolbarIconProps {
   src: string;
   nativeWidth: number;
-  /** Surrounds the icon with an accent-coloured glow. */
+
   glowing?: boolean;
 }
 
@@ -79,15 +74,13 @@ function ToolbarIcon({ src, nativeWidth, glowing = false }: ToolbarIconProps) {
 
 function slotsWithItem(slots: GearLoadoutSlots, slot: EquipmentSlot, item: EquipmentItem): GearLoadoutSlots {
   const next: GearLoadoutSlots = { ...slots, [slot]: item.id };
-  // Equipping a two-handed weapon can't coexist with a shield — clear it rather than leaving
-  // an impossible combination in state.
+
   if (slot === 'weapon' && item.isTwoHanded) delete next.shield;
   return next;
 }
 
 type PanelMode = 'equipment' | 'inventory';
 
-/** An open right-click menu: where it is, and which slot (if any) was under the cursor. */
 interface ContextMenuState {
   x: number;
   y: number;
@@ -105,27 +98,20 @@ function withAdded<T>(selection: ReadonlySet<T>, value: T): ReadonlySet<T> {
   return new Set(selection).add(value);
 }
 
-/** A plain click selects just `value`; an additive (ctrl/cmd) click toggles it within `selection`. */
 function selectionAfterClick<T>(selection: ReadonlySet<T>, value: T, additive: boolean): ReadonlySet<T> {
   return additive ? withToggled(selection, value) : new Set([value]);
 }
 
-/** Stable no-op for the picker's hover preview, which only means something for equipment. */
 const ignoreHover = () => {};
 
 const MAX_STAT_CHANGE_LEVEL = 3;
 
-/** Strength-like stats have a different scale from the attack, defence and prayer bonuses, so
- *  each is only compared against itself. Every other stat shares one scale. */
 const SELF_SCALED_STATS: (keyof TotalBonuses)[] = ['strength', 'rangedStrength', 'magicDamage'];
 
 function scaleKeyOf(stat: keyof TotalBonuses): string {
   return SELF_SCALED_STATS.includes(stat) ? stat : 'general';
 }
 
-/** Rates each item from -MAX_STAT_CHANGE_LEVEL to +MAX_STAT_CHANGE_LEVEL by its single biggest
- *  stat change when equipped, relative to the largest change any of `items` makes to stats on
- *  the same scale. Items that change nothing are left out. */
 function statChangeLevels(
   items: EquipmentItem[],
   slots: GearLoadoutSlots,
@@ -167,7 +153,6 @@ function statChangeLevels(
 
 const NUMERIC_SUFFIX_PATTERN = /^(.*?)\s*\((\d+)\)\s*$/;
 
-/** Of items differing only by a trailing "(<number>)", e.g. charge counts, keeps the highest. */
 function withoutLowerNumberedVariants<T extends { name: string }>(items: T[]): T[] {
   const highestNumberByBaseName = new Map<string, number>();
   for (const item of items) {
@@ -192,14 +177,10 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   const [showStatChanges, setShowStatChanges] = useState(false);
   const [dataError, setDataError] = useState<string | null>(null);
 
-  // Seeded from the persisted draft on the plain /gear editor; a /gear/:slug view loads its own
-  // loadout below instead, so it starts blank here.
   const [slots, setSlots] = useState<GearLoadoutSlots>(() => (initialSlug ? {} : loadGearPickerDraft().slots));
   const [selectedSlots, setSelectedSlots] = useState<ReadonlySet<EquipmentSlot>>(() => new Set());
   const [panelMode, setPanelMode] = useState<PanelMode>('equipment');
-  // Inventory mode slides the bonuses panel behind the middle one, shrinking it so it ends up fully
-  // inside the middle panel's footprint; measured when entering it, from the panels' sizes and
-  // positions at that moment.
+
   const middleColRef = useRef<HTMLDivElement>(null);
   const bonusesWrapRef = useRef<HTMLDivElement>(null);
   const [bonusesTuck, setBonusesTuck] = useState({ offsetX: 0, scale: 1 });
@@ -207,16 +188,13 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   const [selectedInventorySlots, setSelectedInventorySlots] = useState<ReadonlySet<number>>(() => new Set());
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
-  // Loaded the first time inventory mode opens, since it's far bigger than the equipment dataset.
+
   const [itemList, setItemList] = useState<ListedItem[] | null>(null);
   const [itemListError, setItemListError] = useState<string | null>(null);
   const [itemSearchQuery, setItemSearchQuery] = useState('');
   const [hoveredItem, setHoveredItem] = useState<EquipmentItem | null>(null);
   const [loadoutName, setLoadoutName] = useState(() => (initialSlug ? '' : loadGearPickerDraft().loadoutName));
-  // The slug of a loadout the signed-in user owns and can update in place. Deliberately left
-  // null when viewing someone else's (or an anonymous) shared loadout — Save should fork a new
-  // copy in that case, not attempt to overwrite a record the requester doesn't own (which the
-  // backend would 403 on anyway).
+
   const [savedSlug, setSavedSlug] = useState<string | null>(() => (initialSlug ? null : loadGearPickerDraft().savedSlug));
   const [forceEdit, setForceEdit] = useState(false);
 
@@ -229,15 +207,10 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
 
-  // The item picker and bonuses panels are pegged to the equipment panel's own height, so neither
-  // the item list's length nor the bonuses text can feed back into resizing it. A ref-via-state
-  // (not useRef) is needed since this panel only mounts once equipment data finishes loading.
   const [equipmentPanelEl, setEquipmentPanelEl] = useState<HTMLDivElement | null>(null);
   const [matchedPanelHeight, setMatchedPanelHeight] = useState<number>();
   const [itemPickerPanelEl, setItemPickerPanelEl] = useState<HTMLDivElement | null>(null);
 
-  // useLayoutEffect for an immediate first measurement (synchronous with the commit, so there's
-  // no flash of mismatched heights); ResizeObserver then keeps it in sync as content changes.
   useLayoutEffect(() => {
     if (equipmentPanelEl) setMatchedPanelHeight(equipmentPanelEl.getBoundingClientRect().height);
   }, [equipmentPanelEl]);
@@ -275,9 +248,6 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
       })
       .catch((err) => setLoadoutError(err instanceof Error ? err.message : 'Loadout not found'))
       .finally(() => setLoadingLoadout(false));
-    // Intentionally only re-runs when the slug itself changes, not on every `user` identity
-    // change (e.g. logging in/out shouldn't re-fetch a loadout already on screen).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSlug]);
 
   const itemsById = useMemo(() => new Map(equipmentData.map((item) => [item.id, item])), [equipmentData]);
@@ -308,8 +278,6 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   const effectiveReadOnly = readOnly && !forceEdit;
   const inventoryMode = panelMode === 'inventory' && !effectiveReadOnly;
 
-  // A press anywhere but the slot grid, the item picker (which needs the selection to act on) or
-  // the context menu clears the inventory selection.
   useEffect(() => {
     if (!inventoryMode || selectedInventorySlots.size === 0) return;
     function deselectOnOutsidePress(event: globalThis.MouseEvent) {
@@ -321,8 +289,6 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     return () => document.removeEventListener('mousedown', deselectOnOutsidePress);
   }, [inventoryMode, selectedInventorySlots, equipmentPanelEl, itemPickerPanelEl]);
 
-  // Only persist while the loadout is actually editable — a plain read-only shared view (no
-  // forceEdit yet) shouldn't overwrite the user's own in-progress draft.
   useEffect(() => {
     if (effectiveReadOnly) return;
     saveGearPickerDraft({ slots, inventory, loadoutName, savedSlug });
@@ -419,8 +385,6 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     setSelectedInventorySlots((current) => selectionAfterClick(current, index, additive));
   }
 
-  // Every item the picker offers fits only its own slot, so this equips into `item.slot` however
-  // many slots are selected.
   function handleSelectItem(item: EquipmentItem) {
     if (item.slot === 'shield' && itemsById.get(slots.weapon ?? -1)?.isTwoHanded) return;
     setSlots(slotsWithItem(slots, item.slot, item));

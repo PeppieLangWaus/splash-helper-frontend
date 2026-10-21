@@ -41,7 +41,7 @@ const steps = [
           <li style={gs.li}>
             Check <span style={gs.code}>Controls {'>'} Keybinds</span> and remember what key you spellbook is set to.
           </li>
-          
+
         </ol>
       </>
     )
@@ -130,7 +130,7 @@ const steps = [
     body:  (
       <>
         <p style={gs.p}><strong>Hold</strong> <i>alt</i>, and <strong>drag</strong> the the inventory so that the coin pouch is on top of the knight and the tile you're standing on.</p>
-        <GuideFigure 
+        <GuideFigure
             src='/assets/images/guides/optimal/layout.png'
             alt='Equipment'
             width='35em'
@@ -235,11 +235,11 @@ export default function OptimalSetupGuide() {
 
         </ul>
 
-        {/* <h2 style={gs.h2}>Equipment & Inventory & Spellbook</h2> */}
+        {}
         <div style={{ ...gs.row, alignItems: 'flex-start' }}>
           <GuideGearPanel mode='equipment' slug={EQUIPMENT_LOADOUT_SLUG} />
           <GuideGearPanel mode='inventory' items={INVENTORY_ITEMS} />
-          <GuideFigure 
+          <GuideFigure
             src='/assets/images/guides/optimal/spellbook.png'
             alt='Spellbook'
             width='15em'
