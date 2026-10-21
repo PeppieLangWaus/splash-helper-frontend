@@ -114,7 +114,7 @@
 }
 
 /* A button pairing one of the gear picker's own icon assets with a text label — used for
-   Clear all (clearEquipment.png) and Delete (delete.png). */
+   Delete (delete.png). */
 .gear-picker-icon-btn {
     display: inline-flex;
     align-items: center;
@@ -142,7 +142,22 @@
 .gear-picker-icon-btn__img {
     width: 18px;
     height: 18px;
-    image-rendering: pixelated;
+    /* image-rendering: pixelated; */
+}
+
+.gear-picker-toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.gear-picker-toolbar-btn__img {
+    display: block;
+    /* image-rendering: pixelated; */
+}
+
+.gear-picker-toolbar-btn__img--glowing {
+    filter: drop-shadow(0 0 2px var(--accent)) drop-shadow(0 0 4px var(--accent));
 }
 
 .gear-picker-hint {

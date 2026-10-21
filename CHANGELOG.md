@@ -10,6 +10,13 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-10-21
+### Added
+- Add a row of square, pixel-art buttons under the gear picker's equipment grid: Stats, Clear all, Value and Search, with a hover look and an accent-coloured glow on the icons that toggle.
+- Toggle the gear picker's total cost between the full amount (29.300.000) and an abbreviated one (29.3M) with the Value button.
+### Changed
+- Show the gear picker's full total cost with dot-separated thousands instead of commas.
+
 ## [0.28.0] - 2026-10-20
 ### Added
 - Preview an item's effect on the gear picker's bonuses by hovering it in the item picker, with each stat's change shown in green, red or unchanged.

@@ -18,12 +18,22 @@ import {
   shareGearLoadout,
   updateGearLoadout,
 } from '../api';
+import OSRSSquareButton from '../components/osrs/OSRSSquareButton';
 import { computeTotalBonuses } from '../components/gearpicker/gearBonuses';
-import { CLEAR_EQUIPMENT_ICON, CONNECTOR_ASSETS, DELETE_ICON, PANEL_ASSETS_STEEL, PANEL_ASSETS_STONE } from '../components/gearpicker/gearpickerAssets';
+import {
+  CLEAR_EQUIPMENT_ICON,
+  CONNECTOR_ASSETS,
+  DELETE_ICON,
+  PANEL_ASSETS_STEEL,
+  PANEL_ASSETS_STONE,
+  SEARCH_ICON,
+  STATS_ICON,
+  VALUE_ICON,
+} from '../components/gearpicker/gearpickerAssets';
 import { loadGearPickerDraft, saveGearPickerDraft } from '../utils/gearPickerStorage';
 import type { EquipmentItem, EquipmentSlot, GearLoadout, GearLoadoutSlots } from '../types/gear';
 import { EQUIPMENT_SLOT_LABELS } from '../types/gear';
-import '../components/gearpicker/gearpicker.css';
+import '../components/gearpicker/Gearpicker.css';
 import './GearPickerView.css';
 
 interface Props {
@@ -34,6 +44,30 @@ interface Props {
    *  interactive picker. Used for viewing a loadout via its share link without accidentally
    *  changing it. */
   readOnly?: boolean;
+}
+
+/** Outer size (px) of each square toolbar button under the equipment grid. */
+const TOOLBAR_BUTTON_SIZE = 48;
+/** Every toolbar icon is drawn at this multiple of its native pixel size, so they all read as the
+ *  same scale despite their different canvases. */
+const TOOLBAR_ICON_SCALE = 1.25;
+
+interface ToolbarIconProps {
+  src: string;
+  nativeWidth: number;
+  /** Surrounds the icon with an accent-coloured glow. */
+  glowing?: boolean;
+}
+
+function ToolbarIcon({ src, nativeWidth, glowing = false }: ToolbarIconProps) {
+  return (
+    <img
+      src={src}
+      alt=""
+      className={'gear-picker-toolbar-btn__img' + (glowing ? ' gear-picker-toolbar-btn__img--glowing' : '')}
+      style={{ width: nativeWidth * TOOLBAR_ICON_SCALE }}
+    />
+  );
 }
 
 function slotsWithItem(slots: GearLoadoutSlots, slot: EquipmentSlot, item: EquipmentItem): GearLoadoutSlots {
@@ -49,6 +83,8 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
 
   const [equipmentData, setEquipmentData] = useState<EquipmentItem[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [searchGlowing, setSearchGlowing] = useState(false);
+  const [costAbbreviated, setCostAbbreviated] = useState(false);
   const [dataError, setDataError] = useState<string | null>(null);
 
   // Seeded from the persisted draft on the plain /gear editor; a /gear/:slug view loads its own
@@ -290,10 +326,49 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
                   Load into editor
                 </button>
               ) : (
-                <button type="button" className="gear-picker-icon-btn" onClick={handleClearAll} title="Clear all slots">
-                  <img src={CLEAR_EQUIPMENT_ICON} alt="" className="gear-picker-icon-btn__img" />
-                  <span>Clear all</span>
-                </button>
+                <div className="gear-picker-toolbar">
+                  <OSRSSquareButton
+                    width={TOOLBAR_BUTTON_SIZE}
+                    height={TOOLBAR_BUTTON_SIZE}
+                    scaleWithSize={false}
+                    title="Stats"
+                    aria-label="Stats"
+                  >
+                    <ToolbarIcon src={STATS_ICON} nativeWidth={27} />
+                  </OSRSSquareButton>
+                  <OSRSSquareButton
+                    width={TOOLBAR_BUTTON_SIZE}
+                    height={TOOLBAR_BUTTON_SIZE}
+                    scaleWithSize={false}
+                    onClick={handleClearAll}
+                    title="Clear all slots"
+                    aria-label="Clear all slots"
+                  >
+                    <ToolbarIcon src={CLEAR_EQUIPMENT_ICON} nativeWidth={28} />
+                  </OSRSSquareButton>
+                  <OSRSSquareButton
+                    width={TOOLBAR_BUTTON_SIZE}
+                    height={TOOLBAR_BUTTON_SIZE}
+                    scaleWithSize={false}
+                    aria-pressed={costAbbreviated}
+                    onClick={() => setCostAbbreviated((abbreviated) => !abbreviated)}
+                    title="Abbreviate total cost"
+                    aria-label="Abbreviate total cost"
+                  >
+                    <ToolbarIcon src={VALUE_ICON} nativeWidth={25} glowing={costAbbreviated} />
+                  </OSRSSquareButton>
+                  <OSRSSquareButton
+                    width={TOOLBAR_BUTTON_SIZE}
+                    height={TOOLBAR_BUTTON_SIZE}
+                    scaleWithSize={false}
+                    aria-pressed={searchGlowing}
+                    onClick={() => setSearchGlowing((glowing) => !glowing)}
+                    title="Search"
+                    aria-label="Search"
+                  >
+                    <ToolbarIcon src={SEARCH_ICON} nativeWidth={20} glowing={searchGlowing} />
+                  </OSRSSquareButton>
+                </div>
               )}
             </div>
           }
@@ -311,7 +386,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
             <div className="gear-picker-side-col">
               <SplashSafetyIndicator totalMagicAttack={totals.magicAttack} />
               <BonusSummaryPanel totals={totals} previewTotals={previewTotals} />
-              <GearLoadoutCost slots={slots} />
+              <GearLoadoutCost slots={slots} abbreviated={costAbbreviated} />
             </div>
           }
         />

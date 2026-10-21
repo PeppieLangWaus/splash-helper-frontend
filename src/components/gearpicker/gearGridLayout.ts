@@ -5,7 +5,7 @@ import type { EquipmentSlot } from '../../types/gear';
  *  can't drift apart. SLOT_SIZE/GRID_WIDTH/GRID_HEIGHT are a fixed-px *design* reference only;
  *  everything consumed outside this file is expressed as a percentage of that design size, since
  *  the grid itself renders responsively. */
-export const SLOT_SIZE = 36;
+export const SLOT_SIZE = 24;
 /** Default gap (px) used for row pitch (uniform — there's no vertical ROW_HORIZONTAL_GAP
  *  equivalent) and as the horizontal gap for any row not listed in ROW_HORIZONTAL_GAP. */
 export const SLOT_GAP = 3;

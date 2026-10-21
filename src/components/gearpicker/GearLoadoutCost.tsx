@@ -3,8 +3,35 @@ import PixelText from '../PixelText';
 import { colors } from '../../theme';
 import type { GearLoadoutSlots } from '../../types/gear';
 
+const ABBREVIATION_UNITS = [
+  { suffix: 'K', size: 1e3 },
+  { suffix: 'M', size: 1e6 },
+  { suffix: 'B', size: 1e9 },
+];
+
+/** 29300000 → "29.3M"; amounts under 1K stay as-is. A value that rounds up to 1000 of a unit is
+ *  shown in the next one up, so 999,999 reads "1M" rather than "1000K". */
+function formatGpAbbreviated(amount: number): string {
+  let unitIndex = ABBREVIATION_UNITS.findLastIndex(({ size }) => amount >= size);
+  if (unitIndex === -1) return String(amount);
+
+  let rounded = Math.round((amount / ABBREVIATION_UNITS[unitIndex].size) * 10) / 10;
+  if (rounded >= 1000 && unitIndex < ABBREVIATION_UNITS.length - 1) {
+    unitIndex += 1;
+    rounded = Math.round((amount / ABBREVIATION_UNITS[unitIndex].size) * 10) / 10;
+  }
+  return `${rounded}${ABBREVIATION_UNITS[unitIndex].suffix}`;
+}
+
+/** 29300000 → "29.300.000" (dot-separated thousands). */
+function formatGpFull(amount: number): string {
+  return amount.toLocaleString('de-DE');
+}
+
 interface Props {
   slots: GearLoadoutSlots;
+  /** Show the total as "29.3M" instead of the full "29.300.000". */
+  abbreviated?: boolean;
   /** Extra class appended alongside the base gear-picker-ge-cost one — e.g. a modifier for
    *  placement under the Bonuses panel's header title (see GearPickerView.tsx). */
   className?: string;
@@ -12,7 +39,7 @@ interface Props {
 
 /** The combined GE cost of a loadout's equipped items; trailing "+" means at least one has no
  *  GE price (untradeable, or no recent trade data). */
-export default function GearLoadoutCost({ slots, className }: Props) {
+export default function GearLoadoutCost({ slots, abbreviated = false, className }: Props) {
   const price = useGearLoadoutPrice(slots);
   const equipped = Object.values(slots).some((id) => id !== undefined);
 
@@ -37,7 +64,7 @@ export default function GearLoadoutCost({ slots, className }: Props) {
     <div className={rootClass}>
       <PixelText text="Total cost:" fontSize={19.2} color={colors.accentText} bold fixedBaseline />
       <PixelText
-        text={`${price.total.toLocaleString()} gp${price.hasUnpriced ? '+' : ''}`}
+        text={`${abbreviated ? formatGpAbbreviated(price.total) : formatGpFull(price.total)} gp`}
         fontSize={19.2}
         color={colors.textFaint}
         fixedBaseline

@@ -8,7 +8,7 @@ import { fetchEquipmentData, fetchGearLoadout } from '../../api';
 import { PANEL_ASSETS_STONE } from './gearpickerAssets';
 import { colors } from '../../theme';
 import type { EquipmentItem, GearLoadoutSlots } from '../../types/gear';
-import './gearpicker.css';
+import './Gearpicker.css';
 
 interface Props {
   /** Share slug of a saved or anonymously-shared loadout — the same slug GearPickerView's

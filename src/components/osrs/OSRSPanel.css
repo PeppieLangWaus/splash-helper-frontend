@@ -18,12 +18,12 @@
     position: absolute;
     inset: var(--rp-border-thickness);
     background-repeat: repeat;
-    image-rendering: pixelated;
+    /* image-rendering: pixelated; */
 }
 
 .osrs-panel__border {
     position: absolute;
-    image-rendering: pixelated;
+    /* image-rendering: pixelated; */
 }
 
 .osrs-panel__border--top {
@@ -60,7 +60,7 @@
 
 .osrs-panel__corner {
     position: absolute;
-    image-rendering: pixelated;
+    /* image-rendering: pixelated; */
     background-repeat: no-repeat;
     width: var(--rp-corner-width);
     height: var(--rp-corner-height);

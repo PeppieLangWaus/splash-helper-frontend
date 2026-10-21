@@ -91,30 +91,32 @@ export const SLOT_PLACEHOLDER_ICON: Record<EquipmentSlot, string> = {
 export const CONNECTOR_ASSETS = {
   horizontal: `${PANEL_BASE}/connector/horizontal.png`,
   vertical: `${PANEL_BASE}/connector/vertical.png`,
-  barThickness: 6,
+  barThickness: 4,
 };
 
 /** Per-slot uniform scale for SlotTile's icon. Every icon PNG is the same fixed 36x32 canvas
  *  (render-item-icons.ts) regardless of item, so a slot whose icons should read as bigger or
  *  smaller than the others (e.g. weapon vs. ring) needs an explicit multiplier here. */
 export const SLOT_ICON_SCALE: Record<EquipmentSlot, number> = {
-  head: 1.35,
-  cape: 1.35,
-  neck: 1.35,
-  weapon: 1.35,
-  body: 1.35,
-  shield: 1.35,
-  legs: 1.35,
-  hands: 1.35,
-  feet: 1.35,
-  ring: 1.35,
-  ammo: 1.35,
+  head: 1.3,
+  cape: 1.3,
+  neck: 1.3,
+  weapon: 1.3,
+  body: 1.3,
+  shield: 1.3,
+  legs: 1.3,
+  hands: 1.3,
+  feet: 1.3,
+  ring: 1.3,
+  ammo: 1.3,
 };
 
 export const BLOCKED_ICON = `${ICON_BASE}/blocked.png`;
 export const SPLASH_TRUE_ICON = `${ICON_BASE}/splashTrue.png`;
 export const SPLASH_FALSE_ICON = `${ICON_BASE}/splashFalse.png`;
 export const SEARCH_ICON = `${ICON_BASE}/search.png`;
+export const STATS_ICON = `${ICON_BASE}/stats.png`;
+export const VALUE_ICON = `${ICON_BASE}/value.png`;
 export const CLEAR_EQUIPMENT_ICON = `${ICON_BASE}/clearEquipment.png`;
 export const REMOVE_BUTTON_ICON = {
   normal: '/assets/icons/components/buttons/remove/normal.png',
