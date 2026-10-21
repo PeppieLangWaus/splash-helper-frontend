@@ -5,6 +5,26 @@ import { LinkPreview } from '../components/LinkPreview';
 import GuideFigure from '../components/GuideFigure';
 import { colors } from '../../../theme';
 import { Tooltip } from 'react-tooltip';
+import GuideGearPanel from '../../../components/gearpicker/GuideGearPanel';
+import type { GuideInventoryItem } from '../../../components/gearpicker/GearInventoryGuideCard';
+
+const EQUIPMENT_LOADOUT_SLUG = 'f_WQC9jz';
+
+const DODGY_NECKLACE = { id: 21143, name: 'Dodgy necklace' };
+const JUG_OF_WINE = { id: 1993, name: 'Jug of wine' };
+
+const INVENTORY_ITEMS: ReadonlyArray<GuideInventoryItem> = [
+  { id: 22521, name: 'Coin pouch' },
+  DODGY_NECKLACE,
+  DODGY_NECKLACE,
+  DODGY_NECKLACE,
+  { id: 617, name: 'Coins' },
+  DODGY_NECKLACE,
+  DODGY_NECKLACE,
+  DODGY_NECKLACE,
+  ...Array.from({ length: 19 }, () => JUG_OF_WINE),
+  { id: 564, name: 'Cosmic rune' },
+];
 
 const steps = [
   {
@@ -216,19 +236,9 @@ export default function OptimalSetupGuide() {
         </ul>
 
         {/* <h2 style={gs.h2}>Equipment & Inventory & Spellbook</h2> */}
-        <div style={gs.row}>
-          <GuideFigure 
-            src='/assets/images/guides/optimal/equipment.png'
-            alt='Equipment'
-            width='15em'
-            caption='Equipment'
-          />
-          <GuideFigure 
-            src='/assets/images/guides/optimal/inventory.png'
-            alt='Inventory'
-            width='15em'
-            caption='Inventory'
-          />
+        <div style={{ ...gs.row, alignItems: 'flex-start' }}>
+          <GuideGearPanel mode='equipment' slug={EQUIPMENT_LOADOUT_SLUG} />
+          <GuideGearPanel mode='inventory' items={INVENTORY_ITEMS} />
           <GuideFigure 
             src='/assets/images/guides/optimal/spellbook.png'
             alt='Spellbook'

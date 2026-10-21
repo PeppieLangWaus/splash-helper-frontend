@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import OSRSPanel from '../osrs/OSRSPanel';
 import InventoryGrid from './InventoryGrid';
-import { INVENTORY_EXTRA_HEIGHT } from './gearGridLayout';
 import { PANEL_ASSETS_STONE } from './gearpickerAssets';
 import { INVENTORY_SLOT_COUNT, emptyInventory } from '../../types/gear';
 import './Gearpicker.css';
@@ -40,7 +39,7 @@ export default function GearInventoryGuideCard({ items }: Props) {
     return { inventory: layout, itemNamesById: names };
   }, [items]);
 
-  const body = <InventoryGrid inventory={inventory} itemNamesById={itemNamesById} extraHeight={INVENTORY_EXTRA_HEIGHT} />;
+  const body = <InventoryGrid inventory={inventory} itemNamesById={itemNamesById} />;
 
-  return <OSRSPanel assets={PANEL_ASSETS_STONE} borderType="stone" type="side" width={200} content={body} />;
+  return <OSRSPanel assets={PANEL_ASSETS_STONE} borderType="stone" type="side" width={240} content={body} />;
 }

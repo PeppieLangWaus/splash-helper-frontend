@@ -10,6 +10,12 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-10-21
+### Added
+- Replace the equipment and inventory screenshots in the optimal setup guide with read-only gear picker panels (`GuideGearPanel`) that match the spellbook image's size.
+### Changed
+- Make the equipment guide card show only the equipment diamond (no name link or GE cost) and the inventory guide card drop the toolbar spacing, so both sit at a 240px width and the spellbook image's height.
+
 ## [0.36.0] - 2026-10-21
 ### Added
 - Merge the `content/guides` branch: a guides hub (`/guides`) with pickpocketing, normal-knight, sticky-knight, RuneLite plugin, optimal/mobile/solo setup and chat-commands guides, plus the `LinkPreview` (OSRS Wiki, Discord invite and RuneLite Plugin Hub previews), `ExplvMap`, `Faq` and `GuideFigure` components and a `findDaxPath` pathfinder API client.
