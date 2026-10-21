@@ -1,10 +1,10 @@
-import { Fragment, useEffect, useMemo, useRef } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChatItemRef, ChatMessage } from '../../types/chatbox';
 import { formatClockTime } from '../../utils/formatTime';
-import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './chatIcons';
-import { itemIconUrl, stripMessageIconTags } from './itemIcons';
-import { splitColorTagRuns } from './chatColorTags';
-import chatEmptyTips from '../../data/chatEmptyTips';
+import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './utils/chatIcons';
+import { itemIconUrl, stripMessageIconTags } from './utils/itemIcons';
+import { splitColorTagRuns } from './utils/chatColorTags';
+import chatEmptyTips from './data/chatEmptyTips';
 import ScrollbarSprite from '../ScrollbarSprite';
 import { SCROLLBAR_STEP_PX, useScrollbarThumb } from '../useScrollbarThumb';
 
@@ -130,10 +130,13 @@ function ChatLine({ msg, showTimestamps }: { msg: ChatMessage; showTimestamps: b
 /** Shown in place of the log when the currently-filtered view has no messages yet (point 9) —
  *  a few random feature tips, styled like chat lines but never persisted or limit-counted. */
 function ChatEmptyState() {
-  const tips = useMemo(() => {
+  // Picked once per mount, not recomputed on every re-render — a lazy useState initializer
+  // (guaranteed to run exactly once) rather than useMemo, which is for memoizing a pure function
+  // of its deps and isn't meant to wrap a one-off random pick like this.
+  const [tips] = useState(() => {
     const shuffled = [...chatEmptyTips].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, Math.min(EMPTY_TIP_COUNT, shuffled.length));
-  }, []);
+  });
 
   return (
     <div className="chat-log-empty">

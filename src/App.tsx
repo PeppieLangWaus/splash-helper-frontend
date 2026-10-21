@@ -1,21 +1,32 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import AllSplashersView from './views/AllSplashersView';
-import UserView from './views/UserView';
+import AllSplashersView from './views/AllSplashersView/AllSplashersView';
+import UserView from './views/UserView/UserView';
 import LoginView from './views/LoginView';
 import ForgotPasswordView from './views/ForgotPasswordView';
 import ResetPasswordView from './views/ResetPasswordView';
 import VerifyEmailView from './views/VerifyEmailView';
 import SetupAccountView from './views/SetupAccountView';
-import AdminView from './views/AdminView';
+import AdminView from './views/AdminView/AdminView';
 import CommunityView from './views/CommunityView';
-import AccountSettingsView from './views/AccountSettingsView';
+import AccountSettingsView from './views/AccountSettingsView/AccountSettingsView';
 import DevSessionsPanel from './views/DevSessionsPanel';
 import DiscordBotView from './views/DiscordBotView';
 import TermsOfServiceView from './views/TermsOfServiceView';
 import PrivacyPolicyView from './views/PrivacyPolicyView';
 import GearPickerView from './views/GearPickerView';
+import GuidesView from './views/guides/content/GuidesView';
+import NormalKnightGuide from './views/guides/content/NormalKnightGuide';
+import StickyKnightGuide from './views/guides/content/StickyKnightGuide';
+import PluginGuide from './views/guides/content/PluginGuide';
+import PickpocketGuide from './views/guides/content/PickpocketGuide';
+import OptimalSetupGuide from './views/guides/content/OptimalSetupGuide';
+import MobileSetupGuide from './views/guides/content/MobileSetupGuide';
+import SoloSetupGuide from './views/guides/content/SoloSetupGuide';
+import ChatCommandsGuide from './views/guides/content/ChatCommandsGuide';
+import InfoCorner from './components/InfoCorner';
 import { colors, fontSerif } from './theme';
+import { getBrandName } from './utils/brand';
 
 type View =
   | { name: 'active' }
@@ -69,12 +80,68 @@ function pathToView(pathname: string): View {
   }
 }
 
+/** The "What is this?" corner blurb's content, per view — `null` skips rendering it
+ *  (login/forgot-password/dev, where it wouldn't have anything useful to say). */
+function introForView(view: View) {
+  switch (view.name) {
+    case 'active':
+      return (
+        <>
+          Ardy Host tracks OSRS worlds in real time where mages are <strong>splashing the Knights of Ardougne</strong> —
+          AFK-attacking them with a guaranteed-to-miss combat spell so the knights stay stuck in combat and never
+          retaliate. That makes them safe to <strong>pickpocket for Thieving training</strong>: free, low-effort
+          Thieving XP for anyone who shows up. Pick a live <strong>splash world</strong> below and start pickpocketing,
+          or read the <a href="/guides/pickpocketing">full guide</a> if you're new to this, or browse{' '}
+          <a href="/guides">all guides</a> for setting up your own splash spot.
+        </>
+      );
+    case 'user':
+      return (
+        <>
+          This is <strong>{view.username}</strong>'s splashing history — every past session, its duration, runes
+          burned, and the rune-usage breakdown, archived once the session ends. If it's your own account, this is
+          also where your <strong>runecraft/webhook stats</strong> accumulate over time.
+        </>
+      );
+    case 'admin':
+      return (
+        <>
+          Admin-only controls: manage every registered <strong>user</strong> and <strong>community</strong> in the
+          system, promote or delete accounts, inspect archived sessions, and adjust community eligibility. Changes
+          here affect other people's accounts directly.
+        </>
+      );
+    case 'community':
+      return (
+        <>
+          Set up and manage a <strong>splashing community</strong> — create webhooks, ranks, and the Discord bot
+          integration that lets your members link accounts, post live splash sessions, and sync chat through the
+          shared <strong>API token</strong>.
+        </>
+      );
+    case 'settings':
+      return (
+        <>
+          Your <strong>account settings</strong>: recovery email, splasher webhooks, chat-log size limits, and
+          exporting/importing your local session data.
+        </>
+      );
+    case 'bot':
+      return (
+        <>
+          Invite the <strong>Splash Helper Discord bot</strong> to your server — it runs the setup wizard, links
+          member accounts, opens tickets, and keeps a live embed of who's splashing in your community.
+        </>
+      );
+    default:
+      return null;
+  }
+}
+
 const nav = {
   wrapper: {
     background: '#1c150f',
-    borderBottom: `4px solid ${colors.border}`,
-    boxShadow: '0 2px 10px rgba(0,0,0,0.4)',
-    padding: '0 1.5rem',
+    padding: '0 1.5rem 0 0 ',
     display: 'flex',
     alignItems: 'center',
     gap: '0.35rem',
@@ -140,39 +207,42 @@ function AppInner() {
   }, []);
 
   // Handle setup link: /setup?token=...
-  const [setupToken, setSetupToken] = useState<string | null>(null);
-  useEffect(() => {
-    if (window.location.pathname === '/setup') {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      if (token) setSetupToken(token);
-    }
-  }, []);
+  const [setupToken, setSetupToken] = useState<string | null>(() => {
+    if (window.location.pathname !== '/setup') return null;
+    return new URLSearchParams(window.location.search).get('token');
+  });
 
   // Handle password-reset link: /reset-password?token=...
-  const [resetToken, setResetToken] = useState<string | null>(null);
-  useEffect(() => {
-    if (window.location.pathname === '/reset-password') {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      if (token) setResetToken(token);
-    }
-  }, []);
+  const [resetToken, setResetToken] = useState<string | null>(() => {
+    if (window.location.pathname !== '/reset-password') return null;
+    return new URLSearchParams(window.location.search).get('token');
+  });
 
   // Handle email-verification link: /verify-email?token=...
-  const [verifyEmailTokenValue, setVerifyEmailTokenValue] = useState<string | null>(null);
-  useEffect(() => {
-    if (window.location.pathname === '/verify-email') {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      if (token) setVerifyEmailTokenValue(token);
-    }
-  }, []);
+  const [verifyEmailTokenValue, setVerifyEmailTokenValue] = useState<string | null>(() => {
+    if (window.location.pathname !== '/verify-email') return null;
+    return new URLSearchParams(window.location.search).get('token');
+  });
 
   // Standalone legal pages, e.g. linked from the Discord bot's settings —
   // always reachable at their own URL, outside the nav/login-gated shell.
   if (window.location.pathname === '/terms') return <TermsOfServiceView />;
   if (window.location.pathname === '/privacy') return <PrivacyPolicyView />;
+  if (window.location.pathname === '/guides') return <GuidesView />;
+  if (window.location.pathname === '/guides/normal-knight-setup') return <NormalKnightGuide />;
+  if (window.location.pathname === '/guides/sticky-knight-setup') return <StickyKnightGuide />;
+  if (window.location.pathname === '/guides/splash-helper-plugin') return <PluginGuide />;
+  if (window.location.pathname === '/guides/pickpocketing') return <PickpocketGuide />;
+  if (window.location.pathname === '/guides/optimal-setup') return <OptimalSetupGuide />;
+  if (window.location.pathname === '/guides/mobile-setup') return <MobileSetupGuide />;
+  if (window.location.pathname === '/guides/solo-setup') return <SoloSetupGuide />;
+  if (window.location.pathname === '/guides/chat-commands') return <ChatCommandsGuide />;
+  // Legacy URL from before the guides hub existed — keep it working and consolidate to the
+  // new canonical path so it doesn't linger as a second indexed URL for the same content.
+  if (window.location.pathname === '/guide') {
+    history.replaceState(null, '', '/guides/pickpocketing');
+    return <PickpocketGuide />;
+  }
 
   // If a setup token is present, show the setup view
   if (setupToken) {
@@ -228,74 +298,81 @@ function AppInner() {
 
   return (
     <div style={{ minHeight: '100vh', background: colors.bg }}>
-      <nav style={nav.wrapper}>
-        <span style={nav.brand}>Splash Helper</span>
-        <button
-          style={nav.btn(view.name === 'active')}
-          onClick={() => navigate({ name: 'active' })}
-          type="button"
-        >
-          Active
-        </button>
-        <button
-          style={nav.btn(view.name === 'gear' || view.name === 'gear-shared')}
-          onClick={() => navigate({ name: 'gear' })}
-          type="button"
-        >
-          Gear Picker
-        </button>
-        {user && (
+      <nav className="main-nav" style={nav.wrapper}>
+        <div className='logo-container'>
+          <span style={nav.brand}>{getBrandName()}</span>
+        </div>
+        <div className='nav-items'>
           <button
-            style={nav.btn(view.name === 'user')}
-            onClick={() => navigate({ name: 'user', username: user.username })}
+            style={nav.btn(view.name === 'active')}
+            onClick={() => navigate({ name: 'active' })}
             type="button"
           >
-            Sessions
+            Active
           </button>
-        )}
-        {user && (
           <button
-            style={nav.btn(view.name === 'community')}
-            onClick={() => navigate({ name: 'community' })}
+            style={nav.btn(view.name === 'gear' || view.name === 'gear-shared')}
+            onClick={() => navigate({ name: 'gear' })}
             type="button"
           >
-            Communities
+            Gear Picker
           </button>
-        )}
-        {user?.isAdmin && (
+          {user && (
+            <button
+              style={nav.btn(view.name === 'user')}
+              onClick={() => navigate({ name: 'user', username: user.username })}
+              type="button"
+            >
+              Sessions
+            </button>
+          )}
+          {user && (
+            <button
+              style={nav.btn(view.name === 'community')}
+              onClick={() => navigate({ name: 'community' })}
+              type="button"
+            >
+              Communities
+            </button>
+          )}
+          {user?.isAdmin && (
+            <button
+              style={nav.btn(view.name === 'admin')}
+              onClick={() => navigate({ name: 'admin' })}
+              type="button"
+            >
+              Admin
+            </button>
+          )}
+          {user && (
+            <button
+              style={nav.btn(view.name === 'settings')}
+              onClick={() => navigate({ name: 'settings' })}
+              type="button"
+            >
+              Account
+            </button>
+          )}
           <button
-            style={nav.btn(view.name === 'admin')}
-            onClick={() => navigate({ name: 'admin' })}
+            style={nav.btn(view.name === 'bot')}
+            onClick={() => navigate({ name: 'bot' })}
             type="button"
           >
-            Admin
+            Discord Bot
           </button>
-        )}
-        {user && (
-          <button
-            style={nav.btn(view.name === 'settings')}
-            onClick={() => navigate({ name: 'settings' })}
-            type="button"
-          >
-            Account
-          </button>
-        )}
-        <button
-          style={nav.btn(view.name === 'bot')}
-          onClick={() => navigate({ name: 'bot' })}
-          type="button"
-        >
-          Discord Bot
-        </button>
-        {import.meta.env.DEV && (
-          <button
-            style={nav.btn(view.name === 'dev')}
-            onClick={() => navigate({ name: 'dev' })}
-            type="button"
-          >
-            Dev
-          </button>
-        )}
+          <a href="/guides" style={{ ...nav.btn(false), textDecoration: 'none', display: 'inline-block' }}>
+            Guides
+          </a>
+          {import.meta.env.DEV && (
+            <button
+              style={nav.btn(view.name === 'dev')}
+              onClick={() => navigate({ name: 'dev' })}
+              type="button"
+            >
+              Dev
+            </button>
+          )}
+        </div> 
 
         <div style={nav.right}>
           {user ? (
@@ -320,6 +397,8 @@ function AppInner() {
           )}
         </div>
       </nav>
+
+      {introForView(view) && <InfoCorner key={view.name}>{introForView(view)}</InfoCorner>}
 
       {view.name === 'active' && (
         <AllSplashersView onSelectUser={(username) => navigate({ name: 'user', username })} />

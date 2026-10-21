@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent } from 'react';
-import { itemIconUrl } from '../chatbox/itemIcons';
+import { itemIconUrl } from '../chatbox/utils/itemIcons';
 import { REMOVE_BUTTON_ICON, SEARCH_ICON } from './gearpickerAssets';
 import ScrollbarSprite from '../ScrollbarSprite';
 import PixelText from '../PixelText';

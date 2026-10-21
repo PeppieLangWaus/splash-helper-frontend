@@ -10,6 +10,15 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-10-21
+### Added
+- Merge the `content/guides` branch: a guides hub (`/guides`) with pickpocketing, normal-knight, sticky-knight, RuneLite plugin, optimal/mobile/solo setup and chat-commands guides, plus the `LinkPreview` (OSRS Wiki, Discord invite and RuneLite Plugin Hub previews), `ExplvMap`, `Faq` and `GuideFigure` components and a `findDaxPath` pathfinder API client.
+- Add a collapsible "What is this?" `InfoCorner` under the nav bar on every logged-in view, SEO metadata (`index.html`, `robots.txt`, `sitemap.xml`) and a per-domain nav brand name (`getBrandName`, "Ardy Hosts" on ardy.host).
+### Changed
+- Reorganize the file structure: colocate views with their own panels and hooks, split `components/chatbox/` into `hooks/`, `utils/` and `data/`, and split `views/guides/` into `content/`, `components/`, `style/`, `hooks/` and `data/`.
+### Fixed
+- Scope the main nav styling to `.main-nav` so it stops leaking onto guide tables of contents, bold guide ordered-list markers, fix link-preview tooltip positioning and thumbnail sizing, and clear the outstanding ESLint problems (including `setState` inside effects).
+
 ## [0.35.3] - 2026-10-21
 ### Changed
 - Make the gear picker's mode button show the icon of the panel it switches to: the inventory icon on the equipment panel and the equipment icon on the inventory panel, instead of glowing while inventory mode is on.

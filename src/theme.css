@@ -100,3 +100,33 @@ a {
   border-radius: 8px;
   border: 3px solid var(--bg);
 }
+
+/* react-tooltip: every <Tooltip> in the app passes disableStyleInjection so its default
+   stylesheet (dark theme, rounded corners, arrow shape) never gets injected — each instance
+   supplies its own colors instead. This restores just the structural pieces that stylesheet
+   used to provide (corners, shadow, arrow sizing/rotation), shared so all tooltips match. */
+.react-tooltip {
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.react-tooltip-arrow {
+  width: var(--rt-arrow-size, 8px);
+  height: var(--rt-arrow-size, 8px);
+}
+
+[class*='react-tooltip__place-top'] > .react-tooltip-arrow {
+  transform: rotate(45deg);
+}
+
+[class*='react-tooltip__place-right'] > .react-tooltip-arrow {
+  transform: rotate(135deg);
+}
+
+[class*='react-tooltip__place-bottom'] > .react-tooltip-arrow {
+  transform: rotate(225deg);
+}
+
+[class*='react-tooltip__place-left'] > .react-tooltip-arrow {
+  transform: rotate(315deg);
+}

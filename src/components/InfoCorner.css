@@ -1,0 +1,81 @@
+/* Pinned to the top-left corner of the viewport, flush against the nav bar above
+   and the left edge of the screen — only the outer two edges get a border/radius,
+   so it reads as a tab hanging off that corner rather than a floating card. */
+.info-corner {
+    position: fixed;
+    top: 56px; /* nav height (60px) + its 4px bottom border */
+    left: 0;
+    z-index: 40;
+    width: 13rem;
+    background: rgb(28, 21, 15);
+    border-bottom: 4px solid var(--border);
+    border-right: 4px solid var(--border);
+    border-bottom-right-radius: 12px;
+    transition: width 0.3s ease-out;
+}
+
+.info-corner--open {
+    width: 20rem;
+}
+
+.info-corner-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.55rem 0.9rem;
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: left;
+    user-select: none;
+}
+
+.info-corner-chevron {
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+.info-corner--open .info-corner-chevron {
+    transform: rotate(90deg);
+}
+
+.info-corner--open .info-corner-summary {
+    border-bottom: 1px solid var(--border);
+}
+
+/* Grid-rows trick: animating a track from 0fr to 1fr animates the *content's* rendered
+   height smoothly, which a plain `height: auto <-> 0` transition can't do. The clipping
+   wrapper carries `overflow: hidden` + `min-height: 0` and no padding of its own — padding
+   lives one level further in, on the <p>, so at 0fr the whole thing (padding included)
+   clips away to a true 0px instead of a track that can only shrink to the padding's height. */
+.info-corner-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease;
+}
+
+.info-corner--open .info-corner-collapse {
+    grid-template-rows: 1fr;
+}
+
+.info-corner-collapse-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.info-corner-text {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    padding: 0.75rem 0.9rem 1rem;
+    max-width: 68ch;
+    margin: 0;
+}
+
+.info-corner-text strong {
+    color: var(--text);
+}

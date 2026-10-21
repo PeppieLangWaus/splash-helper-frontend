@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { itemIconUrl } from '../chatbox/itemIcons';
+import { itemIconUrl } from '../chatbox/utils/itemIcons';
 import { useHoverTooltip } from './useHoverTooltip';
 import { GRID_HEIGHT, GRID_WIDTH } from './gearGridLayout';
 import { INVENTORY_COLUMNS, INVENTORY_ROWS } from '../../types/gear';

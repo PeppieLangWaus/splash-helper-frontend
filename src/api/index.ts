@@ -14,6 +14,7 @@ import type {
 } from '../types';
 import type { ChatChannelListing, CommunityChatConfig } from '../types/chatbox';
 import type { EquipmentDataResponse, GearLoadout, GearLoadoutSlots, ItemListResponse } from '../types/gear';
+import type { LinkPreviewResult } from '../types/linkPreview';
 
 /** Body shape for every webhook PUT endpoint: either field may be omitted to leave it
  *  unchanged, or set to '' to clear it. */
@@ -149,6 +150,18 @@ export async function getPublicChatChannels(): Promise<ChatChannelListing[]> {
   if (!res.ok) throw new Error('Failed to fetch chat channels');
   const data = (await res.json()) as { channels?: ChatChannelListing[] };
   return data.channels ?? [];
+}
+
+// ─── Link previews ────────────────────────────────────────────────────────────
+
+/** Discord-style hover preview for an OSRS Wiki article or Discord invite link — see
+ *  views/guides/components/LinkPreview.tsx. No auth required; the backend itself allowlists which domains it
+ *  will resolve (routes/linkPreview.ts), so any other URL just comes back `{ type: 'unsupported' }`
+ *  rather than erroring. */
+export async function getLinkPreview(url: string): Promise<LinkPreviewResult> {
+  const res = await fetch(`${BASE}/link-preview?url=${encodeURIComponent(url)}`);
+  if (!res.ok) throw new Error('Failed to fetch link preview');
+  return (await res.json()) as LinkPreviewResult;
 }
 
 // ─── Public splashers ─────────────────────────────────────────────────────────
@@ -341,7 +354,7 @@ export async function getCommunitySplashers(communityId: string, token: string):
 }
 
 /** The caller's own payout ticket history in a community — powers the chatbox's Trade tab (see
- *  hooks/useAccountActivityEvents.ts). Self-scoped server-side, so this works for any community
+ *  chatbox/useAccountActivityEvents.ts). Self-scoped server-side, so this works for any community
  *  the user has ever requested a payout in, not just ones they own. */
 export async function getMyPayouts(
   communityId: string,

@@ -1,7 +1,7 @@
 import type { CSSProperties, MouseEvent } from 'react';
 import OSRSTile from '../osrs/OSRSTile';
 import { useHoverTooltip } from './useHoverTooltip';
-import { itemIconUrl } from '../chatbox/itemIcons';
+import { itemIconUrl } from '../chatbox/utils/itemIcons';
 import { BLOCKED_ICON, SLOT_ICON_SCALE, SLOT_PLACEHOLDER_ICON, TILE_ASSETS } from './gearpickerAssets';
 import type { EquipmentItem, EquipmentSlot } from '../../types/gear';
 import { EQUIPMENT_SLOT_LABELS } from '../../types/gear';

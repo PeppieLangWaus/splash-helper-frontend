@@ -75,6 +75,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Colocated with AuthProvider deliberately, not split into its own file purely to satisfy this
+// rule — the rule only affects Fast Refresh's granularity in dev (an edit here remounts the
+// whole provider tree instead of hot-swapping just this hook), no production behavior.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
