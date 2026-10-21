@@ -1,5 +1,6 @@
 import type { CSSProperties, MouseEvent } from 'react';
 import OSRSTile from '../osrs/OSRSTile';
+import { useHoverTooltip } from './useHoverTooltip';
 import { itemIconUrl } from '../chatbox/itemIcons';
 import { BLOCKED_ICON, SLOT_ICON_SCALE, SLOT_PLACEHOLDER_ICON, TILE_ASSETS } from './gearpickerAssets';
 import type { EquipmentItem, EquipmentSlot } from '../../types/gear';
@@ -24,6 +25,8 @@ interface Props {
 export default function SlotTile({ slot, item, blocked, onClick }: Props) {
   const title = item?.name ?? (blocked ? `${EQUIPMENT_SLOT_LABELS[slot]} (blocked by two-handed weapon)` : EQUIPMENT_SLOT_LABELS[slot]);
 
+  const { hoverProps, tooltip } = useHoverTooltip(item?.name);
+
   const iconStyle = { '--icon-scale': SLOT_ICON_SCALE[slot] } as CSSProperties;
 
   const icon = item ? (
@@ -47,7 +50,12 @@ export default function SlotTile({ slot, item, blocked, onClick }: Props) {
   );
 
   if (!onClick) {
-    return <div className="slot-tile__frame" title={title}>{tile}</div>;
+    return (
+      <div className="slot-tile__frame" title={item ? undefined : title} {...hoverProps}>
+        {tile}
+        {tooltip}
+      </div>
+    );
   }
 
   return (

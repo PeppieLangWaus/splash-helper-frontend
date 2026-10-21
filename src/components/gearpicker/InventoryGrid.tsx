@@ -1,5 +1,6 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { itemIconUrl } from '../chatbox/itemIcons';
+import { useHoverTooltip } from './useHoverTooltip';
 import { GRID_HEIGHT, GRID_WIDTH } from './gearGridLayout';
 import { INVENTORY_COLUMNS, INVENTORY_ROWS } from '../../types/gear';
 import type { GearInventory } from '../../types/gear';
@@ -10,6 +11,16 @@ const gridTemplateStyle: CSSProperties = {
   gridTemplateColumns: `repeat(${INVENTORY_COLUMNS}, 1fr)`,
   gridTemplateRows: `repeat(${INVENTORY_ROWS}, 1fr)`,
 };
+
+function StaticInventorySlot({ itemName, children }: { itemName?: string; children: ReactNode }) {
+  const { hoverProps, tooltip } = useHoverTooltip(itemName);
+  return (
+    <div className="inventory-slot inventory-slot--static" aria-label={itemName} {...hoverProps}>
+      {children}
+      {tooltip}
+    </div>
+  );
+}
 
 interface Props {
   inventory: GearInventory;
@@ -40,11 +51,7 @@ export default function InventoryGrid({ inventory, itemNamesById, selectedIndice
           const icon = itemId !== null && <img src={itemIconUrl(itemId)} alt="" className="inventory-slot__icon" />;
 
           if (!onSlotClick) {
-            return (
-              <div key={index} className="inventory-slot inventory-slot--static" title={itemName}>
-                {icon}
-              </div>
-            );
+            return <StaticInventorySlot key={index} itemName={itemName}>{icon}</StaticInventorySlot>;
           }
 
           const selected = selectedIndices?.has(index) ?? false;

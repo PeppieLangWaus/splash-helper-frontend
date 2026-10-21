@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.35.1] - 2026-10-21
+### Added
+- Show an item's name in a styled tooltip that follows the cursor when hovering a slot in the read-only equipment and inventory panels.
+
 ## [0.35.0] - 2026-10-21
 ### Added
 - Add a read-only `GuideGearPanel` for guide content: `mode="equipment"` shows a shared loadout's equipment panel, and `mode="inventory"` shows a 4×7 inventory panel with its contents configured inline (item ids and names, no quantities).
