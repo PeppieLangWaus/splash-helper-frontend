@@ -50,7 +50,7 @@ const ICON_FILE_PATHS = [
 
 function stripAssetPrefixAndExtension(assetPath: string): string[] {
   return assetPath
-    .replace(/^\/assets\/icons\
+    .replace(/^\/assets\/icons\//, '')
     .replace(/\.[^/.]+$/, '')
     .split('/');
 }
