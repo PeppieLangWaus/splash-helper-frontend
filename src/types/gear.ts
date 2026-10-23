@@ -86,6 +86,7 @@ export interface GearLoadout {
   username?: string;
   name?: string;
   slots: GearLoadoutSlots;
+  inventory?: GearInventory;
   createdAt: string;
   updatedAt: string;
 }

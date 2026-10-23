@@ -39,7 +39,7 @@ import {
   STATS_ICON,
   VALUE_ICON,
 } from '../components/gearpicker/gearpickerAssets';
-import { loadGearPickerDraft, saveGearPickerDraft } from '../utils/gearPickerStorage';
+import { loadGearPickerDraft, parseInventory, saveGearPickerDraft } from '../utils/gearPickerStorage';
 import type { EquipmentItem, EquipmentSlot, GearInventory, GearLoadout, GearLoadoutSlots, ListedItem } from '../types/gear';
 import { EQUIPMENT_SLOT_LABELS, emptyInventory } from '../types/gear';
 import '../components/gearpicker/Gearpicker.css';
@@ -205,6 +205,7 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   const [deleting, setDeleting] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const lastSharedContentRef = useRef<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
 
   const [equipmentPanelEl, setEquipmentPanelEl] = useState<HTMLDivElement | null>(null);
@@ -238,11 +239,12 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   }, [panelMode, itemList]);
 
   useEffect(() => {
-    if (!initialSlug) return;
+    if (!initialSlug || initialSlug === savedSlug) return;
     setLoadingLoadout(true);
     fetchGearLoadout(initialSlug)
       .then((loadout: GearLoadout) => {
         setSlots(loadout.slots);
+        setInventory(parseInventory(loadout.inventory));
         setLoadoutName(loadout.name ?? '');
         setSavedSlug(loadout.username && loadout.username === user?.username ? loadout.slug : null);
       })
@@ -275,7 +277,10 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     return computeTotalBonuses(slotsWithItem(slots, hoveredItem.slot, hoveredItem), itemsById);
   }, [hoveredItem, slots, itemsById]);
 
-  const effectiveReadOnly = readOnly && !forceEdit;
+  const viewingOwnLoadout = savedSlug !== null && savedSlug === initialSlug;
+  const effectiveReadOnly = readOnly && !forceEdit && !viewingOwnLoadout;
+  const savedLoadoutUrl = savedSlug ? `${window.location.origin}/gear/${savedSlug}` : null;
+  const linkToShow = savedLoadoutUrl ?? shareUrl;
   const inventoryMode = panelMode === 'inventory' && !effectiveReadOnly;
 
   useEffect(() => {
@@ -294,18 +299,21 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     saveGearPickerDraft({ slots, inventory, loadoutName, savedSlug });
   }, [slots, inventory, loadoutName, savedSlug, effectiveReadOnly]);
 
-  async function handleSave() {
-    if (!token) return;
+  async function persistLoadout(): Promise<boolean> {
+    if (!token) return false;
     setSaving(true);
     setFeedback(null);
     try {
       const loadout = savedSlug
-        ? await updateGearLoadout(savedSlug, slots, loadoutName || undefined, token)
-        : await saveGearLoadout(slots, loadoutName || undefined, token);
+        ? await updateGearLoadout(savedSlug, slots, inventory, loadoutName || undefined, token)
+        : await saveGearLoadout(slots, inventory, loadoutName || undefined, token);
+      if (!savedSlug) window.history.pushState(null, '', `/gear/${loadout.slug}`);
       setSavedSlug(loadout.slug);
       setFeedback({ type: 'success', message: 'Loadout saved.' });
+      return true;
     } catch (err) {
       setFeedback({ type: 'error', message: err instanceof Error ? err.message : 'Failed to save loadout' });
+      return false;
     } finally {
       setSaving(false);
     }
@@ -318,6 +326,8 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
     try {
       await deleteGearLoadout(savedSlug, token);
       setSavedSlug(null);
+      setForceEdit(true);
+      if (window.location.pathname === `/gear/${savedSlug}`) window.history.replaceState(null, '', '/gear');
       setFeedback({ type: 'success', message: 'Saved loadout deleted.' });
     } catch (err) {
       setFeedback({ type: 'error', message: err instanceof Error ? err.message : 'Failed to delete loadout' });
@@ -327,10 +337,17 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
   }
 
   async function handleShare() {
+    if (token) {
+      await persistLoadout();
+      return;
+    }
+    const content = JSON.stringify({ slots, inventory, name: loadoutName });
+    if (shareUrl && content === lastSharedContentRef.current) return;
     setSharing(true);
     setFeedback(null);
     try {
-      const slug = await shareGearLoadout(slots, loadoutName || undefined);
+      const slug = await shareGearLoadout(slots, inventory, loadoutName || undefined);
+      lastSharedContentRef.current = content;
       setShareUrl(`${window.location.origin}/gear/${slug}`);
     } catch (err) {
       setFeedback({ type: 'error', message: err instanceof Error ? err.message : 'Failed to share loadout' });
@@ -686,22 +703,24 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
               <button
                 type="button"
                 className="gear-picker-btn"
-                onClick={() => void handleSave()}
+                onClick={() => void persistLoadout()}
                 disabled={saving}
               >
-                {saving ? 'Saving…' : savedSlug ? 'Update saved loadout' : 'Save loadout'}
+                {saving ? 'Saving…' : savedSlug ? 'Save' : 'Save loadout'}
               </button>
             ) : (
               <span className="gear-picker-hint">Sign in to save this loadout.</span>
             )}
-            <button
-              type="button"
-              className="gear-picker-btn gear-picker-btn--secondary"
-              onClick={() => void handleShare()}
-              disabled={sharing}
-            >
-              {sharing ? 'Sharing…' : 'Share'}
-            </button>
+            {!savedSlug && (
+              <button
+                type="button"
+                className="gear-picker-btn gear-picker-btn--secondary"
+                onClick={() => void handleShare()}
+                disabled={sharing || saving}
+              >
+                {sharing ? 'Sharing…' : 'Share'}
+              </button>
+            )}
             {savedSlug && (
               <button
                 type="button"
@@ -716,10 +735,10 @@ export default function GearPickerView({ initialSlug, readOnly = false }: Props)
             )}
           </div>
 
-          {shareUrl && (
+          {linkToShow && (
             <CopyableField
               label="Share link"
-              value={shareUrl}
+              value={linkToShow}
               hint="Anyone with this link can view this loadout — no account needed."
             />
           )}

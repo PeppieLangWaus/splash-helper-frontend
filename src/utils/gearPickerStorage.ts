@@ -14,7 +14,7 @@ export interface GearPickerDraft {
 
 const EMPTY_DRAFT: GearPickerDraft = { slots: {}, inventory: emptyInventory(), loadoutName: '', savedSlug: null };
 
-function parseInventory(raw: unknown): GearInventory {
+export function parseInventory(raw: unknown): GearInventory {
   if (!Array.isArray(raw) || raw.length !== INVENTORY_SLOT_COUNT) return emptyInventory();
   return raw.map((itemId) => (Number.isInteger(itemId) && itemId > 0 ? (itemId as number) : null));
 }

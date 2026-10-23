@@ -13,7 +13,7 @@ import type {
   PayoutTicket,
 } from '../types';
 import type { ChatChannelListing, CommunityChatConfig } from '../types/chatbox';
-import type { EquipmentDataResponse, GearLoadout, GearLoadoutSlots, ItemListResponse } from '../types/gear';
+import type { EquipmentDataResponse, GearInventory, GearLoadout, GearLoadoutSlots, ItemListResponse } from '../types/gear';
 import type { LinkPreviewResult } from '../types/linkPreview';
 
 export interface WebhookUpdate {
@@ -603,13 +603,14 @@ export async function fetchItemList(): Promise<ItemListResponse> {
 
 export async function saveGearLoadout(
   slots: GearLoadoutSlots,
+  inventory: GearInventory,
   name: string | undefined,
   token: string,
 ): Promise<GearLoadout> {
   const res = await fetch(`${BASE}/gear-loadouts`, {
     method: 'POST',
     headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, slots }),
+    body: JSON.stringify({ name, slots, inventory }),
   });
   const data = (await res.json()) as { loadout?: GearLoadout; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to save loadout');
@@ -619,13 +620,14 @@ export async function saveGearLoadout(
 export async function updateGearLoadout(
   slug: string,
   slots: GearLoadoutSlots,
+  inventory: GearInventory,
   name: string | undefined,
   token: string,
 ): Promise<GearLoadout> {
   const res = await fetch(`${BASE}/gear-loadouts/${encodeURIComponent(slug)}`, {
     method: 'PUT',
     headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, slots }),
+    body: JSON.stringify({ name, slots, inventory }),
   });
   const data = (await res.json()) as { loadout?: GearLoadout; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to update loadout');
@@ -650,11 +652,11 @@ export async function deleteGearLoadout(slug: string, token: string): Promise<vo
   }
 }
 
-export async function shareGearLoadout(slots: GearLoadoutSlots, name?: string): Promise<string> {
+export async function shareGearLoadout(slots: GearLoadoutSlots, inventory: GearInventory, name?: string): Promise<string> {
   const res = await fetch(`${BASE}/gear-loadouts/share`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, slots }),
+    body: JSON.stringify({ name, slots, inventory }),
   });
   const data = (await res.json()) as { slug?: string; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to share loadout');

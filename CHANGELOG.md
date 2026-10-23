@@ -10,6 +10,13 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-10-23
+### Added
+- Gear picker: sharing while signed in now creates the loadout once, moves the URL to its `/gear/<slug>`, and replaces the Share button with a Save button that updates that same loadout.
+- Gear picker: the inventory is now saved and shared with the loadout and restored when a slug is opened.
+### Fixed
+- Gear picker: pressing Share repeatedly on an unchanged anonymous loadout no longer creates a new link each time.
+
 ## [0.37.0] - 2026-10-21
 ### Added
 - Replace the equipment and inventory screenshots in the optimal setup guide with read-only gear picker panels (`GuideGearPanel`) that match the spellbook image's size.
