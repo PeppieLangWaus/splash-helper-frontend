@@ -1,6 +1,3 @@
-/** Shared color/typography tokens for inline `style={}` objects — mirrors the CSS
- *  custom properties in theme.css. Kept as plain JS values (not var(--x)) because a few
- *  spots need to interpolate them into rgba()/ternaries where CSS vars are inconvenient. */
 export const colors = {
   bg: '#15110d',
   panel: '#241b14',

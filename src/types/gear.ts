@@ -1,4 +1,3 @@
-/** The 11 standard OSRS equipment slots. */
 export type EquipmentSlot =
   | 'head'
   | 'cape'
@@ -12,13 +11,10 @@ export type EquipmentSlot =
   | 'ring'
   | 'ammo';
 
-/** One equipable item from the synced dataset (GET /equipment, see the backend's
- *  scripts/sync-equipment-data.ts). */
 export interface EquipmentItem {
   id: number;
   name: string;
   slot: EquipmentSlot;
-  /** True for a two-handed weapon — occupies the weapon slot but also blocks the shield slot. */
   isTwoHanded: boolean;
   bonuses: {
     stabAttack: number;
@@ -34,7 +30,6 @@ export interface EquipmentItem {
     strength: number;
     rangedStrength: number;
     prayer: number;
-    /** Percent, e.g. 5 = +5% magic damage. */
     magicDamage: number;
   };
 }
@@ -44,8 +39,6 @@ export interface EquipmentDataResponse {
   sourceVersion: string;
 }
 
-/** One entry of the all-items list (GET /items, see the backend's scripts/sync-equipment-data.ts) —
- *  unlike EquipmentItem, any item at all, so it carries no slot or bonuses. */
 export interface ListedItem {
   id: number;
   name: string;
@@ -60,19 +53,14 @@ export const INVENTORY_COLUMNS = 4;
 export const INVENTORY_ROWS = 7;
 export const INVENTORY_SLOT_COUNT = INVENTORY_COLUMNS * INVENTORY_ROWS;
 
-/** Item id per inventory slot, left to right then top to bottom, `null` for an empty slot. Always
- *  INVENTORY_SLOT_COUNT long. */
 export type GearInventory = (number | null)[];
 
 export function emptyInventory(): GearInventory {
   return Array.from({ length: INVENTORY_SLOT_COUNT }, () => null);
 }
 
-/** Item id per equipment slot, all optional (an empty slot is simply absent). */
 export type GearLoadoutSlots = Partial<Record<EquipmentSlot, number>>;
 
-/** Display order for rendering the 11-slot grid. Layout/icons for this grid are placeholder
- *  pending OSRS-styled assets and instructions to be provided separately. */
 export const EQUIPMENT_SLOT_ORDER: EquipmentSlot[] = [
   'head', 'cape', 'neck', 'weapon', 'body', 'shield', 'legs', 'hands', 'feet', 'ring', 'ammo',
 ];
@@ -91,8 +79,6 @@ export const EQUIPMENT_SLOT_LABELS: Record<EquipmentSlot, string> = {
   ammo: 'Ammo',
 };
 
-/** A saved or shared gear loadout (splash-helper-backend's GearLoadout model). A loadout with no
- *  `userId` was created anonymously via the share endpoint. */
 export interface GearLoadout {
   _id: string;
   slug: string;
@@ -100,12 +86,9 @@ export interface GearLoadout {
   username?: string;
   name?: string;
   slots: GearLoadoutSlots;
+  inventory?: GearInventory;
   createdAt: string;
   updatedAt: string;
 }
 
-/** The splash-safety rule already enforced in-game by the RuneLite plugin
- *  (SplashHelperPlugin.hasBadMagicAttackBonus()) and stated in PickpocketGuide.tsx's tooltip:
- *  summed equipment Magic Attack bonus must be this value or lower. Keep in sync with both if
- *  it ever changes. */
 export const SPLASH_SAFE_MAGIC_ATTACK_THRESHOLD = -64;

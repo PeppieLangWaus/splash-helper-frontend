@@ -10,9 +10,6 @@ export interface ScrollbarThumbState {
   visible: boolean;
 }
 
-/** Drives a custom OSRS-sprite scrollbar (see ScrollbarSprite.tsx) for an arbitrary scrollable
- *  `viewportRef`. A caller whose content can resize without the viewport element itself resizing
- *  (e.g. a filtered list) should call the returned `updateThumb` from its own effect. */
 export function useScrollbarThumb(viewportRef: RefObject<HTMLDivElement | null>) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<ScrollbarThumbState>({ top: 0, height: SCROLLBAR_MIN_THUMB_HEIGHT, visible: false });
@@ -27,7 +24,6 @@ export function useScrollbarThumb(viewportRef: RefObject<HTMLDivElement | null>)
     const trackHeight = track.clientHeight;
 
     if (scrollHeight <= clientHeight + 1) {
-      // Nothing to scroll — fill the whole track with the thumb instead of hiding it.
       setThumb({ top: 0, height: trackHeight, visible: true });
       return;
     }
@@ -81,7 +77,7 @@ export function useScrollbarThumb(viewportRef: RefObject<HTMLDivElement | null>)
   }
 
   function handleTrackClick(e: ReactMouseEvent) {
-    if (e.target !== trackRef.current) return; // ignore clicks on the thumb itself
+    if (e.target !== trackRef.current) return;
     const viewport = viewportRef.current;
     if (!viewport) return;
     const rect = trackRef.current!.getBoundingClientRect();

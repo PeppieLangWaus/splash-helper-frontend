@@ -9,8 +9,6 @@ const ABBREVIATION_UNITS = [
   { suffix: 'B', size: 1e9 },
 ];
 
-/** 29300000 → "29.3M"; amounts under 1K stay as-is. A value that rounds up to 1000 of a unit is
- *  shown in the next one up, so 999,999 reads "1M" rather than "1000K". */
 function formatGpAbbreviated(amount: number): string {
   let unitIndex = ABBREVIATION_UNITS.findLastIndex(({ size }) => amount >= size);
   if (unitIndex === -1) return String(amount);
@@ -23,22 +21,18 @@ function formatGpAbbreviated(amount: number): string {
   return `${rounded}${ABBREVIATION_UNITS[unitIndex].suffix}`;
 }
 
-/** 29300000 → "29.300.000" (dot-separated thousands). */
 function formatGpFull(amount: number): string {
   return amount.toLocaleString('de-DE');
 }
 
 interface Props {
   slots: GearLoadoutSlots;
-  /** Show the total as "29.3M" instead of the full "29.300.000". */
+
   abbreviated?: boolean;
-  /** Extra class appended alongside the base gear-picker-ge-cost one — e.g. a modifier for
-   *  placement under the Bonuses panel's header title (see GearPickerView.tsx). */
+
   className?: string;
 }
 
-/** The combined GE cost of a loadout's equipped items; trailing "+" means at least one has no
- *  GE price (untradeable, or no recent trade data). */
 export default function GearLoadoutCost({ slots, abbreviated = false, className }: Props) {
   const price = useGearLoadoutPrice(slots);
   const equipped = Object.values(slots).some((id) => id !== undefined);

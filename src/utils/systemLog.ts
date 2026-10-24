@@ -3,13 +3,6 @@ import { PRIVATE_KEY, appendStoredMessage, publishStoredMessage } from './chatSt
 
 let seq = 0;
 
-/** Appends one line to the Private tab's local action log — "should only be shown to the player
- *  and run locally in the frontend" (point 7.5). Call this from any frontend action worth
- *  surfacing there (account settings changes, community creation, chat-config saves, ...).
- *  Callers are expected to only invoke this from code paths already behind a logged-in check —
- *  there's no separate auth gate here since the log is purely local either way.
- *  Returns the message that was posted, for callers that need to react to it (e.g.
- *  useEmailReminder spotlighting its own reminder — see Chatbox.tsx). Most callers ignore it. */
 export function logSystemEvent(text: string): ChatMessage {
   const message: ChatMessage = {
     id: `system-${Date.now()}-${seq++}`,

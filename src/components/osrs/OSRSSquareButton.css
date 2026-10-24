@@ -1,7 +1,4 @@
-/* OSRSSquareButton — see OSRSSquareButton.tsx. --sb-corner / --sb-border are set inline from the
-   button's size (9px / 3px at the reference size) and the sprites are scaled to match, keeping
-   their aspect ratio; borders repeat along the side but stop at the corners, which are layered
-   over the border ends. */
+
 
 .osrs-square-button {
     --sb-corner: 9px;
@@ -90,7 +87,7 @@
     box-sizing: border-box;
 }
 
-/* Normal / hover sprite sets. Declared per state so each url() is a plain static string. */
+
 .osrs-square-button .osrs-square-button__border--top { background-image: url(/assets/icons/components/buttons/square/normal/border/top.png); }
 .osrs-square-button .osrs-square-button__border--bottom { background-image: url(/assets/icons/components/buttons/square/normal/border/bottom.png); }
 .osrs-square-button .osrs-square-button__border--left { background-image: url(/assets/icons/components/buttons/square/normal/border/left.png); }

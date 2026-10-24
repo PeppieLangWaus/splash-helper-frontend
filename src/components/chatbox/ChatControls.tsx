@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChatChannel, ChatChannelListing, ChatTabStates, LiveChatChannelType } from '../../types/chatbox';
 import PixelText from '../PixelText';
 import ChatChannelMenu from './ChatChannelMenu';
-import { TAB_STATE_COLORS } from './chatColors';
-import { TAB_STATE_LABEL } from './chatFilter';
+import { TAB_STATE_COLORS } from './utils/chatColors';
+import { TAB_STATE_LABEL } from './utils/chatFilter';
 
 const TABS: { id: ChatChannel; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -15,8 +15,6 @@ const TABS: { id: ChatChannel; label: string }[] = [
   { id: 'trade', label: 'Trade' },
 ];
 
-// Which live chat type each OSRS tab picks, when right-clicked. Every other tab is purely
-// decorative and ignores right-click.
 const LIVE_CHANNEL_TYPE_BY_TAB: Partial<Record<ChatChannel, LiveChatChannelType>> = {
   channel: 'fc',
   clan: 'cc',
@@ -28,21 +26,13 @@ interface Props {
   onReport: () => void;
   tabStates: ChatTabStates;
   onToggleTabState: (tab: ChatChannel) => void;
-  /** Every linked community (already watched automatically — see useChatFeeds) — right-clicking
-   *  "Channel"/"Clan" opens a menu built from these (see useChatChannels / Chatbox). */
+
   chatChannels: ChatChannelListing[];
-  /** The viewer's own Filtered-list pick per type, a subset of `chatChannels` (see
-   *  chatFilter.ts / the chatbox-multi-link feature notes). */
+
   chatSelected: { fc: Set<string>; cc: Set<string> };
   onToggleChatSelection: (channelType: LiveChatChannelType, communityId: string) => void;
 }
 
-/** The chatbox's bottom bar: 7 channel-filter tabs (only one selected at a time) plus a
- *  report button, on the `controls.png` background. Each tab (besides All) also has its own
- *  status line — Game/Public/Private/Trade cycle On/Off, Channel/Clan cycle On/Filtered/Off —
- *  toggled independently of which tab is selected; see chatbox/chatFilter.ts for what each state
- *  actually does to the message list. Right-clicking "Channel" or "Clan" additionally opens a
- *  menu of live Friends/Clan Chats to watch. */
 export default function ChatControls({
   selected,
   onSelect,
@@ -56,7 +46,6 @@ export default function ChatControls({
   const [menuFor, setMenuFor] = useState<LiveChatChannelType | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close the open menu on a click outside it, or Escape.
   useEffect(() => {
     if (!menuFor) return;
     function handlePointerDown(e: PointerEvent) {
@@ -75,7 +64,7 @@ export default function ChatControls({
 
   function handleContextMenu(e: React.MouseEvent, tab: ChatChannel) {
     const channelType = LIVE_CHANNEL_TYPE_BY_TAB[tab];
-    if (!channelType) return; // not "Channel"/"Clan" — let the real browser menu through
+    if (!channelType) return;
     e.preventDefault();
     setMenuFor((current) => (current === channelType ? null : channelType));
   }
@@ -101,10 +90,7 @@ export default function ChatControls({
             <div className="chat-tab-label">
               <PixelText text={tab.label} fontSize={12} color="#ffffff" />
             </div>
-            {/* "All" isn't a filterable channel — it has no On/Filtered/Off state, unlike the
-                rest, so its label centers vertically (see .chat-tab-btn--no-status) instead of
-                sitting at the fixed top offset the other tabs use to line up with their status
-                line. */}
+            {}
             {tab.id !== 'all' && (
               <button
                 type="button"

@@ -1,34 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Surfaces */
+  
   --bg: #15110d;
   --panel: #241b14;
   --panel-alt: #2c2117;
   --panel-hover: #33271a;
 
-  /* Borders */
+  
   --border: #3a2c20;
   --border-strong: #5c4a38;
 
-  /* Inputs */
+  
   --input-bg: #2f2419;
   --input-border: #1c140e;
 
-  /* Text */
+  
   --text: #f2e8d5;
   --text-muted: #cbb896;
   --text-faint: #a3906f;
   --text-disabled: #7c6b52;
 
-  /* Accent (orange) */
+  
   --accent: #c2410c;
   --accent-hover: #ea580c;
   --accent-soft: rgba(194, 65, 12, 0.18);
   --accent-text: #fb923c;
   --link: #f0975a;
 
-  /* Semantic */
+  
   --danger: #b91c1c;
   --danger-soft: rgba(220, 38, 38, 0.16);
   --danger-text: #fca5a5;
@@ -99,4 +99,31 @@ a {
   background: var(--border-strong);
   border-radius: 8px;
   border: 3px solid var(--bg);
+}
+
+
+.react-tooltip {
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.react-tooltip-arrow {
+  width: var(--rt-arrow-size, 8px);
+  height: var(--rt-arrow-size, 8px);
+}
+
+[class*='react-tooltip__place-top'] > .react-tooltip-arrow {
+  transform: rotate(45deg);
+}
+
+[class*='react-tooltip__place-right'] > .react-tooltip-arrow {
+  transform: rotate(135deg);
+}
+
+[class*='react-tooltip__place-bottom'] > .react-tooltip-arrow {
+  transform: rotate(225deg);
+}
+
+[class*='react-tooltip__place-left'] > .react-tooltip-arrow {
+  transform: rotate(315deg);
 }

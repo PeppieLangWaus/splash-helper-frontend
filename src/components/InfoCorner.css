@@ -1,0 +1,75 @@
+
+.info-corner {
+    position: fixed;
+    top: 56px; 
+    left: 0;
+    z-index: 40;
+    width: 13rem;
+    background: rgb(28, 21, 15);
+    border-bottom: 4px solid var(--border);
+    border-right: 4px solid var(--border);
+    border-bottom-right-radius: 12px;
+    transition: width 0.3s ease-out;
+}
+
+.info-corner--open {
+    width: 20rem;
+}
+
+.info-corner-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.55rem 0.9rem;
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: left;
+    user-select: none;
+}
+
+.info-corner-chevron {
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+.info-corner--open .info-corner-chevron {
+    transform: rotate(90deg);
+}
+
+.info-corner--open .info-corner-summary {
+    border-bottom: 1px solid var(--border);
+}
+
+
+.info-corner-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease;
+}
+
+.info-corner--open .info-corner-collapse {
+    grid-template-rows: 1fr;
+}
+
+.info-corner-collapse-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.info-corner-text {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    padding: 0.75rem 0.9rem 1rem;
+    max-width: 68ch;
+    margin: 0;
+}
+
+.info-corner-text strong {
+    color: var(--text);
+}

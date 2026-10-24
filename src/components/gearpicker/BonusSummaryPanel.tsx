@@ -32,18 +32,10 @@ function Stat({ label, value, change }: StatProps) {
 
 interface Props {
   totals: TotalBonuses;
-  /** Totals as they would be if the hovered item were equipped; each stat then shows its change
-   *  from `totals` in parentheses. */
+
   previewTotals?: TotalBonuses | null;
 }
 
-/**
- * Mirrors the real OSRS equipment-stats panel's own layout and grouping (Attack bonus / Defence
- * bonus, each as Stab alone then Slash+Magic / Crush+Range paired; Other bonuses below) rather
- * than an arbitrary list — this is the exact pairing the game itself uses. "Target-specific"
- * and "Weapon speed" sections from the reference screenshot are omitted: the synced dataset
- * (scripts/sync-equipment-data.ts) doesn't carry that data.
- */
 export default function BonusSummaryPanel({ totals, previewTotals }: Props) {
   const statProps = (label: string, key: keyof TotalBonuses): StatProps => ({
     label,

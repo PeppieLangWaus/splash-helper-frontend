@@ -57,15 +57,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }
 
-  // Dev convenience: skip the login screen by auto-signing in as a standing
-  // admin account. Only fires when nobody is already signed in, so it never
-  // clobbers a manual sign-in as a different (e.g. non-admin) test user.
   useEffect(() => {
     if (!import.meta.env.DEV || token) return;
     devGetAdminToken()
       .then((data) => setFromToken(data.token, data.username, data.isAdmin, data.communityEligible))
       .catch((err) => console.error('Dev auto-login failed:', err));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

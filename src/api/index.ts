@@ -13,10 +13,9 @@ import type {
   PayoutTicket,
 } from '../types';
 import type { ChatChannelListing, CommunityChatConfig } from '../types/chatbox';
-import type { EquipmentDataResponse, GearLoadout, GearLoadoutSlots, ItemListResponse } from '../types/gear';
+import type { EquipmentDataResponse, GearInventory, GearLoadout, GearLoadoutSlots, ItemListResponse } from '../types/gear';
+import type { LinkPreviewResult } from '../types/linkPreview';
 
-/** Body shape for every webhook PUT endpoint: either field may be omitted to leave it
- *  unchanged, or set to '' to clear it. */
 export interface WebhookUpdate {
   activeWebhookUrl?: string;
   historyWebhookUrl?: string;
@@ -28,8 +27,6 @@ function authHeaders(token: string): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
-// ─── Testing upload ───────────────────────────────────────────────────────────
-
 export async function uploadJson(entries: SplashEntry[]): Promise<{ message: string; added: number; skipped: number }> {
   const res = await fetch(`${BASE}/sessions/upload`, {
     method: 'POST',
@@ -40,8 +37,6 @@ export async function uploadJson(entries: SplashEntry[]): Promise<{ message: str
   if (!res.ok) throw new Error(data.error ?? 'Upload failed');
   return data as { message: string; added: number; skipped: number };
 }
-
-// ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export async function setupAccount(
   setupToken: string,
@@ -140,10 +135,6 @@ export async function resendVerificationEmail(token: string): Promise<{ message:
   return { message: data.message ?? '' };
 }
 
-// ─── Public live chat relay ───────────────────────────────────────────────────
-
-/** Every community with at least one registered Friends/Clan Chat name, for the chatbox's
- *  community picker. Public — no auth required, matching GET /chat-channels on the backend. */
 export async function getPublicChatChannels(): Promise<ChatChannelListing[]> {
   const res = await fetch(`${BASE}/chat-channels`);
   if (!res.ok) throw new Error('Failed to fetch chat channels');
@@ -151,7 +142,11 @@ export async function getPublicChatChannels(): Promise<ChatChannelListing[]> {
   return data.channels ?? [];
 }
 
-// ─── Public splashers ─────────────────────────────────────────────────────────
+export async function getLinkPreview(url: string): Promise<LinkPreviewResult> {
+  const res = await fetch(`${BASE}/link-preview?url=${encodeURIComponent(url)}`);
+  if (!res.ok) throw new Error('Failed to fetch link preview');
+  return (await res.json()) as LinkPreviewResult;
+}
 
 export async function getActiveSessions(): Promise<ActiveSession[]> {
   const res = await fetch(`${BASE}/splashers`);
@@ -160,8 +155,6 @@ export async function getActiveSessions(): Promise<ActiveSession[]> {
   return data.sessions;
 }
 
-/** Anonymous like/dislike tally for a splasher, plus the caller's own vote if any.
- *  No auth required — voter identity is tracked server-side (e.g. by IP). */
 export async function getSplasherVotes(username: string): Promise<SplasherVotes> {
   const res = await fetch(`${BASE}/splashers/${encodeURIComponent(username)}/votes`);
   const data = (await res.json()) as Partial<SplasherVotes> & { error?: string };
@@ -169,9 +162,6 @@ export async function getSplasherVotes(username: string): Promise<SplasherVotes>
   return { likes: data.likes ?? 0, dislikes: data.dislikes ?? 0, myVote: data.myVote ?? null };
 }
 
-/** Casts (or retracts/switches) an anonymous like/dislike for a splasher. Voting again with
- *  the same value retracts it; voting with the other value switches it — the server keeps at
- *  most one vote per caller. No auth required. */
 export async function voteSplasher(username: string, value: 1 | -1): Promise<SplasherVotes> {
   const res = await fetch(`${BASE}/splashers/${encodeURIComponent(username)}/vote`, {
     method: 'PUT',
@@ -182,8 +172,6 @@ export async function voteSplasher(username: string, value: 1 | -1): Promise<Spl
   if (!res.ok) throw new Error(data.error ?? 'Failed to vote');
   return { likes: data.likes ?? 0, dislikes: data.dislikes ?? 0, myVote: data.myVote ?? null };
 }
-
-// ─── Authenticated splasher data ─────────────────────────────────────────────
 
 export async function getArchivedSessions(
   username: string,
@@ -220,8 +208,6 @@ export async function setSplasherWebhook(
   if (!res.ok) throw new Error(data.error ?? 'Failed to update webhook');
   return data;
 }
-
-// ─── Admin ────────────────────────────────────────────────────────────────────
 
 export async function adminGetUsers(token: string): Promise<AdminUser[]> {
   const res = await fetch(`${BASE}/admin/users`, { headers: authHeaders(token) });
@@ -296,8 +282,6 @@ export async function adminSendResetLink(username: string, token: string): Promi
   return { message: data.message ?? '' };
 }
 
-// ─── Communities ──────────────────────────────────────────────────────────────
-
 export async function getMyCommunities(token: string): Promise<Community[]> {
   const res = await fetch(`${BASE}/communities/mine`, { headers: authHeaders(token) });
   const data = (await res.json()) as { communities?: Community[]; error?: string };
@@ -340,9 +324,6 @@ export async function getCommunitySplashers(communityId: string, token: string):
   return data.splashers ?? [];
 }
 
-/** The caller's own payout ticket history in a community — powers the chatbox's Trade tab (see
- *  hooks/useAccountActivityEvents.ts). Self-scoped server-side, so this works for any community
- *  the user has ever requested a payout in, not just ones they own. */
 export async function getMyPayouts(
   communityId: string,
   token: string,
@@ -397,8 +378,6 @@ export async function setCommunityDiscordInvite(
   return data.community!;
 }
 
-// ─── Live chat relay config (chat.splasher.help / chat.ardy.host) ────────────
-
 export async function getCommunityChatConfig(communityId: string, token: string): Promise<CommunityChatConfig> {
   const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/chat-config`, {
     headers: authHeaders(token),
@@ -408,9 +387,6 @@ export async function getCommunityChatConfig(communityId: string, token: string)
   return data;
 }
 
-/** Every field is optional — omit one to leave it unchanged, or send '' to clear it.
- *  `friendsChatOwner` (the Friends Chat owner's RSN), not a chat name, is what registers Friends
- *  Chat — see CommunityChatConfig. */
 export interface ChatConfigUpdate {
   friendsChatOwner?: string;
   friendsChatDisplayName?: string;
@@ -434,10 +410,6 @@ export async function setCommunityChatConfig(
   return data;
 }
 
-// ─── Discord config (/setup, editable from the website) ──────────────────────
-
-/** Body for PUT .../discord-config: every field optional, omitting one leaves it unchanged.
- *  An empty string clears a channel id; an empty array clears a role id list. */
 export interface DiscordConfigUpdate {
   supportRoleIds?: string[];
   supportTicketChannelId?: string;
@@ -476,8 +448,6 @@ export async function setCommunityDiscordConfig(
   if (!res.ok) throw new Error(data.error ?? 'Failed to update Discord config');
   return data.config!;
 }
-
-// ─── Ranks ─────────────────────────────────────────────────────────────────────
 
 export async function getCommunityRanks(communityId: string, token: string): Promise<Rank[]> {
   const res = await fetch(`${BASE}/communities/${encodeURIComponent(communityId)}/ranks`, {
@@ -569,8 +539,6 @@ export async function setCommunityMemberWebhook(
   return data;
 }
 
-// ─── Admin: communities ───────────────────────────────────────────────────────
-
 export async function adminGetCommunities(token: string): Promise<Community[]> {
   const res = await fetch(`${BASE}/admin/communities`, { headers: authHeaders(token) });
   const data = (await res.json()) as { communities?: Community[]; error?: string };
@@ -619,8 +587,6 @@ export async function adminDeleteCommunity(communityId: string, token: string): 
   }
 }
 
-// ─── Gear picker ───────────────────────────────────────────────────────────────
-
 export async function fetchEquipmentData(): Promise<EquipmentDataResponse> {
   const res = await fetch(`${BASE}/equipment`);
   const data = (await res.json()) as Partial<EquipmentDataResponse> & { error?: string };
@@ -637,13 +603,14 @@ export async function fetchItemList(): Promise<ItemListResponse> {
 
 export async function saveGearLoadout(
   slots: GearLoadoutSlots,
+  inventory: GearInventory,
   name: string | undefined,
   token: string,
 ): Promise<GearLoadout> {
   const res = await fetch(`${BASE}/gear-loadouts`, {
     method: 'POST',
     headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, slots }),
+    body: JSON.stringify({ name, slots, inventory }),
   });
   const data = (await res.json()) as { loadout?: GearLoadout; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to save loadout');
@@ -653,13 +620,14 @@ export async function saveGearLoadout(
 export async function updateGearLoadout(
   slug: string,
   slots: GearLoadoutSlots,
+  inventory: GearInventory,
   name: string | undefined,
   token: string,
 ): Promise<GearLoadout> {
   const res = await fetch(`${BASE}/gear-loadouts/${encodeURIComponent(slug)}`, {
     method: 'PUT',
     headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, slots }),
+    body: JSON.stringify({ name, slots, inventory }),
   });
   const data = (await res.json()) as { loadout?: GearLoadout; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to update loadout');
@@ -684,22 +652,17 @@ export async function deleteGearLoadout(slug: string, token: string): Promise<vo
   }
 }
 
-/** Creates an anonymous, ownerless share of a loadout — no account required. Returns only the
- *  slug; there's no way to edit or delete an anonymous share afterward (see the backend's
- *  POST /gear-loadouts/share). */
-export async function shareGearLoadout(slots: GearLoadoutSlots, name?: string): Promise<string> {
+export async function shareGearLoadout(slots: GearLoadoutSlots, inventory: GearInventory, name?: string): Promise<string> {
   const res = await fetch(`${BASE}/gear-loadouts/share`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, slots }),
+    body: JSON.stringify({ name, slots, inventory }),
   });
   const data = (await res.json()) as { slug?: string; error?: string };
   if (!res.ok) throw new Error(data.error ?? 'Failed to share loadout');
   return data.slug!;
 }
 
-/** Fetches a loadout by its public share slug — works for both a saved (logged-in) loadout and
- *  an anonymous share, no auth required either way. */
 export async function fetchGearLoadout(slug: string): Promise<GearLoadout> {
   const res = await fetch(`${BASE}/gear-loadouts/${encodeURIComponent(slug)}`);
   const data = (await res.json()) as { loadout?: GearLoadout; error?: string };
@@ -707,10 +670,6 @@ export async function fetchGearLoadout(slug: string): Promise<GearLoadout> {
   return data.loadout!;
 }
 
-/** Current Grand Exchange price for each of the given item ids (null for an id the backend has
- *  no price data for — untradeable, or new enough it hasn't traded yet). Backed by the backend's
- *  own cached OSRS Wiki snapshot (see splash-helper-backend's services/gePrices.ts), so this is
- *  cheap to call per-item as items get equipped rather than needing to be batched upfront. */
 export async function fetchItemPrices(ids: number[]): Promise<Record<number, number | null>> {
   if (ids.length === 0) return {};
   const res = await fetch(`${BASE}/items/prices?ids=${ids.join(',')}`);
@@ -718,8 +677,6 @@ export async function fetchItemPrices(ids: number[]): Promise<Record<number, num
   if (!res.ok) throw new Error(data.error ?? 'Failed to load item prices');
   return Object.fromEntries(Object.entries(data.prices ?? {}).map(([id, price]) => [Number(id), price]));
 }
-
-// ─── Dev-only fake sessions (backend rejects these outside NODE_ENV=production check) ─────────
 
 export async function devGetAdminToken(): Promise<{ token: string; username: string; isAdmin: boolean; communityEligible: boolean }> {
   const res = await fetch(`${BASE}/dev/admin-token`, { method: 'POST' });
@@ -750,8 +707,6 @@ export async function devAddFakeSession(username: string, pinned = false): Promi
   return data;
 }
 
-/** Toggles whether the backend's inactivity sweeper is allowed to auto-clear this
- *  dev-view fake session. See POST /dev/sessions/:username/pin. */
 export async function devSetFakeSessionPinned(username: string, pinned: boolean): Promise<{ username: string; pinned: boolean }> {
   const res = await fetch(`${BASE}/dev/sessions/${encodeURIComponent(username)}/pin`, {
     method: 'PATCH',
@@ -782,8 +737,6 @@ export async function devRemoveFakeSession(username: string): Promise<void> {
   }
 }
 
-/** Wipes every collection in the dev database and clears in-memory active sessions —
- *  see the backend's POST /dev/reset for details. */
 export async function devReset(): Promise<{ message: string; collectionsCleared: string[] }> {
   const res = await fetch(`${BASE}/dev/reset`, { method: 'POST' });
   const data = (await res.json()) as { message?: string; collectionsCleared?: string[]; error?: string };

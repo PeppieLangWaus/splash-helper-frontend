@@ -7,11 +7,6 @@ interface Props {
   totalMagicAttack: number;
 }
 
-/**
- * Flags whether a loadout's summed Magic Attack bonus is low enough to reliably splash — mirrors
- * the threshold RuneLite's SplashHelperPlugin.hasBadMagicAttackBonus() enforces in-game, including
- * its icon (blue = safe, red = not) matching that plugin's own overlay.
- */
 export default function SplashSafetyIndicator({ totalMagicAttack }: Props) {
   const safe = totalMagicAttack <= SPLASH_SAFE_MAGIC_ATTACK_THRESHOLD;
   return (

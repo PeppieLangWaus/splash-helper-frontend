@@ -1,10 +1,7 @@
-/** Player mod status shown as an icon before the username in chat. */
 export type ModStatus = 'pmod' | 'jmod';
 
-/** Ironman mode shown as an icon before the username in chat. */
 export type IronmanStatus = 'im' | 'hcim' | 'uim' | 'gim' | 'hcgim' | 'ugim';
 
-/** Clan/community rank shown as an icon before the username in chat. */
 export type ChatRank =
   | 'owner'
   | 'general'
@@ -15,111 +12,61 @@ export type ChatRank =
   | 'recruit'
   | 'smiley';
 
-/** The chat channel tabs along the bottom of the chatbox. */
 export type ChatChannel = 'all' | 'game' | 'public' | 'private' | 'channel' | 'clan' | 'trade';
 
-/** What kind of source a message came from — drives which tab it belongs to (see
- *  chatbox/chatFilter.ts) and how it's rendered (chatbox/ChatLog.tsx). `fc`/`cc` are real live
- *  chat lines (Channel/Clan tabs); the rest are locally-synthesized lines (Game/Public/Private/
- *  Trade tabs) — see the individual `use*` hooks in `hooks/`. `system` is the chat command
- *  console's own replies (utils/chatCommands.ts) — it shares the Game tab with `info`, but is
- *  kept as its own kind/localStorage feed so `::clear info` and `::clear system` can target
- *  either independently. */
 export type ChatMessageKind = 'fc' | 'cc' | 'info' | 'public' | 'private' | 'trade' | 'system';
 
-/** One colored run of text within a message body — see ChatMessage.segments. */
 export interface MessageSegment {
   text: string;
-  /** CSS color; omitted means "use the line's default message color". */
+
   color?: string;
 }
 
-/** A real OSRS item id + quantity, resolved server-side by splash-helper-backend (see its
- *  services/itemLogResolver.ts) for a `!log <page>`/`!pets` chat line — never derived from any
- *  `<img=N>` tag embedded in the message text itself, which is a third-party plugin's own
- *  local, per-viewer-session rendering artifact with no relation to the real item id. */
 export interface ChatItemRef {
   id: number;
   quantity: number;
 }
 
-/** A single line in the chat log. */
 export interface ChatMessage {
   id: string;
-  /** Epoch ms; rendered as `[HH:MM]`. */
+
   timestamp: number;
   kind: ChatMessageKind;
-  /** Real chat lines (fc/cc) only. */
+
   username?: string;
-  /** Plain-text body. Used as-is for fc/cc chat lines; for synthetic kinds (info/public/private/
-   *  trade) it's the plain-text fallback when `segments` isn't set. */
+
   message: string;
-  /** Rich, multi-color body — when set, overrides `message` for rendering. Used by the info/
-   *  public/private/trade kinds; fc/cc chat lines never set this. */
+
   segments?: MessageSegment[];
-  /** Prefix image shown before everything else on the line (e.g. the info/System/world icons —
-   *  see chatbox/chatColors.ts and the `use*` hooks). fc/cc chat lines don't use this — they use
-   *  modStatus/ironmanStatus/rankIcon below instead. */
+
   icon?: string;
-  /** The `[info]` / `[System]` / `[Worlds]` / `[<fc display name>]` / `[<cc name>]` tag shown
-   *  right after the timestamp — `text` is the label only, without brackets. ChatLine (ChatLog.tsx)
-   *  always renders it as black brackets around a blue label; that's a fixed app-wide format, not
-   *  per-message. */
+
   prefix?: { text: string };
   modStatus?: ModStatus;
   ironmanStatus?: IronmanStatus;
-  /** Resolved icon path for the sender's Friends/Clan Chat rank — already translated from the
-   *  relay's raw numeric rank attribute via `getRankIcon` (see chatbox/chatIcons.ts), since that
-   *  translation depends on which channel type the message came from. Undefined if the raw value
-   *  has no mapped icon (e.g. UNRANKED, or an unmapped Clan Chat rank). */
+
   rankIcon?: string;
-  /** Which community's live feed this came from — fc/cc kinds only (stamped by useChatFeeds).
-   *  Lets chatFilter.ts's Filtered state narrow down to just the viewer's selected chats within
-   *  the full linked set — see the chatbox-multi-link feature notes. */
+
   communityId?: string;
-  /** Real items resolved for a `!log <page>`/`!pets` line — see ChatItemRef. When set, `message`
-   *  has already been replaced with a clean summary (e.g. "Cyclopes (8/8):") built from this same
-   *  resolution. Absent for every other message, and for one of these commands if server-side
-   *  resolution failed (in which case `message` stays as the original text). */
+
   items?: ChatItemRef[];
-  /** Whether a per-item `quantity` in `items` is meaningful to show as "xN" next to its icon —
-   *  true for a resolved collection-log page, false for resolved pets (owning a pet isn't a
-   *  "count" the way owning 5 arrows is). Meaningless/absent when `items` itself is absent. */
+
   showQuantities?: boolean;
-  /** Set once the relay tells us this message's text was edited after it was first sent (see
-   *  useChatFeed's handling of `edited: true` broadcasts / utils/chatStorage.ts's
-   *  upsertStoredMessage). Not shown in the UI — its only job is stopping a later plain resend of
-   *  the same message id from clobbering the edited text back to the original. Never set for the
-   *  vast majority of messages, which are never edited. */
+
   edited?: boolean;
 }
 
-// ── Live relay feed (splash-helper-backend's chat.splasher.help relay) ─────────────────
-
-/** In-game Friends Chat vs Clan Chat — the two feeds a community can register a name for. */
 export type LiveChatChannelType = 'fc' | 'cc';
 
-/** One community's registered live chat(s), as returned by GET /chat-channels — the public,
- *  unauthenticated endpoint the chatbox's community picker reads from. A community only appears
- *  once it's registered at least one of these names in its settings. */
 export interface ChatChannelListing {
   communityId: string;
   communityName: string;
   friendsChatName: string | null;
-  /** Owner-chosen display name for the Friends Chat, shown in the chatbox's `[...]` prefix
-   *  instead of `friendsChatName` when set — see point 4/5 of the chatbox feature notes (the FC
-   *  name itself is inherently tied to the owner's RSN). Null when unset; fall back to
-   *  `friendsChatName`. */
+
   friendsChatDisplayName: string | null;
   clanChatName: string | null;
 }
 
-/** A community owner's chat-relay settings — GET/PUT /communities/:id/chat-config.
- *  `friendsChatOwner` (the Friends Chat owner's RSN) is what's actually registered and settable
- *  for Friends Chat — an FC's in-game name can be renamed by its owner at any time, so the backend
- *  no longer trusts or accepts a name for it. `friendsChatName` is read-only: the FC's current
- *  in-game name, kept in sync from live chat traffic by the backend, and null until its first
- *  message has been relayed. */
 export interface CommunityChatConfig {
   friendsChatOwner: string | null;
   friendsChatName: string | null;
@@ -129,11 +76,6 @@ export interface CommunityChatConfig {
   discordClanChatWebhookUrl: string | null;
 }
 
-// ── Bottom-bar tab filter state ─────────────────────────────────────────────────────────
-
-/** A tab's own On/Filtered/Off status (the little colored line under its label — see
- *  ChatControls.tsx). Game/Public/Private/Trade only ever use 'on'/'off'; Channel/Clan cycle
- *  through all three. See chatbox/chatFilter.ts for what each state actually does. */
 export type TabState = 'on' | 'filtered' | 'off';
 
 export type ChatTabStates = Record<ChatChannel, TabState>;

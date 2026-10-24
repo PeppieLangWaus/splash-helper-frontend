@@ -10,6 +10,28 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-10-23
+### Added
+- Gear picker: sharing while signed in now creates the loadout once, moves the URL to its `/gear/<slug>`, and replaces the Share button with a Save button that updates that same loadout.
+- Gear picker: the inventory is now saved and shared with the loadout and restored when a slug is opened.
+### Fixed
+- Gear picker: pressing Share repeatedly on an unchanged anonymous loadout no longer creates a new link each time.
+
+## [0.37.0] - 2026-10-21
+### Added
+- Replace the equipment and inventory screenshots in the optimal setup guide with read-only gear picker panels (`GuideGearPanel`) that match the spellbook image's size.
+### Changed
+- Make the equipment guide card show only the equipment diamond (no name link or GE cost) and the inventory guide card drop the toolbar spacing, so both sit at a 240px width and the spellbook image's height.
+
+## [0.36.0] - 2026-10-21
+### Added
+- Merge the `content/guides` branch: a guides hub (`/guides`) with pickpocketing, normal-knight, sticky-knight, RuneLite plugin, optimal/mobile/solo setup and chat-commands guides, plus the `LinkPreview` (OSRS Wiki, Discord invite and RuneLite Plugin Hub previews), `ExplvMap`, `Faq` and `GuideFigure` components and a `findDaxPath` pathfinder API client.
+- Add a collapsible "What is this?" `InfoCorner` under the nav bar on every logged-in view, SEO metadata (`index.html`, `robots.txt`, `sitemap.xml`) and a per-domain nav brand name (`getBrandName`, "Ardy Hosts" on ardy.host).
+### Changed
+- Reorganize the file structure: colocate views with their own panels and hooks, split `components/chatbox/` into `hooks/`, `utils/` and `data/`, and split `views/guides/` into `content/`, `components/`, `style/`, `hooks/` and `data/`.
+### Fixed
+- Scope the main nav styling to `.main-nav` so it stops leaking onto guide tables of contents, bold guide ordered-list markers, fix link-preview tooltip positioning and thumbnail sizing, and clear the outstanding ESLint problems (including `setState` inside effects).
+
 ## [0.35.3] - 2026-10-21
 ### Changed
 - Make the gear picker's mode button show the icon of the panel it switches to: the inventory icon on the equipment panel and the equipment icon on the inventory panel, instead of glowing while inventory mode is on.

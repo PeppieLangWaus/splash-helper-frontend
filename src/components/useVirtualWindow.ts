@@ -9,8 +9,6 @@ export interface VirtualWindow {
   handleScroll: () => void;
 }
 
-/** Windowing for equal-height rows: render only `[startIndex, endIndex)` and pad the rest with
- *  spacers so the scrollable height matches the full list. */
 export function useVirtualWindow(
   viewportRef: RefObject<HTMLDivElement | null>,
   itemCount: number,
@@ -33,7 +31,6 @@ export function useVirtualWindow(
     return () => observer.disconnect();
   }, [viewportRef]);
 
-  // The browser clamps scrollTop when the list shrinks, which is not guaranteed to fire a scroll event.
   useEffect(handleScroll, [itemCount, handleScroll]);
 
   const visibleRowCount = Math.ceil(viewportHeight / rowHeight) + 1;

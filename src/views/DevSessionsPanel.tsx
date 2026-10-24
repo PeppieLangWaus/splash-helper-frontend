@@ -10,8 +10,6 @@ import {
 import type { ActiveSession } from '../types';
 import { colors, fontSerif } from '../theme';
 
-// Remembered across reloads so the checkbox doesn't reset itself every time the dev view is
-// re-opened while poking at fake sessions.
 const PIN_NEW_SESSIONS_KEY = 'dev.pinNewFakeSessions';
 
 const s = {

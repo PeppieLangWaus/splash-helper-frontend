@@ -1,6 +1,4 @@
-/* OSRSPanel — see OSRSPanel.tsx. Numeric dimensions that differ per asset set (stone vs steel
-   border thickness/corner size) come in as CSS custom properties (--rp-*) so the stylesheet
-   can't drift out of sync with whatever RSPanelAssets a caller passes in. */
+
 
 .osrs-panel {
     position: relative;
@@ -18,12 +16,12 @@
     position: absolute;
     inset: var(--rp-border-thickness);
     background-repeat: repeat;
-    /* image-rendering: pixelated; */
+    
 }
 
 .osrs-panel__border {
     position: absolute;
-    /* image-rendering: pixelated; */
+    
 }
 
 .osrs-panel__border--top {
@@ -60,7 +58,7 @@
 
 .osrs-panel__corner {
     position: absolute;
-    /* image-rendering: pixelated; */
+    
     background-repeat: no-repeat;
     width: var(--rp-corner-width);
     height: var(--rp-corner-height);
@@ -86,9 +84,7 @@
     right: 0;
 }
 
-/* Separate from .osrs-panel__bg-container (which spans edge-to-edge for the decorative layer)
-   so padding here can inset the actual content without affecting where the border/corner art
-   is anchored. */
+
 .osrs-panel__inner {
     position: relative;
     z-index: 1;

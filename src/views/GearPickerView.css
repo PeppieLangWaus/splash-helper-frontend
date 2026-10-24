@@ -27,12 +27,7 @@
     color: var(--danger-text);
 }
 
-/* Up to three OSRS-chrome panels (see components/osrs/OSRSPanel.tsx) side by side: the item
-   picker, the equipment grid, and splash-safety + bonuses + GE cost — matching the reference
-   screenshots' panel layout. The item picker/bonuses panels get an explicit `height` prop pegged
-   to the equipment panel's own height (see GearPickerView.tsx) rather than a generic CSS
-   `align-items: stretch`, so the item list's length can't feed back into resizing it. Wraps to a
-   single column on narrow viewports. */
+
 .gear-picker-layout {
     display: flex;
     gap: 1.25rem;
@@ -42,7 +37,7 @@
 }
 
 .gear-picker-middle-col {
-    /* Above the bonuses panel while that slides behind it. */
+    
     position: relative;
     z-index: 1;
     display: flex;
@@ -51,10 +46,7 @@
     gap: 0.75rem;
 }
 
-/* In inventory mode the bonuses panel slides behind the middle panel, then is hidden once it gets
-   there. It stays in the layout (transform and visibility don't affect it), so the other two
-   panels don't recenter. The transition used is the destination state's: showing is immediate,
-   hiding waits out the slide. */
+
 .gear-picker-bonuses {
     position: relative;
     z-index: 0;
@@ -87,8 +79,7 @@
     width: 15rem;
 }
 
-/* Sits below .gear-picker-layout's two panels (not inside either one anymore — see
-   GearPickerView.tsx), horizontally centered under the pair of them. */
+
 .gear-picker-actions {
     display: flex;
     flex-direction: column;
@@ -145,8 +136,7 @@
     color: var(--accent-text);
 }
 
-/* A button pairing one of the gear picker's own icon assets with a text label — used for
-   Delete (delete.png). */
+
 .gear-picker-icon-btn {
     display: inline-flex;
     align-items: center;
@@ -174,7 +164,7 @@
 .gear-picker-icon-btn__img {
     width: 18px;
     height: 18px;
-    /* image-rendering: pixelated; */
+    
 }
 
 .gear-picker-toolbar {
@@ -185,7 +175,7 @@
 
 .gear-picker-toolbar-btn__img {
     display: block;
-    /* image-rendering: pixelated; */
+    
 }
 
 .gear-picker-toolbar-btn__img--glowing {
