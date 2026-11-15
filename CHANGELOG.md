@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.35.5] - 2026-11-15
+### Fixed
+- Drop the CI workflow's `npm test` step — there's no test script or test runner in this project, so it failed every run with "Missing script: test".
+
 ## [0.35.4] - 2026-11-15
 ### Fixed
 - Send your login with the Account Settings session import, which the backend now requires before accepting uploaded sessions.
