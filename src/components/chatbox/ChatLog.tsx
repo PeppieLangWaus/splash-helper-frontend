@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChatItemRef, ChatMessage } from '../../types/chatbox';
 import { formatClockTime } from '../../utils/formatTime';
 import { IRONMAN_STATUS_ICONS, MOD_STATUS_ICONS } from './chatIcons';
@@ -130,10 +130,12 @@ function ChatLine({ msg, showTimestamps }: { msg: ChatMessage; showTimestamps: b
 /** Shown in place of the log when the currently-filtered view has no messages yet (point 9) —
  *  a few random feature tips, styled like chat lines but never persisted or limit-counted. */
 function ChatEmptyState() {
-  const tips = useMemo(() => {
+  // Shuffled once per mount via a lazy initializer, not useMemo — useMemo's calculator must be
+  // pure (React may re-run or discard it), while useState's initializer runs exactly once.
+  const [tips] = useState(() => {
     const shuffled = [...chatEmptyTips].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, Math.min(EMPTY_TIP_COUNT, shuffled.length));
-  }, []);
+  });
 
   return (
     <div className="chat-log-empty">

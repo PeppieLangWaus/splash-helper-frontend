@@ -40,11 +40,12 @@ function ChatInputRow({ tabStates, onToggleTabState, inputRef }: ChatInputRowPro
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     switch (e.key) {
-      case 'Enter':
+      case 'Enter': {
         const text = value
         setValue('');
-        runChatCommand(text, { tabStates, toggleTabState: onToggleTabState });        
+        runChatCommand(text, { tabStates, toggleTabState: onToggleTabState });
         break;
+      }
       case 'Backspace':
         setValue(value.slice(0, value.length - 1));
         break;
@@ -133,6 +134,7 @@ export default function Chatbox({ messages: messagesOverride, className }: Props
   // manually (handleSelect) clears the spotlight, so All -> Private afterward shows everything.
   useEffect(() => {
     if (!emailReminder) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reacts to the emailReminder event firing, not derived render state
     setChannel('private');
     setWindowOpen(true);
     setSpotlightMessageId(emailReminder.id);
