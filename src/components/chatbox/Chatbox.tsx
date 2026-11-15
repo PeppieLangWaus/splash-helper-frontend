@@ -63,7 +63,7 @@ function ChatInputRow({ tabStates, onToggleTabState, inputRef }: ChatInputRowPro
         className="chat-input-field"
         type="text"
         value={value + "*"}
-        onChange={(e) => setValue(e.target.value.replace("*", ""))}
+        onChange={(e) => setValue(e.target.value.replace(/\*/g, ""))}
         onKeyDown={handleKeyDown}
         autoComplete="off"
         spellCheck={false}
