@@ -10,6 +10,10 @@ every version after it are real.
 
 ## [Unreleased]
 
+## [0.35.4] - 2026-11-15
+### Fixed
+- Send your login with the Account Settings session import, which the backend now requires before accepting uploaded sessions.
+
 ## [0.35.3] - 2026-10-21
 ### Changed
 - Make the gear picker's mode button show the icon of the panel it switches to: the inventory icon on the equipment panel and the equipment icon on the inventory panel, instead of glowing while inventory mode is on.

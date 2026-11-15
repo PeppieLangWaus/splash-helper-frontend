@@ -122,6 +122,7 @@ export default function AccountSettingsView() {
   }
 
   async function handleImportFile(file: File) {
+    if (!token) return;
     setImporting(true);
     try {
       const text = await file.text();
@@ -136,7 +137,7 @@ export default function AccountSettingsView() {
         showFeedback('error', 'JSON must be an array of session entries.');
         return;
       }
-      const result = await uploadJson(parsed as SplashEntry[]);
+      const result = await uploadJson(parsed as SplashEntry[], token);
       showFeedback('success', result.message);
     } catch (err) {
       showFeedback('error', err instanceof Error ? err.message : 'Import failed.');

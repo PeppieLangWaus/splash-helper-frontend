@@ -28,12 +28,12 @@ function authHeaders(token: string): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
-// ─── Testing upload ───────────────────────────────────────────────────────────
+// ─── Session import ───────────────────────────────────────────────────────────
 
-export async function uploadJson(entries: SplashEntry[]): Promise<{ message: string; added: number; skipped: number }> {
+export async function uploadJson(entries: SplashEntry[], token: string): Promise<{ message: string; added: number; skipped: number }> {
   const res = await fetch(`${BASE}/sessions/upload`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
     body: JSON.stringify(entries),
   });
   const data = (await res.json()) as { message?: string; added?: number; skipped?: number; error?: string };
