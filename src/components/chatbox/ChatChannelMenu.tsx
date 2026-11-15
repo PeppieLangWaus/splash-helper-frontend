@@ -46,6 +46,7 @@ export default function ChatChannelMenu({ channelType, channels, selected, onTog
     const el = menuRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- derived from a DOM measurement, not available before paint
     setPlacement({
       vertical: rect.bottom > window.innerHeight ? 'up' : 'down',
       horizontal: rect.right > window.innerWidth ? 'right' : 'left',

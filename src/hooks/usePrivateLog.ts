@@ -12,6 +12,7 @@ export function usePrivateLog() {
   const [messages, setMessages] = useState<ChatMessage[]>(() => (user ? loadStoredMessages(PRIVATE_KEY) : []));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reloads on user (login/logout), not just mount; the lazy initializer above only covers first render
     setMessages(user ? loadStoredMessages(PRIVATE_KEY) : []);
   }, [user]);
 

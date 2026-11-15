@@ -228,7 +228,7 @@ function CommunityCard({
     }
   }
 
-  useEffect(() => { void loadMembers(); }, [community._id, token]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { void loadMembers(); }, [community._id, token]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect -- loadMembers sets state only after its own await
 
   async function handleAssign() {
     if (!token || !newUsername.trim()) return;
